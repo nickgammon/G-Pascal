@@ -1,0 +1,6 @@
+abs, address, and, array, begin, call, case, char, chr, const,
+cursor, delay, digitalread, digitalwrite, div, do, downto, else,
+end, for, function, getkey, hex, if, integer, lcdclear, lcdhome,
+lcdpos, lcdwrite, mem, memc, mod, not, of, or, pinmode, procedure,
+random, read, repeat, shl, shr, then, to, until, var, while, write,
+writeln, xor

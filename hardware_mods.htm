@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>hardware_mods</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="ben-eaters-board-suggested-hardware-modifications">Ben Eater’s board suggested hardware modifications</h1>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#rs232_interface">RS232 Interface</a></li>
+<li><a href="#protect_EEPROM">Protect from writing to ROM</a></li>
+<li><a href="#nmi_interrupt">NMI interrupt</a></li>
+<li><a href="#increased_ram">Increased RAM</a></li>
+</ul>
+<p><strong>Author</strong>: Nick Gammon (written in 2022)</p>
+<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<hr />
+<h2 id="rs232_interface">RS232 Interface (required)</h2>
+<p>In order to “talk” to Ben’s 6502 Board you need some way of interfacing a keyboard and monitor. You could conceivably use a “dumb terminal” but they may be hard to find these days. The simplest thing is to obtain a FTDI cable, available from eBay for around $US 10.</p>
+<p><img src="images/FTDI%20cable.jpg" /></p>
+<p>One end plugs into a USB port on your PC/Mac/Linux box, and the other end breaks out the six RS232 signals:</p>
+<ol type="1">
+<li>Ground — usually a <strong>black</strong> cable</li>
+<li>CTS (clear to send)</li>
+<li>Vcc (+5V)</li>
+<li>TxD (transmit data - PC to board)</li>
+<li>RxD (receive data - board to PC)</li>
+<li>RTS (request to send) — usually a <strong>green</strong> cable</li>
+</ol>
+<p><img src="images/FTDI%20connection.png" /></p>
+<p>The order shown in the photos is from “above” the connector, in other words you cannot see the metal pins inside the connector (they are visible on the “bottom” side).</p>
+<p><img src="images/FTDI%20schematic.png" /></p>
+<ul>
+<li>Connect FTDI pin 1 (Ground - black) to Ground</li>
+<li>Connect FTDI pin 2 (CTS) to ground</li>
+<li>Connect FTDI pin 3 (VCC) to the +5V rail if you want to power the board from it</li>
+<li>Connect FTDI pin 4 (FTDI -&gt; VIA) to 65C22 (U5) PA0 (pin 2) via a 1k resistor (receiving data)</li>
+<li>Connect FTDI pin 5 (VIA -&gt; FTDI) to 65C22 (U5) PA1 (pin 3) (sending data)</li>
+<li>Connect FTDI pin 6 (RTS - green) via a 0.1µF capacitor for automatic reset, if you are powering from the FTDI</li>
+</ul>
+<h3 id="interrupt-detection">Interrupt detection</h3>
+<p>In order for the code to detect the start of a byte, we need to generate an interrupt on the falling edge of the received data. Thus also:</p>
+<ul>
+<li>Connect 65C22 (U5) pin 2 to CB2 (pin 19)</li>
+</ul>
+<p><img src="images/Serial%20connections.png" /></p>
+<h3 id="caveats-regarding-the-rs232-interface">Caveats regarding the RS232 interface</h3>
+<ul>
+<li>The baud rate is fixed at 4800 baud (assuming your 6502 board is clocked at 1 MHz as it was in Ben’s kit).</li>
+<li>If you choose a faster clock adjust the baud rate on your Mac/PC program accordingly. For example:
+<ul>
+<li>If the board is clocked at 2 MHz the baud rate will be 9600</li>
+<li>If the board is clocked at 4 MHz the baud rate will be 19200</li>
+</ul></li>
+<li>The serial read/write software is somewhat timing and interrupt dependent. If you type while it is sending then data <strong>will</strong> be corrupted. I advise you to not type anything while the code is sending data to your PC.</li>
+</ul>
+<h3 id="program-to-talk-to-the-serial-interface.">Program to “talk” to the serial interface.</h3>
+<p>I found <strong>miniterm</strong> very good on my Linux box. It appears to be available from <a href="https://pyserial.readthedocs.io/en/latest/index.html" class="uri">https://pyserial.readthedocs.io/en/latest/index.html</a>.</p>
+<p>Miniterm is available on Mac, Windows and Linux. See <a href="https://pypi.org/project/pyserial/#files" class="uri">https://pypi.org/project/pyserial/#files</a></p>
+<p>It requires Python 3.x to run. You may need to install that as well.</p>
+<p>When I was testing G-Pascal I used this command:</p>
+<pre class="bash"><code>miniterm /dev/ttyUSB0 4800 -e</code></pre>
+<p>The port (in my case “/dev/ttyUSB0”) may be different. If you aren’t sure what it is, try opening the Arduino IDE and looking at the Tools Menu -&gt; Port, like this:</p>
+<p><img src="images/Serial%20device%20name.png" /></p>
+<p>The “-e” command-line option on Miniterm activates “local echo”. You need this because the board will not echo back what you type (and if it did, it would be corrupted as described above).</p>
+<p>Type Ctrl+] to exit from Miniterm.</p>
+<h3 id="warning-about-dumb-terminals">Warning about dumb terminals</h3>
+<p>Whilst you can use a dumb terminal that has a RS232 interface, you need to be aware the the electrical signals are not compatible with the 6502 processor. The original RS232 specs had a “1” bit as -12V and a “0” bit as +12V. You would need to use a conversion cable, or make up something, for example with the MAX232 chip, which will do the conversion.</p>
+<hr />
+<h2 id="protect_EEPROM">Protect from writing to ROM (suggested)</h2>
+<p>The way Ben described the address decoding for the EEPROM, it is possible for both the CPU and the EEPROM to be attempting to write to the bus at the same time (eg. STA $8000). The suggested wiring uses a spare NAND gate on the existing board to prevent that. This would prevent possible damage to the CPU and/or the EEPROM if such code was attempted.</p>
+<p>I suggest using the spare NAND gate on U4 and run R/W from the CPU through the AND gate to invert it, and run that to /OE on the EEPROM.</p>
+<ul>
+<li>Disconnect EEPROM (U2) pin 22 from Gnd</li>
+<li>CPU (U1) R/W pin 34 to NAND (U4A) pin 1</li>
+<li>NAND (U4A) pin 2 to pin 1</li>
+<li>NAND (U4A) output (pin 3) to /OE on EEPROM (U2) pin 22</li>
+</ul>
+<p><img src="images/Protect%20EEPROM.png" /></p>
+<p>I am using the 74LS00 as an inverter here, and you can see that when the CPU is writing, then the output of the EEPROM is disabled.</p>
+<hr />
+<h2 id="nmi_interrupt">NMI interrupt (suggested)</h2>
+<p>It helps to recover from runaway or rogue code by pressing a switch button connected to the NMI pin of the 65C02. This does a “warm restart” which basically starts the code again, however it retains your existing source code.</p>
+<ul>
+<li>Connect NMI on CPU (U1) pin 6 via 10k resistor to +5V (pull-up).</li>
+<li>Connect same pin via a push-button to ground.</li>
+</ul>
+<p><img src="images/NMI%20interrupt.png" /></p>
+<hr />
+<h2 id="increased_ram">Increased RAM (recommended)</h2>
+<p>The way Ben did his address decoding for the RAM meant that only 16k of the chip’s 32k was available. You can make a simple change using a 74LS08 “AND” gate that extends the RAM address space to 0x6000 rather than 0x4000, thus giving you 24k of RAM (an extra 8k) for the cost of a one dollar chip and a few jumper cables. This change is required to compile the “Adventure” game because of its size.</p>
+<ul>
+<li>Insert a 74LS08 (AND gate) onto a spare part of the breadboard. Connect power to pin 14 and ground to pin 7.</li>
+<li>Connect A13 to pin 2 (from the CPU (U1) pin 23)</li>
+<li>Connect A14 to pin 1 (from the CPU (U1) pin 24)</li>
+<li>Disconnect the previous connection from pin 1 to pin 22 on the RAM (U6).</li>
+<li>Connect output of 74LS08 (pin 3) to RAM (U6) /OE (pin 22).</li>
+</ul>
+<p><img src="images/More%20RAM.png" /></p>
+<p>This increases the top of RAM from $3FFF to $5FFF. Basically if both A13 and A14 are high then the RAM output enable will be off. In other words, the RAM is disabled when <strong>both</strong> the 0x4000 and 0x2000 address bits are set (because we are “and”ing them together), which means that the RAM works up to 0x6000 rather than 0x4000 as it originally did.</p>
+<hr />
+<p><a href="index.htm">Back to main G-Pascal page</a></p>
+</body>
+</html>

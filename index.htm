@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>index</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="g-pascal-for-bens-eaters-6502-board">G-Pascal for Ben’s Eater’s 6502 board</h1>
+<p><strong>Author</strong>: Nick Gammon</p>
+<p><strong>Date written</strong>: February 2022</p>
+<div class="quick_link">
+<a href="pascal_compiler.htm">G-Pascal info</a>
+</div>
+<div class="quick_link">
+<a href="assembler.htm">Assembler info</a>
+</div>
+<div class="quick_link">
+<a href="hardware_mods.htm">Suggested hardware mods</a>
+</div>
+<div class="quick_link">
+<a href="adventure.htm">Adventure game</a>
+</div>
+<div class="quick_link">
+<a href="https://gammon.com.au/electronics">More electronics</a>
+</div>
+<p><img src="images/Board%20photo.png" /></p>
+<p>I am pleased to announce <strong>on-board</strong> code for Ben Eater’s 6502 computer board. This code, which is available HERE, can be burnt onto the EEPROM and has the following features:</p>
+<ul>
+<li>A <strong>“tiny” Pascal compiler</strong> (G-Pascal) which allows you to program the board in a high-level language. Whilst there are limitations in what can be done in a few KB of memory, the compiler supports:
+<ul>
+<li><p>CONST, VAR, FUNCTION and PROCEDURE declarations</p></li>
+<li><p>Local declarations (functions and variables within functions, etc.)</p></li>
+<li><p>Recursive function and procedure calls</p></li>
+<li><p>Arithmetic: multiply, divide, add, subtract, modulus</p></li>
+<li><p>Logical operations: and, or, shift left, shift right, exclusive or</p></li>
+<li><p>INTEGER and CHAR data types. (Integer are 3 bytes and thus range from 8388607 to -8388608)</p></li>
+<li><p>Arrays</p></li>
+<li><p>Interface with any memory address by using the MEM and MEMC constructs (to peek and poke memory locations)</p></li>
+<li><p>Built-in functions to write to the LCD display.</p></li>
+<li><p>Built-in functions to do pinMode, digitalRead and digitalWrite, similar to the Arduino. These interface with any available ports on the VIA chip.</p></li>
+<li><p>Here is “hello world” for the LCD display:</p>
+<pre class="pas"><code>begin
+  lcdclear;
+  lcdwrite (&quot;Hello, world!&quot;)
+end.</code></pre>
+<p>And for the serial monitor:</p>
+<pre class="pas"><code>begin
+  writeln (&quot;Hello, world!&quot;)
+end.</code></pre></li>
+<li><p>Detailed notes about the compiler <a href="pascal_compiler.htm">here</a>.</p></li>
+</ul></li>
+<li>A <strong>6502 assembler</strong> which lets you try out your assembler programming without having to keep removing the EEPROM chip and programming it externally. The assembler supports:
+<ul>
+<li><p>The documented WD65C02 instruction set, with all operand modes</p></li>
+<li><p>Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.</p></li>
+<li><p>Relocation of the output to any memory address (ORG directive)</p></li>
+<li><p>Here is “hello world” in assembler:</p>
+<pre class="asm"><code>; interface routines in the EEPROM
+serial_print_message = $8012
+
+      jmp start   ; skip the message
+hello asciiz &quot;Hello, world!&quot;
+start = *
+      lda #&lt;hello
+      ldx #&gt;hello
+      jsr serial_print_message
+      rts</code></pre></li>
+<li><p>Detailed notes about the assembler <a href="assembler.htm">here</a>.</p></li>
+</ul></li>
+<li>A <strong>text editor</strong> for keying in programs. It supports:
+<ul>
+<li>Loading and saving (via the RS232 interface)</li>
+<li>Inserting and deleting lines</li>
+<li>Find and replace</li>
+<li>Tokenisation of code to reduce source code size</li>
+</ul></li>
+<li><strong>Support functions</strong>, such as:
+<ul>
+<li>RS232 interface for connecting a “dumb” terminal, or a PC/Mac</li>
+<li>Support for the LCD interface described in Ben’s videos</li>
+<li>Other support functions for use by your assembler code, such as multiplication and division</li>
+<li>Support for NMI (non-maskable interrupts) so that you can recover from runaway code</li>
+<li>There is approximately 15k of space available on the EEPROM to add your own functions</li>
+</ul></li>
+</ul>
+<p>Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:</p>
+<ul>
+<li>A 335-line assembler program testing all opcodes assembles in 9 seconds</li>
+<li>A 651-line G-Pascal program (the Adventure game) compiles in 6 seconds</li>
+</ul>
+<hr />
+<h2 id="how-much-does-it-cost">How much does it cost?</h2>
+<ul>
+<li>The software is open source</li>
+<li>There is no fee</li>
+<li>You do not need to register</li>
+<li>You do not need to provide any personal details such as email address</li>
+<li>The software can be downloaded from GitHub</li>
+<li>The license (MIT License) is <a href="doc/license.txt">here</a></li>
+</ul>
+<hr />
+<h2 id="hardware-modifications-suggestedrequired">Hardware modifications suggested/required</h2>
+<ul>
+<li><p>RS232 interface (required)</p>
+<p>To interface with the compiler, text editor and assembler you clearly need some way to “talk” to Ben’s 6502 board. The on-board code supports interfacing with a serial interface running at 4800 baud. To do this you will need to use an FTDI cable, available on eBay for around $US 10. The wiring for it is <a href="hardware_mods.htm#rs232_interface">here</a>.</p></li>
+<li><p>An NMI interrupt push-button (suggested)</p>
+<p>It helps to recover from runaway or rogue code by pressing a switch button connected to the NMI pin of the 65C02. This does a “warm restart” which basically starts the code again, however it retains your existing source code. The wiring for it is <a href="hardware_mods.htm#nmi_interrupt">here</a>.</p></li>
+<li><p>An enhancement that stops you attempting to write to EEPROM (suggested)</p>
+<p>The way Ben described the address decoding for the EEPROM, it is possible for both the CPU and the EEPROM to be attempting to write to the bus at the same time (eg. STA $8000). The suggested wiring uses a spare NAND gate on the existing board to prevent that. This would prevent possible damage to the CPU and/or the EEPROM if such code was attempted. The wiring for it is <a href="hardware_mods.htm#protect_EEPROM">here</a>.</p></li>
+<li><p>An enhancement to give yourself access to more of the on-board RAM (suggested)</p>
+<p>The way Ben did his address decoding for the RAM meant that only 16k of the chip’s 32k was available. You can make a simple change using a 74LS08 “AND” gate that extends the RAM address space to 0x6000 rather than 0x4000, thus giving you 24k of RAM (an extra 8k) for the cost of a one dollar chip and a few jumper cables. This change is required to compile the “Adventure” game because of its size. The wiring for it is <a href="hardware_mods.htm#increased_ram">here</a>.</p></li>
+<li><p>Put in a faster oscillator</p>
+<p>To get a nice speed boost, simply replace the 1 MHz oscillator with 2 MHz or 4 MHz. You will get a corresponding increase in speed. Since the serial communications assume a 1 MHz oscillator, simply increase the baud rate that you use to communicate with the board to match. In other words, with a 2 MHz oscillator use 9600 baud, and with a 4 MHz oscillator use 19200 baud. I haven’t tried faster clock speeds yet.</p></li>
+<li><p>You can disconnect, if you wish, the four low-order data bits from the HD44780U LCD screen to the VIA. (That is, VIA pins 10, 11, 12 and 13). This is because the LCD code has been rewritten to use 4-bit mode, thus freeing up those pins.</p></li>
+</ul>
+<hr />
+<h2 id="more-via-pins-are-available">More VIA pins are available</h2>
+<p>I rewrote the LCD code to use 4-bit mode on the HD44780U LCD display. This frees up 4 fairly valuable pins on the VIA (versatile interface adapter) chip for other uses, such as developing an SPI interface.</p>
+<p>Pins PA0 and PA1 on the VIA are used for the serial interface, as well as CB2 to detect the start bit for incoming serial data.</p>
+<p>That leaves 7 pins for your own use (PA2, PA3, PA4, PB0, PB1, PB2, PB3).</p>
+<hr />
+<h2 id="example-programs">Example programs</h2>
+<p>As an example of what can be done, there is a (roughly) 700-line “Adventure” program available <a href="examples/pas/adventure.pas">here</a> for compiling. That demonstrates a lot of the features of the compiler and is a fun game to try out. Note that running this requires a small hardware modification to Ben’s board to make more of the RAM available, as described <a href="hardware_mods.htm#increased_ram">here</a>. This program was originally written in 1982 for the Apple II version of G-Pascal, and has been modified slightly to conform to the syntax of this compiler.</p>
+<p>Other example programs are <a href="examples/pas/prime_numbers.pas">prime number generation</a>, <a href="examples/pas/sqrt.pas">square roots calculation</a>, and a <a href="examples/pas/guessing_game.pas">guessing game</a>.</p>
+<p>Or, you can play with assembler coding and make LEDs blink. :)</p>
+<p>Example code HERE.</p>
+<p>The code is released under an extremely liberal license (MIT License), which basically means you can do anything at all you like with it, except claiming you wrote it yourself. ;)</p>
+<hr />
+<h2 id="ben-eaters-6502-board">Ben Eater’s 6502 board</h2>
+<p>Ben does a fabulous series of YouTube videos about wiring together this 6502 breadboard computer. The first in the series is <a href="https://www.youtube.com/watch?v=LnzuMJLZRdU">here</a>.</p>
+<p>It really is extremely interesting and educational. I strongly recommend you watch the video series and consider supporting <a href="https://www.patreon.com/beneater">Ben’s Patreon</a>.</p>
+<p>You can buy a <a href="https://eater.net/6502">kit from Ben</a> however the parts described are readily available. It is just easier to buy from Ben. I don’t have any commercial affiliation with him, I am just impressed by the work he has done in educating the community about how computers work.</p>
+<hr />
+<h2 id="support-for-other-6502-boards">Support for other 6502 boards</h2>
+<p>There is no particular reason this code wouldn’t run on other 6502 set-ups. You would need to be aware of the hardware addresses of things like your RAM (which presumably starts at 0x0000 because you need access to the 6502 hardware stack at 0x0100) and your ROM (which presumably covers 0xF000 to 0xFFFF because of the need to have NMI/Reset/IRQ vectors).</p>
+<p>You may need to modify the way the code interfaces with the hardware, depending on your personal setup.</p>
+<hr />
+<h2 id="other-links">Other links</h2>
+<ul>
+<li><a href="hardware_mods.htm">Suggested hardware modifications</a> to Ben’s 6502 board including accessing more of the on-board RAM, and connecting up the board to your PC/Mac</li>
+<li><a href="pascal_compiler.htm">G-Pascal compiler features</a> and limitations</li>
+<li><a href="assembler.htm">Assembler features</a> and limitations</li>
+<li>Example code</li>
+<li><a href="history.htm">History of G-Pascal</a> and the assembler</li>
+</ul>
+<hr />
+<h2 id="license">License</h2>
+<p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+</body>
+</html>

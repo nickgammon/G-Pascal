@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>pascal_compiler</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">G-Pascal compiler specs and notes</h1>
+</header>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#Features">Features</a></li>
+<li><a href="#Limitations">Limitations</a></li>
+<li><a href="#how_to_compile">How to enter and compile a program</a></li>
+<li><a href="#extensions">Extensions and syntax notes</a></li>
+<li><a href="#machine_code">Calling machine code</a></li>
+<li><a href="#differences">Differences to C</a></li>
+<li><a href="#via_adapter">Accessing the VIA (Versatile Interface Adapater) pins</a></li>
+<li><a href="#syntax_diagram">Syntax diagram</a></li>
+<li><a href="#directives">Compiler directives</a></li>
+<li><a href="#debugging">Debugging</a></li>
+<li><a href="#pcode_meanings">P-code meanings</a></li>
+<li><a href="#example_code">Example code</a></li>
+<li><a href="#reserved_words">Reserved words</a></li>
+<li><a href="#memory_layout">Memory layout</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+<p><strong>Author</strong>: Nick Gammon (written in 2022)</p>
+<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<h2 id="introduction">Introduction</h2>
+<p>The G-Pascal compiler is a “tiny” Pascal compiler, entirely resident in the EEPROM, and available immediately after resetting your board.</p>
+<hr />
+<h2 id="Features">Features</h2>
+<ul>
+<li>CONST, VAR, FUNCTION and PROCEDURE declarations</li>
+<li>Local declarations (functions and variables within functions, etc.)</li>
+<li>Recursive function and procedure calls</li>
+<li>Arithmetic: multiply, divide, add, subtract, modulus</li>
+<li>Logical operations: and, or, shift left, shift right, exclusive or</li>
+<li>INTEGER and CHAR data types. (Integer are 3 bytes and thus range from -8388608 to 8388607)</li>
+<li>Arrays</li>
+<li>Interface with any memory address by using the MEM and MEMC constructs (to peek and poke memory locations)</li>
+<li>Built-in functions to write to the LCD display.</li>
+<li>Built-in functions to do pinMode, digitalRead and digitalWrite, similar to the Arduino. These interface with any available ports on the VIA chip.</li>
+</ul>
+<hr />
+<h2 id="Limitations">Limitations</h2>
+<ul>
+<li>Integers are only three bytes and range in value from -8388608 to 8388607.</li>
+<li>Char variables are one byte long and range in value from 0 to 255. Char and integer variables can be used interchangeably, however data stored into a char variable will be truncated to a single byte.</li>
+<li>There is no type-checking.</li>
+<li>There are no type definitions.</li>
+<li>Arrays are single dimension only, and range from 0 to whatever final index you specify. Thus an array declared “var foo : array [10] of integer” in fact takes eleven positions in memory, from [0] to [10]. Arrays start at index 0.</li>
+<li>Array bounds are not checked at run-time.</li>
+<li>Arguments to procedures and functions are passed by value, not by reference.</li>
+<li>Programs do not start with the word “program” — you start a program with the first (main) block.</li>
+<li>The compiler does not produce machine code, it produces “Pseudo code” (P-code). This is then interpreted by the runtime system.</li>
+</ul>
+<hr />
+<h2 id="how_to_compile">How to enter and compile a program</h2>
+<ol type="1">
+<li><p>Enter the Editor from the main menu (type E) and use that to enter your program. Alternatively load it from your PC using the File menu. The Editor is described in a separate page.</p></li>
+<li><p>Type “S” from the main menu to syntax-check the code. This is slightly faster than attempting to compile it. This step is optional.</p></li>
+<li><p>When it is error-free type “C” to compile it and produce P-codes.</p></li>
+<li><p>If it compiles without errors type “R” from the main menu to run the code. Alternatively type D to debug or T to trace it.</p></li>
+<li><p>If the code does not appear to be doing anything try typing Ctrl+C to abort it, Ctrl+T to trace it, or Ctrl+D to enter debugging mode. Alternatively press the NMI switch (if installed) to do a warm start, recovering control of the processor and retaining your source code.</p></li>
+</ol>
+<hr />
+<h2 id="extensions">Extensions and syntax notes</h2>
+<ul>
+<li><p>String literals are supported for use in <strong>write</strong>, <strong>writeln</strong>, and <strong>lcdwrite</strong> function calls.</p></li>
+<li><p>String literals up to three bytes long can be used as constants. For example:</p>
+<pre class="pas"><code>  var foo : integer ;
+  begin
+    foo := &#39;a&#39;;
+    writeln (foo);
+  end .</code></pre>
+<p>This will display 97 as that is the value of the letter ‘a’.</p>
+<p>Strings may also contain “escape” sequences of a backslash followed by a letter, as follows:</p>
+<pre><code>  \A    bell ($07)
+  \B    backspace ($08)
+  \E    escape  (0x1B)
+  \F    formfeed ($0C)
+  \N    newline  (0x0A)
+  \R    carriage return (0x0D)
+  \T    horizontal tab (0x09)
+  \V    vertical tab (0x0B)
+  \&#39;    single quote
+  \&quot;    double quote
+  \\    backslash
+  \Xnn  where nn is one or two hex digits (eg. \x0A \X42 \x9 )</code></pre>
+<p>The letter following the backslash is not case-dependent. For the \Xnn form, if there is potential confusion if the character following the escape sequence happens to be a hex digit then you should use two digits. Only the first two digits are considered when parsing.</p></li>
+<li><p>You may use an <strong>else</strong> clause with the <strong>case</strong> statement, to specify a statement to be executed if no case matches.</p></li>
+<li><p>Numeric constants may be one of:</p>
+<ul>
+<li>Signed decimal numbers (eg. -10, 42, +666)</li>
+<li>Hexadecimal constants (eg. $1234)</li>
+<li>Binary constants (used in the assembler, but available in the Pascal compiler) (eg. %00111011001010)</li>
+<li>String literals up to a maximum of three bytes long. This is little endian architecture, so that constant “abc” would be stored as (“a” + (“b” * 256) + (“c” * 65536)).</li>
+<li>String literals may start with either single or double quotes, and end with the same quote symbol they started with. You may use the other quote symbol inside a quoted string. (eg. “Nick’s cat”). Alternatively you can insert a quote symbol inside a string by putting it twice. (eg. ‘Nick’‘s cat’).</li>
+</ul></li>
+<li><p>Direct access to memory. You can use <strong>mem</strong> or <strong>memc</strong> to “peek” or “poke” either three bytes or a single byte into memory. For example:</p>
+<pre class="pas"><code>memc [$1234] := $42;
+foo := memc [$5678];</code></pre>
+<p>This could be used to directly access the hardware registers.</p></li>
+<li><p><strong>write</strong>, <strong>writeln</strong> may be used to write to the serial port. They behave the same except that <strong>writeln</strong> adds a newline at the end. <strong>writeln</strong> may be called without arguments to simply output a newline.</p></li>
+<li><p><strong>lcdwrite</strong> may be used to write to the LCD screen.</p></li>
+<li><p><strong>lcdhome</strong> homes the cursor on the LCD screen.</p></li>
+<li><p><strong>lcdclear</strong> clears the LCD screen.</p></li>
+<li><p><strong>lcdpos</strong> (line, column) moves the cursor on the LCD screen to the specified position (zero-relative).</p></li>
+<li><p><strong>write</strong>, <strong>writeln</strong> and <strong>lcdwrite</strong> statements may take the following arguments:</p>
+<ul>
+<li><p>String literals of any length: these will be written “as is”.</p></li>
+<li><p><strong>chr</strong> ( <em>expression</em> ) — this converts the value of the expression to a character and writes that, for example:</p>
+<pre class="pas"><code>write ( chr (65) );</code></pre>
+<p>That would write the letter “A”.</p></li>
+<li><p><strong>hex</strong> ( <em>expression</em> ) — this writes the value of the expression as a 6-character hex number.</p></li>
+</ul></li>
+<li><p>Random numbers can be obtained by calling the <strong>random</strong> function. These are pseudo-random numbers generated with an initial seed internally of 0xFFFFFFFF. Thus they will be the same every time the processor is reset. You can change the seed by using <strong>mem</strong> to change the current value in memory. A possible way of seeding the numbers in an unpredictable way (eg. for games) is to use an internal value in memory which increments every time the code is waiting for a keypress from the user. Since the time between keypresses will be unpredictable (up to a point) the random numbers should look random enough for casual applications.</p></li>
+<li><p>You can obtain the address of a variable by using <strong>address</strong> ( <em>variable</em> ). This could be used to pass the address of a variable to a function, which could then use <strong>mem</strong> to change that variable, thus effectively passing a pointer to a function rather than a value.</p></li>
+<li><p>Comments are between braces, or bracket-asterisk, see examples below. Comments may not be nested. The two different sorts of comment symbols are treated interchangeably, so you could conceivably start with one and end with another, see below.</p>
+<pre class="pas"><code> { my comment }
+ (* my comment *)
+ { my comment *)</code></pre></li>
+<li><p>There is no <strong>boolean</strong> type, however any variable could be considered a boolean, and you could declare:</p>
+<pre class="pas"><code>const true = 1; false = 0;</code></pre>
+<p>The results of conditional comparisons (eg. greater-than, less-than) will always be 0 (false) or 1 (true).</p></li>
+<li><p>The compiler is not case-sensitive. Reserved words (such as “procedure”) are tokenised in the Editor and will always display in lower-case with a preceding space.</p></li>
+<li><p>Identifier names can be any length (within reason), must start with a letter, and after that be letters, numbers or the underscore character. All characters of the name are significant.</p></li>
+<li><p>Arrays start at index 0.</p></li>
+</ul>
+<hr />
+<h3 id="machine_code">Calling machine code</h3>
+<p>You can call machine code (eg. that you produced with the assembler) by using <strong>call</strong>.</p>
+<p>You can “seed” the A, X, Y and status registers prior to the call by using <strong>memc</strong>. For example:</p>
+<pre class="pas"><code>memc [$16] := 22;  { A register }
+memc [$17] := 33;  { X register }
+memc [$18] := 44;  { Y register }
+memc [$19] := %00000010;   { status register P: NV1BDIZC - see image below
+                             - example sets Z flag }
+call ($5000);      { call the machine-code function, which should end with an RTS }
+                   { the values of A,X,Y,P after the call are now in the above addresses }</code></pre>
+<p><img src="images/6502%20status%20register.png" /></p>
+<p>These addresses ($16 to $19) are “well-known” addresses used by G-Pascal. They will always be used for this purpose.</p>
+<p>A couple more well-known addresses are:</p>
+<ul>
+<li>$0F … $12 (4 bytes) — the current random number. Change this to re-seed it.</li>
+<li>$13 … $15 (3 bytes) — the current “typing latency” figure. This is incremented while the system waits for a keypress.</li>
+</ul>
+<p>You could re-seed the random-number generator thus:</p>
+<pre class="pas"><code>mem [$F] := mem [$13];  { re-seed random number }</code></pre>
+<p>That would copy the typing latency figure into the 3 high-order bytes of the current random number, thus re-seeding it.</p>
+<hr />
+<h3 id="via_adapter">Accessing the VIA (Versatile Interface Adapater) pins</h3>
+<p>There are three inbuilt procedures and functions to control the 16 pins on the VIA chip, which operate similarly to the ones on the Arduino.</p>
+<p>The VIA ports are PA0 to PA7 (pins 2 to 9 on the chip) and PB0 to PB7 (pins 10 to 17 on the chip). For the purposes of these functions they are numbered 0 to 15, where 0 is PA0, 1 is PA1, 8 is PB0 and 15 is PB7, and so on for the ones in-between.</p>
+<p>Pins PA0 and PA1 on the VIA are used for the serial interface, as well as CB2 to detect the start bit for incoming serial data.</p>
+<p>Pins PA5, PA6, PA7, PB4, PB5, PB6, PB7 are used for the LCD interface.</p>
+<p>That leaves 7 pins for your own use (PA2, PA3, PA4, PB0, PB1, PB2, PB3).</p>
+<ul>
+<li><p><strong>pinMode</strong> (port, mode). This sets the mode of the port, where 0 is input and 1 is output.</p></li>
+<li><p><strong>digitalWrite</strong> (port, value). Writes to the specified port. The value can be 0 or 1.</p></li>
+<li><p><strong>digitalRead</strong> (port). Reads a value from the specified port. Returns 0 or 1.</p></li>
+</ul>
+<p><img src="images/VIA%20pin%20mappings.png" /></p>
+<p>Example:</p>
+<pre class="pas"><code>pinMode (2, 1);  { set VIA PA2 (pin 4 on the chip) to output }
+digitalWrite (2, 1);  { set PA2 to logic level 1 }
+foo := digitalRead (3);  { read PA3 }</code></pre>
+<hr />
+<h2 id="syntax_diagram">Syntax diagram</h2>
+<p>The compiler’s syntax diagram is <a href="G-Pascal%20syntax%20diagram.xhtml">here</a> — check that if you find yourself getting error messages.</p>
+<p>This was generated from the EBNF syntax <a href="doc/ebnf_syntax.txt">here</a>.</p>
+<hr />
+<h2 id="differences">Differences to C</h2>
+<p>If you are used to C (or C++) you may find yourself getting a lot of error messages. Points to note are:</p>
+<ul>
+<li><p>Procedures and functions must be declared at the <em>start</em> of a block, not in the middle.</p></li>
+<li><p>The order is important. CONST first, then VAR, then procedure/function declarations, then BEGIN. eg.</p>
+<pre class="pas"><code>const limit = 10;   { &lt;-- this is the start of a block: CONST before VAR }
+var k: integer;     { we declare variables and constants here - BEFORE &quot;begin&quot; }
+line : array [100] of char;  { array of 101 items }
+
+function foo;       { and functions and procedures - this is the start of another block}
+  { constants and variables would go here, if needed }
+begin
+  foo := 42         { assign to function return value }
+end;                { end of the function block - semicolon is required }
+
+begin               { end of declarations - now we have the main block statements }
+ for k := 1 to limit do
+   writeln (&quot;square of &quot;, k, &quot; is &quot;, k * k);
+ write (foo)        { call function }
+end.</code></pre></li>
+<li><p>If a procedure or function does not take arguments <em>omit the brackets</em>.</p></li>
+<li><p>Likewise, omit the brackets if you <em>call</em> the procedure or function if it takes no arguments (unlike C)</p></li>
+<li><p>Semicolons <em>separate</em> statements, they don’t terminate them.</p></li>
+<li><p>BEGIN and END are similar to braces in C. If you want to do multiple things (eg. as part of an IF statement) then put BEGIN … END around them.</p></li>
+</ul>
+<h3 id="things-to-be-careful-of">Things to be careful of</h3>
+<ul>
+<li><p>Functions which do not assign to the function return value give undefined results.</p></li>
+<li><p>Variables are not initialised and therefore their initial contents are undefined.</p></li>
+<li><p>Multiplication discards high-order bits if result is too large.</p></li>
+<li><p>Divide remainder is always positive (ie. MOD always gives a positive result, regardless of operand signs)</p></li>
+<li><p>Function arguments are always integers and always return an integer.</p></li>
+<li><p>Divide-by-zero raises an error and stops execution. Check for a zero divisor if you don’t want that to happen.</p></li>
+<li><p>One to three-byte strings can be used as integer constants</p>
+<p>eg. a := “abc”; write (a); –&gt; Result: 6513249 (ie. 0x636261 or “abc”)</p>
+<p>The first character is the low-order byte in the number (little endian), explaining the above results.</p></li>
+<li><p>Maximum arguments to a procedure/function is 85 (255 / 3) due to internal coding</p></li>
+<li><p>Procedures or functions may be nested (declared within another procedure or function) up to 127 levels of depth.</p></li>
+<li><p>There is no <strong>return</strong> statement, unlike C. For a function to return a value you assign to the function name. See the example just above where inside the function foo an assignment is made to foo. That is setting the function return value.</p></li>
+<li><p>Check the <a href="G-Pascal%20syntax%20diagram.xhtml">syntax diagram</a> if you are unsure.</p></li>
+</ul>
+<hr />
+<h2 id="directives">Compiler directives</h2>
+<p>Compiler directives are placed inside comments, with a “%”</p>
+<ul>
+<li>{%L} - list during compile (source code and current P-code address)</li>
+<li>{%P} - show generated P-codes during compile - only works during compile (not syntax check)</li>
+<li>{%N} - stop listing during compile (cancels %L and %P)</li>
+<li>{%S <em>address</em> } - relocate symbol table to <em>address</em> - must be done before defining symbols, also generates an opcode to relocate the runtime stack. More information about the usefulness of this is on the <a href="assembler.htm">assembler page</a>.</li>
+</ul>
+<p>The % must directly follow the start of the comment.</p>
+<hr />
+<h2 id="debugging">Debugging</h2>
+<p>If your program seems to be producing strange results you can either Trace or Debug it.</p>
+<h3 id="trace-mode">Trace mode</h3>
+<p>If you select &lt;T&gt;race instead of &lt;R&gt;un when you go to start execution, you will see something like this:</p>
+<pre><code>(0590)  00 d0 07 00
+(0594)  14 3d 1c 00
+(0595)  3d 1c 00 2c
+(0598)  2c 00 20 f8
+(059c)  80 37 00 f7
+(059d)  37 00 f7 ff
+(05a1)  2c 00 20 f8
+(05a5)  2c 00 1d f8
+(05a9)  04 32 00 20</code></pre>
+<p>This lists the address of the current P-code (pseudo-code) and then the P-code (first byte) and the following three bytes. Some P-codes are only one byte long (in the example above, at $0594 you can see that the next line is at $0595, so that particular P-code was only one byte.</p>
+<p>You can see what lines of code the P-codes relate to by putting “{%L}” at the start of your source code. Then, when compiling, you will see something like this:</p>
+<pre><code>(058c)   27           while K &lt; size do
+(0598)   28           begin
+(0598)   29             flags [k] := false;
+(05a1)   30             k := k + prime
+(05a9)   31           end ;</code></pre>
+<p>You can see from the above that we are clearly in the loop from lines 27 to 31, because the P-code addresses agree with the trace information.</p>
+<p><strong>Tip</strong>: If you add {%L} to your source, and recompile it, the P-code addresses detected in the trace may have changed because adding to the source file makes it longer, and thus the generated P-codes (which follow the source) will be at different addresses. Thus you may need to do a Trace again to make the addressess in the listing agree with the addresses in the Trace.</p>
+<p>You can also start tracing in the middle of execution by typing Ctrl+T.</p>
+<h3 id="debug-mode">Debug mode</h3>
+<p>If you select &lt;D&gt;ebug instead of &lt;R&gt;un when you go to start execution, you will see something like this:</p>
+<pre><code>(0537)  16 3d 18 00
+ Stack: 5810 = 02 00 00 d0 07 00 d0 07 00
+ Base:  5fff = 05 04 53 49 5a 45
+(0538)  3d 18 00 2c
+ Stack: 5813 = 01 00 00 d0 07 00 02 00 00
+ Base:  5fff = 05 04 53 49 5a 45
+(053b)  2c 00 1a f8
+ Stack: 5816 = d0 07 00 02 00 00 07 00 00
+ Base:  5fff = 05 04 53 49 5a 45
+(053f)  81 37 00 f7
+ Stack: 5813 = 02 00 00 d0 07 00 02 00 00
+ Base:  5fff = 05 04 53 49 5a 45
+(0540)  37 00 f7 ff
+ Stack: 5810 = 01 00 00 02 00 00 d0 07 00
+ Base:  5fff = 05 04 53 49 5a 45
+(0544)  2c 00 1a f8
+ Stack: 5816 = d0 07 00 02 00 00 07 00 00
+ Base:  5fff = 05 04 53 49 5a 45</code></pre>
+<p>This gives you somewhat more verbose information. For each P-code address you see the P-code itself on the right. On the first line the P-code is $16 (Greater or Equal) followed by $3d on the next line (Jump if zero). See <a href="doc/P-code-meanings.txt">here</a> for the meanings of the P-code numbers.</p>
+<p>The Stack, underneath, shows the top three values on the runtime stack. In the case of the first line (Greater or Equal), the top value is 02 00 00 and since this is a little-endian machine, that is the number 2. The next value is d0 07 00, which is therefore $0007d0, which is 2000 in decimal. This example is from the Eratosthenes Sieve prime number generator below, so clearly we are comparing to see if 2 &lt; 2000 (or effectively, if 2000 &gt;= 2). Clearly either of those comparisons is true (2 is less than 2000) so we see a $000001 (true) on the top of the stack underneath the P-code at $0538. Thus the “jump if zero” is not taken, and the loop continues.</p>
+<p>The Base underneath that is rather complicated, and is explained in the compiler source code. Basically it is used to restore the stack when a function returns, and has provision for three two-byte addresses:</p>
+<ul>
+<li>The return address from this procedure/function call</li>
+<li>The dynamic stack frame address (what the stack was when this function was called)</li>
+<li>The static stack frame address (which function was lexically prior to this function) which is used for finding variables in earlier functions.</li>
+</ul>
+<p>You can also start tracing in the middle of execution by typing Ctrl+D.</p>
+<h3 id="stopping-tracingdebuggingexecution">Stopping tracing/debugging/execution</h3>
+<p>You can stop tracing/debugging in the middle of execution by typing Ctrl+N.</p>
+<p>You can abort execution by typing Ctrl+C, or by pressing the NMI switch if you installed it.</p>
+<hr />
+<h2 id="pcode_meanings">P-code meanings</h2>
+<p>A list of P-code meanings is <a href="doc/P-code-meanings.txt">here</a>.</p>
+<p>Many of the P-codes have no operands. That is, they operate on the top contents of the runtime stack. For example, to add two numbers the compiler would generate:</p>
+<pre><code>LIT $012345     &lt;--- push the constant $12345
+LIT $056789     &lt;--- push the constant $56789
+ADD             &lt;--- add top two items on the stack (leaving the result on top of the stack)</code></pre>
+<hr />
+<h2 id="example_code">Example code</h2>
+<pre class="pas"><code>{ Eratosthenes Sieve prime number generator }
+
+{ Note: does not detect the number 2 }
+
+const size = 2000;
+      true = 1;
+      false = 0;
+      perline = 10;
+
+var flags : array [size] of char;
+    i, prime, k, count, online : integer;
+
+begin
+    count := 0;     { how many primes we found }
+    writeln;
+
+    online := 0;    { numbers we have shown on this line }
+
+    for i := 0 to size do
+      flags [i] := true;
+
+    for i := 0 to size do
+        if flags [i] then
+        begin
+          prime := i + i + 3;
+          k := i + prime;
+          while K &lt; size do
+          begin
+            flags [k] := false;
+            k := k + prime
+          end;
+          if online &gt; perline then
+          begin
+            writeln;
+            online := 0
+          end;
+          online := online + 1;
+          count := count + 1;
+          write (prime, &quot; &quot;)
+        end;
+      writeln;
+      writeln (count, &quot;  primes&quot;)
+end.</code></pre>
+<p>Output:</p>
+<pre><code>Running
+
+3 5 7 11 13 17 19 23 29 31 37
+41 43 47 53 59 61 67 71 73 79 83
+89 97 101 103 107 109 113 127 131 137 139
+149 151 157 163 167 173 179 181 191 193 197
+199 211 223 227 229 233 239 241 251 257 263
+269 271 277 281 283 293 307 311 313 317 331
+...
+3089 3109 3119 3121 3137 3163 3167 3169 3181 3187 3191
+3203 3209 3217 3221 3229 3251 3253 3257 3259 3271 3299
+3301 3307 3313 3319 3323 3329 3331 3343 3347 3359 3361
+3371 3373 3389 3391 3407 3413 3433 3449 3457 3461 3463
+3467 3469 3491 3499 3511 3517 3527 3529 3533 3539 3541
+3547 3557 3559 3571 3581 3583 3593 3607 3613 3617 3623
+3631 3637 3643 3659 3671 3673 3677 3691 3697 3701 3709
+3719 3727 3733 3739 3761 3767 3769 3779 3793 3797 3803
+3821 3823 3833 3847 3851 3853 3863 3877 3881 3889 3907
+3911 3917 3919 3923 3929 3931 3943 3947 3967 3989 4001
+4003
+551  primes</code></pre>
+<hr />
+<h2 id="reserved_words">Reserved words</h2>
+<p>The following words are reserved by the compiler. They are also tokenised in the source, so they will always be displayed in lower-case with a preceding space. They may not be used as identifiers in the compiler or labels in the assembler.</p>
+<pre><code>abs, address, and, array, begin, call, case, char, chr, const,
+cursor, delay, digitalread, digitalwrite, div, do, downto, else,
+end, for, function, getkey, hex, if, integer, lcdclear, lcdhome,
+lcdpos, lcdwrite, mem, memc, mod, not, of, or, pinmode, procedure,
+random, read, repeat, shl, shr, then, to, until, var, while, write,
+writeln, xor</code></pre>
+<hr />
+<h2 id="memory_layout">Memory layout</h2>
+<p><img src="images/Compiler%20memory%20organisation.svg.png" /></p>
+<hr />
+<h2 id="credits">Credits</h2>
+<ul>
+<li><p>The compiler was originally written in 1979 for the Motorola 6800 after reading a series of articles in Byte magazine (September, October, and November 1978) written by Kin-Man Chung and Herbert Yuen. That article described making a “Tiny” Pascal compiler written in Basic.</p></li>
+<li><p>Syntax diagrams generated from the “Bottlecaps” Railroad Diagram Generator available <a href="https://bottlecaps.de/rr/ui#expression">here</a>.</p></li>
+</ul>
+<hr />
+<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<hr />
+<h2 id="license">License</h2>
+<p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+</body>
+</html>

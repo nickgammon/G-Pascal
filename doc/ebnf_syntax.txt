@@ -1,0 +1,83 @@
+program ::= block '.'
+
+block ::= ('const' (const_identifier '=' constant ';')+)?
+          ('var' (identifier ( ',' identifier)* ':' ( 'array' '[' constant ']' 'of' )? ( 'integer' | 'char' ) ';' ))?
+          (('procedure' procedure_identifier | 'function' function_identifier)   ('(' identifier ( ',' identifier )* ')')*  ';' block ';')*
+         'begin' (statement (';' statement)*)? 'end'
+
+expression ::= simple_expression (( '=' | '<' | '>' | '<>' | '<=' | '>=') simple_expression)*
+
+simple_expression ::= ( '+' | '-' )? term (('+' | '-' | 'or') term)*
+
+term ::= factor (( '*' | 'div' | 'mod' | 'and' | 'shl' | 'shr' ) factor)*
+
+identifier ::=  letter ( letter | digit | '_')*
+
+variable_identifier ::= identifier
+
+const_identifier ::= identifier
+
+procedure_identifier ::= identifier
+
+function_identifier ::= identifier
+
+
+integer ::= ( '+' | '-' )? digit+
+
+digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+letter ::= "A" | "B" | "C" | "D" | "E" | "F" | "G"
+       | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+       | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+       | "V" | "W" | "X" | "Y" | "Z" | "a" | "b"
+       | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+       | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+       | "q" | "r" | "s" | "t" | "u" | "v" | "w"
+       | "x" | "y" | "z"
+
+string ::= ('"' ([^"] | '""')+ '"') | ("'" ([^']| "''")+ "'")
+
+hexinteger ::= '$' hexadecimal_digit+
+
+hexadecimal_digit ::= digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f'
+
+binaryinteger ::= '%' ( '0' | '1') +
+
+factor ::= constant |
+           variable |
+           function_identifier ('(' expression (',' expression)*  ')' )* |
+           'not' factor |
+           '(' expression ')' |
+           ('mem' | 'memc') '[' expression ']' |
+           'random' |
+           'address' '(' variable_identifier ')' |
+           'abs' '(' expression ')' |
+           'digitalread' '(' expression ',' expression ')'
+
+
+variable ::= variable_identifier ( '[' expression ']')?
+
+constant ::= const_identifier | integer | string | hexinteger | binaryinteger
+
+writeable_expression ::= string | expression | 'chr' '(' expression ')' | 'hex' '(' expression ')'
+
+statement ::= (variable ':=' expression |
+              procedure_identifier ('(' expression (',' expression)*  ')' )* |
+              'begin' (statement (';' statement)*)? 'end' |
+              'if' expression 'then' statement ( 'else' statement)?  |
+              'case' expression 'of'  (constant (',' constant)* ':' statement)+
+                   ('else' statement )? 'end' |
+              'while' expression 'do' statement |
+              'repeat' statement (';' statement)* 'until' expression |
+              'for' variable_identifier ':=' expression ( 'to' | 'downto' ) expression 'do' statement |
+              ('write' | 'lcdwrite' ) '(' writeable_expression (',' writeable_expression)* ')' |
+              'writeln' ('(' writeable_expression (',' writeable_expression)* ')')? |
+              'call' '(' expression ')' |
+              ('mem' | 'memc' ) '[' expression ']' ':=' expression |
+              'lcdhome' |
+              'lcdclear' |
+              'lcdpos' '(' expression ',' expression ')' |
+              'digitalwrite' '(' expression ',' expression ')'
+             )?
+
+

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>adventure</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">G-Pascal Adventure</h1>
+</header>
+<p><strong>Author</strong>: Nick Gammon</p>
+<p><strong>Date</strong>: Original text written in 1982</p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<p><img src="images/Pascal%20Adventure.png" /></p>
+<p>Ever since Will Crowther and Don Woods wrote in 1976 the “original” Adventure game, known as Colossal Cave Adventure, computerised fantasy games have become very popular. These days, of course, you can play in highly sophisticated immersive 3D worlds, such as World of Warcraft, and Final Fantasy XIV.</p>
+<p>Have you not wanted to write your <em>own</em> game? To design a dungeon, place treasures, make mazes, and generally be in control? With G-Pascal you can do that with a minimum of fuss.</p>
+<h3 id="why-pascal">Why Pascal?</h3>
+<p>Pascal makes the job easy because:</p>
+<ul>
+<li>Its long data names make the program self-documenting.</li>
+<li>The <strong>case</strong> statement is very useful for decision-making.</li>
+<li>Its strong structure makes it easy to debug and enhance.</li>
+</ul>
+<hr />
+<h3 id="source-code">Source code</h3>
+<p>The game is available <a href="examples/pas/adventure.pas">here</a>. Because of its size you need to make the hardware modification described <a href="hardware_mods.htm">here</a>, to give yourself 24kB of RAM rather than 16kB.</p>
+<hr />
+<h3 id="how-to-play">How to play</h3>
+<p>Adventure games generally accept commands from the player in the form of two-word sentences, for example GET ROD or WALK NORTH. Our game expects commands to consist of a verb, followed in some cases by a noun. For the sake of brevity commands such as GO NORTH can be abbreviated to the direction only: NORTH (for example).</p>
+<hr />
+<h3 id="code-structure">Code structure</h3>
+<p>Commands are accepted from the player by <strong>getline</strong> which reads a line of text from the player. This calls <strong>getword</strong> twice to decode the text into two words. If <strong>getline</strong> finds more than two words it asks the player to try again. You could easily accept more than two words by changing the constant <strong>maxwords</strong>.</p>
+<p><strong>getword</strong> may seem a bit obscure, but it pasically “packs” the first three letters of the next word on the input line into a single integer (G-Pascal uses 3-byte integers so this is a neat way of storing a three-letter word).</p>
+<p>A side-effect of this is that our game only regards the first three characters of the word as significant. <strong>getword</strong> also keeps track of where the whole word starts and ends, so if you take TAKE ANTELOPE it can reply I SEE NO ANTELOPE HERE rather than I SEE NO ANT HERE.</p>
+<p>Our adventure player can take one of five general categories of actions: Move (for example, GO NORTH); take something (TAKE ROD); drop something (DROP LAMP); use something (WAVE RING); and other (SCORE, QUIT, INVENTORY).</p>
+<hr />
+<h3 id="make-a-move">Make a move …</h3>
+<p>The player’s current location is stored in <strong>room</strong>. Their previous location is stored in <strong>oldroom</strong>. If <strong>room</strong> and <strong>oldroom</strong> differ the program prints a description of the current location by using a <strong>case</strong> statement in <strong>describeroom</strong>.</p>
+<pre><code>    write (&quot;You are &quot;);
+    case room of
+      1: writeln (&quot;at a plateau near a cliff. A rocky path leads south.&quot;);
+      2: writeln (&quot;on a rocky path leading north and curving to the east.&quot;,chr(newline),
+                  &quot;There is a slight breeze.&quot;);
+      3: writeln (&quot;at the entrance to a dark cave. The cave is east of here. A rocky path to the west curves north.&quot;);
+
+...</code></pre>
+<p><strong>describeroom</strong> also prints a description of all objects in the same room as the player:</p>
+<pre><code>  for i := 0 to maxobj do
+    if inroom (i) then
+      begin
+      write (&quot;There is a &quot;);
+      describeobject (i);
+      writeln (&quot; here!&quot;)
+      end;  { of if in room }
+  end;  { of for }</code></pre>
+<p>When the player enters a movement command such as NORTH, SOUTH, UP, DOWN and so on, the <strong>verb</strong> procedure calls the appropriate movement procedure. The movement procedures handle all movement in a single <strong>case</strong> statement (per verb) — invalid directions are caught by the <strong>else</strong> clause of the <strong>case</strong>.</p>
+<pre><code>procedure south;
+begin
+  case room of
+    1: room := 2;
+    4: room := 5;
+    5: room := 6;
+    9: room := 7;
+    7: room := 11;
+   16: room := 15;
+   17: room := 16;
+   19: if carrying (statue) then
+         room := 18
+        else
+          force
+    else noway end
+end;  { of south }</code></pre>
+<p>Movement can be conditional — in the above example the player can only move from room 19 to 18 if carrying the statue.</p>
+<p>To add more rooms to our game we merely have to add their descriptions to <strong>describeroom</strong>, and make provision for getting to and from them in the movement procedures.</p>
+<hr />
+<h3 id="manipulating-objects">Manipulating objects</h3>
+<p>A lot of the fun in adventure games is finding “objects” (such as lamps and rods) and discovering a use for them. An object can either be carried, lying around somewhere, or nonexistent.</p>
+<p>In our game we use an array, <strong>object</strong>, to contain the current location of each object. For example <strong>object [lamp]</strong> is the location of the lamp. The locations are: -1: being carried, 0: nowhere, room number: lying in that room.</p>
+<p>We now define some handy boolean functions which tell us if a given object is being carried, is in the room, is is here (meaing carried or in the room).</p>
+<pre><code>function carrying (x);
+begin
+  carrying := object [x] = inhand
+end; { carrying }
+
+function inroom (x);
+begin
+  inroom := object [x] = room
+end;  { inroom }
+
+function here (x);
+begin
+  here := carrying (x) or inroom (x)
+end;  { here }</code></pre>
+<p>We can now pick up an object by setting its location to -1, or drop it by setting its location to the current room number, for example:</p>
+<pre><code>procedure pickup (x);
+begin
+  if holding &gt;= maxcarry then
+    writeln (&quot;You can&#39;t carry any more!&quot;)
+  else
+  begin
+    holding := holding + 1;
+    object [x] := inhand;
+    writeln (&quot;Taken.&quot;)
+  end
+end;  { of pickup }</code></pre>
+<p>At this point you might ask: “if I say TAKE LAMP, how does the word ‘LAMP’ become a subscript in the <strong>object</strong> array?”</p>
+<p>Good question! This conversion is carried out by <strong>convertobject</strong>:</p>
+<pre><code>function convertobject;
+begin
+  obj := 0;
+  if word [2] = 0 then
+  begin
+    sayword (1);
+    writeln (&quot; what?&quot;)
+  end else
+  case word [2] of
+    &quot;lam&quot;         : obj := lamp;
+    &quot;bun&quot;, &quot;cre&quot;  : obj := bun;
+    &quot;rod&quot;         : obj := rod;
+    &quot;rin&quot;, &quot;gol&quot;  : obj := ring;
+    &quot;sil&quot;, &quot;sta&quot;  : obj := statue;
+    &quot;jew&quot;, &quot;cro&quot;  : obj := crown
+  else
+    obj := 9999
+  end; { case }
+  convertobject := obj
+end;  { convertobject }</code></pre>
+<p><strong>convertobject</strong> uses a <strong>case</strong> statement to convert the name of any object (or its synonym/s) into a value which is stored in <strong>obj</strong>. (The actual numbers are stored as constants at the start of the program to avoid confusion and make the program more self-explanatory). <strong>convertobject</strong> also prints “WHAT?” if the player has not supplied a noun, so if you just take TAKE, it will reply TAKE WHAT?</p>
+<p><strong>convertobject</strong> is called by the boolean function <strong>getobject</strong> whose function is to check that the requested object is in the right place.</p>
+<p>Since <strong>getobject</strong> returns true or false, you can write (for example): “if getobject (carried) then statement;”.</p>
+<p>In this case the statement is executed if:</p>
+<ul>
+<li>a noun was supplied</li>
+<li>it is a valid object; and</li>
+<li>it is being cararied</li>
+</ul>
+<p>If the statement is executed then the the object number is in <strong>obj</strong> otherwise the appropriate error message will already have been printed. This greatly simplifies programming the rest of the game. For example, here is how we handle the verb EAT:</p>
+<pre><code>procedure eat;
+begin
+  if getobject (nearby) then
+    if obj = bun then
+    begin
+      writeln (&quot;Thanks! You were rather hungry!&quot;);
+      destroy (bun)
+    end else
+      crazy
+end; { eat }</code></pre>
+<hr />
+<h3 id="to-add-more-objects">To add more objects …</h3>
+<p>Here’s how you add more objects to the game:</p>
+<ul>
+<li>Increase <strong>maxobj</strong> to the appropriate size</li>
+<li>Allocate an internal name and sequential number to each object in the <strong>const</strong> declaration at the start of the program.</li>
+<li>Put the description of each object in <strong>describeobject</strong></li>
+<li>Put the external name to internal name conversion in <strong>convertobject</strong></li>
+<li>Allocate the object’s initial room number (if any) in <strong>initialize</strong></li>
+<li>Decide what the use of the object will be and put it in an appropriate procedure. For example, a book might be read, or a key might open a lock.</li>
+</ul>
+<hr />
+<h3 id="expanding-the-program">Expanding the program</h3>
+<p>To turn this game into a full-scale adventure you would need to:</p>
+<ul>
+<li>Create more rooms</li>
+<li>Create more objects</li>
+<li>Create more verbs (for example, READ, LOCK, OPEN, magic words and so on).</li>
+</ul>
+<hr />
+<h2 id="example-output-from-the-adventure-game">Example output from the Adventure game:</h2>
+<pre><code>Your quest is to explore the cave of the evil Ur-Lord, and bring back to
+the edge of the cliff the following valuables:
+
+  1. The white gold ring;
+  2. The sacred silver statue;
+  3. The jewelled crown of the Ur-Lord.
+
+Be careful ...
+
+Hints: LOOK, INVENTORY, HELP, SCORE,
+       TAKE and DROP, compass directions to move.
+       (Also: IN, OUT, UP, DOWN, INSPECT, WAVE)
+
+You are at the entrance to a dark cave. The cave is east of here. A rocky path to the west curves north.
+
+west
+
+You are on a rocky path leading north and curving to the east.
+There is a slight breeze.
+
+north
+
+You are at a plateau near a cliff. A rocky path leads south.
+There is a lamp here!
+
+take lamp
+
+Taken.
+
+inventory
+
+You are carrying:
+  lamp</code></pre>
+<hr />
+<h3 id="references">References</h3>
+<p><a href="https://en.wikipedia.org/wiki/Colossal_Cave_Adventure%3E">Colossal Cave Adventure: Wikipedia</a></p>
+<p>Graphic from Australian <em>Your Computer</em> magazine, August 1982, used with permission.</p>
+<hr />
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<hr />
+<h2 id="license">License</h2>
+<p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+</body>
+</html>

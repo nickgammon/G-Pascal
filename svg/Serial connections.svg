@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="169.33333mm"
+   height="127mm"
+   viewBox="0 0 169.33333 127"
+   version="1.1"
+   id="svg973"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="Serial connections.svg"
+   inkscape:export-filename="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/Serial connections.png"
+   inkscape:export-xdpi="142"
+   inkscape:export-ydpi="142">
+  <defs
+     id="defs967">
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker2500"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lstart">
+      <path
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         style="fill:#ddf200;fill-opacity:1;fill-rule:evenodd;stroke:#ddf200;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path2498"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lstart"
+       style="overflow:visible"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         id="path1566"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#ddf200;fill-opacity:1;fill-rule:evenodd;stroke:#ddf200;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.979899"
+     inkscape:cx="310.47458"
+     inkscape:cy="372.27103"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="3840"
+     inkscape:window-height="2098"
+     inkscape:window-x="0"
+     inkscape:window-y="34"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <metadata
+     id="metadata970">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-18.331852,-94.782738)">
+    <image
+       sodipodi:absref="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/photo of serial connection.JPG"
+       xlink:href="photo of serial connection.JPG"
+       width="169.33333"
+       height="127"
+       preserveAspectRatio="none"
+       id="image1561"
+       x="18.331852"
+       y="94.782738" />
+    <path
+       style="fill:none;stroke:#ddf200;stroke-width:0.79374999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart)"
+       d="m 94.591323,178.50446 v 40.65959"
+       id="path1564"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+       x="96.350662"
+       y="218.42274"
+       id="text2488"><tspan
+         sodipodi:role="line"
+         id="tspan2486"
+         x="96.350662"
+         y="218.42274"
+         style="fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1">Serial input to the board via 1k resistor</tspan></text>
+    <path
+       sodipodi:nodetypes="ccc"
+       inkscape:connector-curvature="0"
+       id="path2496"
+       d="m 101.00579,158.59288 v 40.65959 h 20.86912 v 2.53276"
+       style="fill:none;stroke:#ddf200;stroke-width:0.79374999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker2500)" />
+    <text
+       id="text3410"
+       y="205.32654"
+       x="100.89424"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+         y="205.32654"
+         x="100.89424"
+         id="tspan3408"
+         sodipodi:role="line">Serial output from the board</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+       x="113.99045"
+       y="159.0889"
+       id="text3414"><tspan
+         sodipodi:role="line"
+         id="tspan3412"
+         x="113.99045"
+         y="159.0889"
+         style="fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1">74LS08 for</tspan><tspan
+         sodipodi:role="line"
+         x="113.99045"
+         y="164.38057"
+         style="fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+         id="tspan3416">RAM expansion</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+       x="99.424255"
+       y="117.79577"
+       id="text3420"><tspan
+         sodipodi:role="line"
+         id="tspan3418"
+         x="99.424255"
+         y="117.79577"
+         style="fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1">Gnd</tspan><tspan
+         sodipodi:role="line"
+         x="99.424255"
+         y="123.08743"
+         style="fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1"
+         id="tspan3422">CTS</tspan></text>
+    <rect
+       style="opacity:0.61699997;fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.79374999;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect3440"
+       width="51.048477"
+       height="4.9444861"
+       x="111.91911"
+       y="138.57599" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="112.92138"
+       y="142.38457"
+       id="text3438"><tspan
+         sodipodi:role="line"
+         id="tspan3436"
+         x="112.92138"
+         y="142.38457"
+         style="stroke-width:0.26458332">Interrupt detection to CB2</tspan></text>
+  </g>
+</svg>

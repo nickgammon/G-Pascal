@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>assembler</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">G-Pascal Assembler</h1>
+</header>
+<p><strong>Author</strong>: Nick Gammon</p>
+<p><strong>Date written</strong>: February 2022</p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#Features">Features</a></li>
+<li><a href="#how_to_assemble">How to assemble a program</a></li>
+<li><a href="#syntax">Syntax and notes</a>
+<ul>
+<li><a href="#labels">Labels</a></li>
+<li><a href="#whitespace">Whitespace</a></li>
+<li><a href="#opcode">Opcode / directive</a></li>
+<li><a href="#operand">Operand and expression evaluation</a></li>
+<li><a href="#directives">Directives</a></li>
+</ul></li>
+<li><a href="#directives">Assembler directives</a></li>
+<li><a href="#memory_layout">Memory layout</a></li>
+<li><a href="#co_exist">How to co-exist with Pascal code?</a></li>
+<li><a href="#eeprom_functions">Access to EEPROM functions and variables</a></li>
+<li><a href="#via_adapter">Accessing the VIA (Versatile Interface Adapater) pins</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+<p><strong>Author</strong>: Nick Gammon (written in 2022)</p>
+<h2 id="introduction">Introduction</h2>
+<p>The G-Pascal assembler is a 65C02 assembler, entirely resident in the EEPROM, and available immediately after resetting your board. This is intended to let you try small to medium-scale assembler projects, without having to keep removing the EEPROM chip and programming it externally.</p>
+<hr />
+<h2 id="Features">Features</h2>
+<ul>
+<li><p>The documented WD65C02 instruction set, with all operand modes</p></li>
+<li><p>Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.</p></li>
+<li><p>Relocation of the output to any memory address (ORG directive)</p></li>
+<li><p>Here is “hello world” in assembler:</p>
+<pre class="asm"><code>; interface routines in the EEPROM
+serial_print_message = $8012
+
+      jmp start   ; skip the message
+hello asciiz &quot;Hello, world!&quot;
+start = *
+      lda #&lt;hello
+      ldx #&gt;hello
+      jsr serial_print_message
+      rts</code></pre></li>
+</ul>
+<hr />
+<h2 id="how_to_assemble">How to enter and assemble a program</h2>
+<ol type="1">
+<li><p>Enter the Editor from the main menu (type E) and use that to enter your program. Alternatively load it from your PC using the File menu. The Editor is described in a separate page.</p></li>
+<li><p>Type “A” from the main menu to assemble it and produce machine code.</p></li>
+<li><p>If it assembles without errors type “R” from the main menu to run the code. It will automatically start running at the location of the first byte of emitted machine code. It is probably useful to put a JMP there to go to where you want the code to start executing. Put a RTS at the end of your code to return to the G-Pascal system.</p></li>
+</ol>
+<hr />
+<h2 id="syntax">Syntax and notes</h2>
+<p>The assembler is intended to be compatible — to a point — with the vasm6502 assembler, in particular when run on your PC like this:</p>
+<pre class="sh"><code>vasm6502_oldstyle MYFILE.asm  -wdc02 -esc -Fbin -o MYFILE.bin -L MYFILE.list</code></pre>
+<p>Note that there is a limit to how much can be implemented in a few kB of EEPROM. Thus source files written in this assembler should compile in vasm, however if you use extra features of vasm (like conditional compiles) then these are not supported. In other words, file written here should be compatible with vasm, not necessarily the other way around.</p>
+<p>Vasm is available from <a href="http://sun.hasenbraten.de/vasm/" class="uri">http://sun.hasenbraten.de/vasm/</a></p>
+<p>The assembler is line-based, that is each line is treated separately, and is terminated by the newline character (0x0A).</p>
+<hr />
+<h2 id="labels">Labels</h2>
+<p>A line may optionally contain of a label, which must be located in column 1 (the first column).</p>
+<ul>
+<li>Labels must start with a letter, and then consist of letters, numbers and/or the underscore character.</li>
+<li>Labels are not case-sensitive.</li>
+<li>There are no local labels.</li>
+<li>It is an error to re-use a label.</li>
+<li>Labels may optionally be followed by a colon (“:”).</li>
+<li>Except in the case of the EQU (or “=”) directive the value of the label is the value of the current output code address.</li>
+<li>A line may consist of a label only.</li>
+</ul>
+<hr />
+<h2 id="whitespace">Whitespace</h2>
+<p>Whitespace (spaces) are ignored, except that a label must start in the first column.</p>
+<h2 id="comments">Comments</h2>
+<p>A comment starts with semicolon (“;”) and continues to the end of the line. Lines may consist entirely of comments, or be entirely blank.</p>
+<hr />
+<h2 id="opcode">Opcode / directive</h2>
+<p>Opcodes (eg. LDA) or directives (eq. ORG) are separated from the label, if present, by one or more spaces. If there is no label then the opcode must be at least on column 2 of the line. Opcodes are not case-sensitive.</p>
+<p>A test file is <a href="examples/asm/assembler_opcode_test.asm">here</a> which assembles every opcode/addressing-mode combination. The expected code to be generated is shown in the comments. This should assemble the same under this assembler and vasm.</p>
+<hr />
+<h2 id="operand">Operand</h2>
+<p>Operands are separated from the opcode by one or more spaces.</p>
+<ul>
+<li><p>The operand "*" must appear on its own, and evaluates to the current output code address, eg.</p>
+<pre class="asm"><code>foo = *  ; foo is assigned to the current address</code></pre></li>
+<li><p>In the case of opcodes which may or may not use the A register as an operand, the “A” must be explicitly provided, eg.</p>
+<pre class="asm"><code>  LSR A</code></pre></li>
+<li><p>String operands only apply to the ASC, ASCII, ASCIIZ and STRING directives. In those cases a quoted string of any length (up to 255 characters) may be the operand. In a similar way to the Pascal compiler, strings may start with either single of double quotes, and contain the other type of quote inside. Alternatively you may double the starting quote to include it in the string. eg. ‘Nick’‘s cat’. In other places strings of one to three characters long may be used, and will be treated as numbers. Eg.</p>
+<pre class="asm"><code>  lda #&#39;A&#39;   ; load A with $41</code></pre>
+<p>Strings may also contain “escape” sequences of a backslash followed by a letter, as follows:</p>
+<pre><code>  \A    bell ($07)
+  \B    backspace ($08)
+  \E    escape  (0x1B)
+  \F    formfeed ($0C)
+  \N    newline  (0x0A)
+  \R    carriage return (0x0D)
+  \T    horizontal tab (0x09)
+  \V    vertical tab (0x0B)
+  \&#39;    single quote
+  \&quot;    double quote
+  \\    backslash
+  \Xnn  where nn is one or two hex digits (eg. \x0A \X42 \x9 )</code></pre>
+<p>The letter following the backslash is not case-dependent. For the \Xnn form, if there is potential confusion if the character following the escape sequence happens to be a hex digit then you should use two digits. Only the first two digits are considered when parsing.</p></li>
+<li><p>Other operands go through the “expression evaluator” after taking into account indirect addressing which is noticed by the presence of a leading “(” on the line.</p>
+<p>The expression evaluator combines values using operators following the following precedence list, as obtained from the vasm documentation:</p>
+<pre><code>  1. + - ! ~ (unary +/- sign, not, complement),  also &lt; (low-byte) &gt; (high byte)
+  2. &lt;&lt; &gt;&gt; (shift left, shift right)
+  3. &amp; (bitwise and)
+  4. ^ (bitwise exclusive-or)
+  5. | (bitwise inclusive-or)
+  6. * / % (multiply, divide, modulo)
+  7. + - (plus, minus)
+  8. &lt; &gt; &lt;= &gt;= (less, greater, less or equal, greater or equal)
+  9. == != &lt;&gt; (equality, inequality)
+  10. &amp;&amp; (logical and)
+  11. || (logical or)</code></pre>
+<p>The high-byte and low-byte operators are unary operators with a high precedence. Depending on their location in the expression they are not considered to be comparison operators. For example :</p>
+<pre class="asm"><code>  lda #&gt;foo           ; load A with the high-order byte of the address of foo
+  lda #&gt;(foo + $100)  ; load A with the high-order byte of the address of (foo + $100)
+  lda #&lt;foo           ; load A with the low-order byte of the address of foo</code></pre>
+<p>There is a <a href="examples/asm/expression_evaluator_test.asm">operator evaluation</a> test file you can try.</p></li>
+<li><p>Parentheses may be used to force the order of evaluation of operators.</p></li>
+<li><p>Labels, if used in expressions, take on the value of the address of that label.</p></li>
+<li><p>Expressions are evaluated internally to 24 bits of precision, and then truncated to 16 bits at the end of the expression evaluation. This means that operations which might overflow 16 bits may still evaluate correctly. eg. lda # ($8000 &lt;&lt; 4) &gt;&gt; 12 would generate a9 80 (that is, lda #$80) because the high-order bit was not lost during the initial shift left (it was still in the range of a 24-bit value).</p></li>
+</ul>
+<hr />
+<h2 id="directives">Directives</h2>
+<p>The following assembler directives are supported:</p>
+<ul>
+<li><p>LIST <em>number</em></p>
+<p>This controls the listing of your code during assembly. It consists of three bits which may be OR’ed together as follows:</p>
+<ul>
+<li>1 : Show the source during assembly (with the generated address on the left)</li>
+<li>2 : Show the generated opcodes during assembly</li>
+<li>4 : Show the symbol table at the completion of the assembly</li>
+</ul>
+<p>For example:</p>
+<pre class="asm"><code>  LIST 1     ; show source
+  LIST 1|2   ; show source and generated code (alternatively: LIST 3)
+  LIST 1|2|4 ; show source, generated code, and symbols (alternatively: LIST 7)
+  LIST 0     ; stop listing anything</code></pre>
+<p>The assembler does two passes, the first to find the address of forward-declared symbols, and the second to output the machine code. The listing is shown during the second pass, unless there is an error, in which case the line in error is shown.</p></li>
+<li><p>LIST</p>
+<p>Same as “LIST 3”.</p></li>
+<li><p>NOLIST</p>
+<p>Same as “LIST 0”.</p></li>
+<li><p>ASSERT <em>expression</em></p>
+<p>Raises an error “Assertion failed” if <em>expression</em> is zero. This can be used to do compile-time checking. For example, you could check if a block of memory exceeded a certain size.</p></li>
+<li><p>ASC <em>string</em></p>
+<p>Insert the string into the code, with no terminator.</p>
+<pre class="asm"><code>  asc &quot;Hello, world!&quot;</code></pre></li>
+<li><p>ASCII <em>string</em></p>
+<p>Same as ASC.</p></li>
+<li><p>ASCIIZ <em>string</em></p>
+<p>Insert the string into the code, with a 0x00 (null) terminator.</p></li>
+<li><p>STRING <em>string</em></p>
+<p>Same as ASCIIZ.</p></li>
+<li><p><em>label</em> EQU <em>address</em></p>
+<p>The specified label takes on the address of the evaluated expression. Alternatively, the address may be the symbol "*" which means “the current address”.</p></li>
+<li><p><em>label</em> = <em>address</em></p>
+<p>Same as EQU.</p></li>
+<li><p>ORG <em>expression</em></p>
+<p>The output generation is relocated to whatever <em>expression</em> evaluates to, from this point on. If this line had a label the label evaluates to the address <em>before</em> the relocation.</p></li>
+<li><p>DFB <em>expression</em> [, <em>expression</em> ]</p>
+<p>A single byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.</p></li>
+<li><p>DFW <em>expression</em> [, <em>expression</em> ]</p>
+<p>Two bytes (one word) are emitted to the output, which is the value of the expression. It must evaluate to 0x0000 to 0xFFFF. The bytes are emitted in little-endian order, that is the low-order byte first, followed by the high-order byte. Multiple words may be emitted separated by commas.</p></li>
+<li><p>WORD <em>expression</em> [, <em>expression</em> ]</p>
+<p>Same as DFW.</p></li>
+<li><p>BLK <em>expression</em></p>
+<p>The assembler emits <em>expression</em> zeroes. For example:</p>
+<pre class="asm"><code>  BLK 10    ; emit 10 zeroes, advancing the output address by 10</code></pre></li>
+<li><p>RESERVE <em>expression</em></p>
+<p>The assembler advances the output address by <em>expression</em> bytes <em>without</em> emitting anything. This could be handy for reserving blocks of memory without overwriting them during the assembly process.</p></li>
+<li><p>SYM <em>expression</em></p>
+<p>Relocate the symbol table, used during assembly, to the address that <em>expression</em> evaluates to. This must be done before any symbols are created (that is, before any labels). The intention of this is to allow you to make a “safe place” for code which could be shared by the Pascal compiler and the assembler, as described below.</p>
+<p>For example:</p>
+<pre class="asm"><code>  SYM $4800     ; symbols are to be placed at $4800 (growing downwards)
+  ORG $4800     ; code is to be placed at $4800 (growing updwards)</code></pre></li>
+</ul>
+<hr />
+<h2 id="memory_layout">Memory layout</h2>
+<h3 id="where-is-the-generated-machine-code-placed">Where is the generated machine-code placed?</h3>
+<p>In the absence of an ORG directive, the generated code is placed directly after the end of the source code. This is fine for testing out assembly-code ideas.</p>
+<p>During assembly the symbol table is placed at the top of RAM and grows downwards, see graphic:</p>
+<p><img src="images/Assembler%20memory%20organisation.svg.png" /></p>
+<hr />
+<h3 id="co_exist">How to co-exist with Pascal code?</h3>
+<p>It is possible to generate machine code and call that from a Pascal program (using <strong>call</strong> ( <em>address</em> ) ). However to do this we need to move the assembler code somewhere where it won’t be overwritten by the Pascal source or the Pascal P-codes. One possible spot would be somewhere between the P-codes and the symbol table, however the exact safe location for such code might be hard to determine.</p>
+<p>A safer approach is to move the symbol table (with a compiler and assembler directive) and free up a block of memory, like this:</p>
+<p><img src="images/Assembler%20memory%20organisation%20with%20symbol%20table%20relocation.svg.png" /></p>
+<p>To do this, in the assembler we need two extra lines, right at the start of the source file:</p>
+<pre class="asm"><code>  SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
+  ORG $5800     ; code is to be placed at $5800 (growing upwards)</code></pre>
+<p>If you haven’t installed my RAM extending mod, change the address from $5800 to $3800, as RAM ends at $4000 in that case.</p>
+<p>Now when you assemble your code the output goes to $5800 and is not affected by the symbol table growing, or the later loading of Pascal source.</p>
+<p>Meanwhile, in your Pascal code you need to do a similar thing:</p>
+<pre class="pas"><code>{%S $5800 }</code></pre>
+<p>That ensures that the Pascal compiler symbol table also starts lower in memory, thus not clobbering the generated machine code. That directive also relocates the run-time stack to the same address.</p>
+<hr />
+<h3 id="example-of-co-existence">Example of co-existence</h3>
+<pre class="asm"><code>  SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
+  ORG $5800     ; code is to be placed at $5800 (growing upwards)
+
+; interface routines in the EEPROM
+serial_print_message = $8012
+
+      jmp start   ; skip the message
+hello asciiz &quot;Hello, world!\n&quot;
+start = *
+      lda #&lt;hello
+      ldx #&gt;hello
+      jsr serial_print_message
+      rts</code></pre>
+<p>Load and compile the above assembler code, which relocates itself to $5800 and with the symbol table moved to $5800 to avoid a clash with the symbols.</p>
+<p>You can test that on its own now by going to the main menu and selecting &lt;R&gt;un. The runtime system automatically starts running at the first <em>emitted</em> object code. In this case, that is the “jmp start” instruction.</p>
+<pre class="pas"><code>  { Relocate symbol table and runtime stack: } {%s $5800}
+  { Note: hello_world_relocated.asm should be loaded and compiled before running this }
+
+begin
+  writeln (&quot;About to call machine code ...&quot;);
+  call ($5800);
+  writeln (&quot;Machine code done.&quot;)
+end .</code></pre>
+<p>Now load, compile and run the above Pascal code. It will display a message, then call the assembler code at $5800, and then return to display its final message.</p>
+<p>If you don’t have the extended RAM mod then change $5800 in the above examples to $3800.</p>
+<hr />
+<h2 id="eeprom_functions">Access to EEPROM functions and variables</h2>
+<p>There are various useful functions exposed in the EEPROM code by way of a “jump table” at the very start of the code. This consists of a series of 3-byte JMP instructions which jump to the start of the functions. The intention here is that, even if the functions move around in subsequent releases of the EEPROM code, the jump tables will always be in the same place, and thus code that relies on them will still work.</p>
+<p>A list of the jump tables is <a href="examples/asm/on_board_entry_points.asm">here</a>. You could copy/paste part or all of that file into your project. For space reasons you may choose to only use the parts relevant to a particular project, as each line stands on its own.</p>
+<p>There are also the addresses of “well known” zero-page locations which are used by some of the functions.</p>
+<p>Example of using the inbuilt functions to multiply two numbers and display the result:</p>
+<pre class="asm"><code>;
+;  zero-page locations used by this code
+;
+reg            = $0000 ; (3 bytes) work &quot;register&quot; used in various places
+value          = $0006 ; (3 bytes) used by the assembler expression evaluator
+value2         = $0009 ; (3 bytes) used by the assembler expression evaluator
+;
+;  functions used by this code
+;
+exp_multiply   = $8081     ; VALUE := VALUE * VALUE2 (may overflow and the overflow is lost)
+dsp_bin        = $809c     ; write the number in REG (3 bytes) to the serial port (in decimal)
+
+;
+;  put 47302 into value
+;
+  lda #&lt;47302
+  sta value
+  lda #&gt;47302
+  sta value+1
+  stz value+2
+;
+;  put 55 into value2
+;
+  lda #&lt;55
+  sta value2
+  lda #&gt;55
+  sta value2+1
+  stz value2+2
+;
+;  multiply them to get the result 2601610
+;
+  jsr exp_multiply
+;
+;  display the result
+;
+  lda value
+  sta reg
+  lda value+1
+  sta reg+1
+  lda value+2
+  sta reg+2
+  jsr dsp_bin
+; done!
+  rts</code></pre>
+<hr />
+<h3 id="via_adapter">Accessing the VIA (Versatile Interface Adapater) pins</h3>
+<p>There are three utility functions in the EEPROM code to control the 16 pins on the VIA chip, which operate similarly to the ones on the Arduino.</p>
+<p>The functions are in the <a href="examples/asm/on_board_entry_points.asm">exposed functions jump table</a>.</p>
+<p>The VIA ports are PA0 to PA7 (pins 2 to 9 on the chip) and PB0 to PB7 (pins 10 to 17 on the chip). For the purposes of these functions they are numbered 0 to 15, where 0 is PA0, 1 is PA1, 8 is PB0 and 15 is PB7, and so on for the ones in-between.</p>
+<p>Pins PA0 and PA1 on the VIA are used for the serial interface, as well as CB2 to detect the start bit for incoming serial data.</p>
+<p>Pins PA5, PA6, PA7, PB4, PB5, PB6, PB7 are used for the LCD interface.</p>
+<p>That leaves 7 pins for your own use (PA2, PA3, PA4, PB0, PB1, PB2, PB3).</p>
+<ul>
+<li><p><strong>pinmode</strong> (port, mode). This sets the mode of the port, where 0 is input and 1 is output.</p>
+<p>Port in A, mode in X, then <strong>jsr pinmode</strong></p></li>
+<li><p><strong>digitalWrite</strong> (port, value). Writes to the specified port. The value can be 0 or 1.</p>
+<p>Port in A, value in X, then <strong>jsr digitalwrite</strong></p></li>
+<li><p><strong>digitalRead</strong> (port). Reads a value from the specified port. Returns 0 or 1.</p>
+<p>Port in A, then <strong>jsr digitalread</strong>. Returns the value in A.</p></li>
+</ul>
+<p><img src="images/VIA%20pin%20mappings.png" /></p>
+<p>Example:</p>
+<pre class="asm"><code>
+;
+;  digitalWrite example
+;
+  jmp start     ; skip the variable declarations
+
+;
+;  VIA functions
+;
+pinmode_           = $809f     ; sets the pin mode - pin:0 to 15; mode: 0 or 1 : pin in A, mode in X
+digitalread_       = $80a2     ; reads a pin - pin:0 to 15; Pin to read is in in A. Returns zero or non-zero in A.
+digitalwrite_      = $80a5     ; writes to a pin - pin:0 to 15; value: 0 or 1 : pin in A, mode in X
+
+delay_             = $80ae     ; delay for YYXX ms (Y = high-order byte, X = lo-order byte)
+
+counter   dfb 0     ; how many toggles we did
+pin_state dfb 0     ; current pin state
+
+ITERATIONS = 20     ; how many times to loop (this will be 10 flashes)
+
+start:
+
+  stz pin_state
+  stz counter
+
+;
+;  set PA2 to output
+;
+  lda #2   ; Port PA2
+  ldx #1   ; write mode
+  jsr pinmode_
+
+
+write_loop:
+;
+;  write to PA2
+;
+  lda pin_state
+  eor #1   ; toggle state
+  sta pin_state
+  tax
+  lda #2   ; Port PA2
+  jsr digitalwrite_
+;
+;  delay 500 ms
+;
+  ldx #&lt;500
+  ldy #&gt;500
+  jsr delay_
+;
+;  do it ITERATIONS times
+;
+  inc counter
+  lda counter
+  cmp #ITERATIONS
+  bcc write_loop
+;
+;  all done
+;
+  rts</code></pre>
+<hr />
+<h2 id="credits">Credits</h2>
+<ul>
+<li><strong>Vasm</strong> portable and retargetable assembler was used to assemble the G-Pascal EEPROM binary file. It is available from <a href="http://sun.hasenbraten.de/vasm/" class="uri">http://sun.hasenbraten.de/vasm/</a></li>
+</ul>
+<hr />
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<hr />
+<h2 id="license">License</h2>
+<p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+</body>
+</html>

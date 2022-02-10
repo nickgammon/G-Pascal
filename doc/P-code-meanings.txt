@@ -1,0 +1,76 @@
+Name        Number  Description                         Arguments
+----------------------------------------------------------------------------------
+LIT            $00  Load constant                       3-byte literal (number)
+STACK          $01  Alter runtime stack to address      2-byte stack address
+NEG            $02  Negate (sp)                         none
+ADD            $04  Add (sp) to (sp - 1)                none
+SUB            $06  Subtract (sp) from (sp - 1)         none
+GETKEY         $07  GETKEY                              none
+MUL            $08  Multiply (sp) * (sp - 1)            none
+DIV            $0A  Divide (sp - 1) / (sp)              none
+MOD            $0B  Modulus (sp - 1) MOD (sp)           none
+ADRNN          $0C  Address of integer                  level, displ
+ADRNC          $0D  Address of character                level, displ
+ADRAN          $0E  Address of integer array            level, displ
+ADRAC          $0F  Address of character array          level, displ
+EQL            $10  Test (sp - 1) == (sp)               none
+FINISHD        $11  Stop run (end program)              none
+NEQ            $12  Test (sp - 1) != (sp)               none
+LSS            $14  Test (sp - 1) < (sp)                none
+GEQ            $16  Test (sp - 1) >= (sp)               none
+INH            $17  Input hex number                    none
+GTR            $18  Test (sp - 1) > (sp)                none
+LEQ            $19  Test (sp - 1) <= (sp)               none
+ORR            $1A  OR  (sp - 1) | (sp)                 none
+AND            $1B  AND (sp - 1) & (sp)                 none
+INP            $1C  Input number                        none
+INPC           $1D  Input character                     none
+OUT            $1E  Output number                       none
+OUTC           $1F  Output character                    none
+EOR            $20  Not (sp) (logical negate)           none
+OUH            $21  Output hex number                   none
+SHL            $22  Shift left (sp) bits                none
+OUS            $23  Output string                       length, string
+SHR            $24  Shift right (sp) bits               none
+INS            $25  Input string into array             max, level, displ
+INC            $26  Increment (sp) by 1                 none
+CLL            $27  Relative procedure/function call    level, relative address
+DEC            $28  Decrement (sp) by 1                 none
+RTN            $29  Procedure/function return           none
+MOV            $2A  Copy (sp) to (sp + 1)               none
+CLA            $2B  Call absolute address               none
+LOD            $2C  Load integer onto stack             level, displ
+LODC           $2D  Load character onto stack           level, displ
+LDA            $2E  Load absolute address integer       none
+LDAC           $2F  Load absolute address character     none
+LDI            $30  Load integer indexed                level, displ
+LDIC           $31  Load character indexed              level, displ
+STO            $32  Store integer                       level, displ
+STOC           $33  Store character                     level, displ
+STA            $34  Store integer absolute address      none
+STAC           $35  Store character absolute address    none
+STI            $36  Store integer indexed               level, displ
+STIC           $37  Store character indexed             level, displ
+ABSCLL         $38  Absolute procedure/function call    level, absolute address
+XOR            $3A  XOR (sp - 1) ^ (sp)                 none
+INT            $3B  Increment stack pointer             increment
+JMP            $3C  Jump unconditionally                relative address
+JMZ            $3D  Jump if (sp) zero                   relative address
+JM1            $3E  Jump if (sp) not zero               relative address
+ABS            $3F  ABS (absolute value of (sp))        none
+OUTCR          $40  Output a carriage-return            none
+DELAY          $41  Delay (ms)                          none
+LCD_WRITE_NUM  $42  Write number to LCD                 none
+LCD_WRITE_STR  $43  Write string to LCD                 none
+LCD_WRITE_HEX  $44  Write hex number to LCD             none
+LCD_WRITE_CHR  $45  Write character to LCD              none
+LCD_HOME       $46  Home cursor on LCD                  none
+LCD_CLEAR      $47  Clear LCD                           none
+LCD_GOTOXY     $48  Go to X,Y on LCD                    none
+PINMODE        $49  Pinmode (pin, mode)                 none
+DIGITALREAD    $4A  DigitalRead (pin)                   none
+DIGITALWRITE   $4B  DigitalWrite (pin, value)           none
+RANDOM         $4C  Random                              none
+
+
+0x80 to 0xFF - Load low literal (onto stack), where literal is P-code with 8-bit clear (ie. P-code & 0x7F)
