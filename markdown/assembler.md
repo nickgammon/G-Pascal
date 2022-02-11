@@ -235,7 +235,12 @@ The following assembler directives are supported:
 
 * ASSERT *expression*
 
-    Raises an error "Assertion failed" if *expression* is zero. This can be used to do compile-time checking. For example, you could check if a block of memory exceeded a certain size.
+    Raises an error "Assertion failed" if *expression* is zero. This can be used to do compile-time checking. For example, you could check if a block of memory exceeded a certain size. You can also use it to check that the assembler is evaluating expressions correctly, for example:
+
+    ```
+      assert 2 + 2 == 4
+    ```
+
 
 * ASC *string*
 
@@ -263,6 +268,14 @@ The following assembler directives are supported:
 
     The specified label takes on the address of the evaluated expression. Alternatively, the address may be the symbol "*" which means "the current address".
 
+    ```
+    EEPROM         =      $8000
+    start_message  ASC    "Hi there"
+    end_message    =      *
+    message_length =      end_message - start_message   ; calculate message length
+    ```
+
+
 * *label* = *address*
 
     Same as EQU.
@@ -271,13 +284,25 @@ The following assembler directives are supported:
 
     The output generation is relocated to whatever *expression* evaluates to, from this point on. If this line had a label the label evaluates to the address *before* the relocation.
 
+    ```
+       org $5000    ; output code at $5000 onwards now
+    ```
+
 * DFB *expression* \[, *expression* \]
 
      A single byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.
 
+     ```
+       dfb $01,$02,$03,$04
+     ```
+
 * DFW *expression* \[, *expression* \]
 
     Two bytes (one word) are emitted to the output, which is the value of the expression. It must evaluate to 0x0000 to 0xFFFF. The bytes are emitted in little-endian order, that is the low-order byte first, followed by the high-order byte. Multiple words may be emitted separated by commas.
+
+    ```
+      dfw $1234,$5678,$ABCD
+    ```
 
 * WORD *expression* \[, *expression* \]
 

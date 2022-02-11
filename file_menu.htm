@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>file_menu</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">G-Pascal File menu</h1>
+</header>
+<p><strong>Author</strong>: Nick Gammon</p>
+<p><strong>Date</strong>: February 2022</p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="editor.htm">Text editor</a>
+</div>
+<p>The File menu, which was originally used in the Commodore 64 G-Pascal to load and save files, is used here to assist in loading and saving via the serial port. As described in the <a href="editor.htm">editor</a> section, simply entering Insert mode and dumping a whole lot of text into the Editor will not work, because the Editor tries to tokenise each line, and will fall behind the rate of the incoming source. Instead use Load as described below, and Save to get a copy of the current source without line numbers. There is also an ability to Append more source to the existing source, and a Recover function, in case you press Reset and lose your source.</p>
+<p>Enter the File menu by pressing <strong>F</strong> from the main menu, or <strong>QF</strong> from the Editor.</p>
+<p>The File menu looks like this:</p>
+<pre><code> &lt;L&gt;oad, &lt;A&gt;ppend, &lt;S&gt;ave, &lt;E&gt;dit, &lt;I&gt;nfo, &lt;R&gt;ecover, &lt;Q&gt;uit ?</code></pre>
+<hr />
+<h2 id="load">Load</h2>
+<p>This loads your source into memory basically copying it as quickly as possible into memory as it is received. If you have more than four lines of source already you will be asked to confirm that the existing source is to be overwritten. You may see, for example, a message like this:</p>
+<pre><code> Do you want to delete 657 lines ? y/n</code></pre>
+<p>If you do not press <strong>Y</strong> then the load is aborted.</p>
+<p>If you continue with the load you will see:</p>
+<pre><code>Paste source, terminate with Ctrl+D</code></pre>
+<p>Now is the time to copy the source from your Mac/PC, and then use the Paste function in your terminal program (or “send file” if there is such a function). Once the file has been sent press Ctrl+D to exit the loading mode.</p>
+<p><em>Do not type anything while the file is loading! That will corrupt it. Just wait until it has finished.</em></p>
+<p>Once you have finished loading you will see something like this:</p>
+<pre><code> source ended at $3a63
+Tokenising ...
+ source ended at $2f04
+ source CRC $efdf
+ source length 14178
+</code></pre>
+<p>What this is telling you is that initially the source ended at address $3A63. Then it is tokenised which may take a few seconds, depending on how long it is. In the case of the Adventure game, on a processor running at 1 MHz, it takes six seconds. Then you get a second message about the new source ending address ($2F04 in this case). In this particular case tokenising has saved 2911 bytes ($3A63 - $2F04 = $B5F which is 2911 in decimal). Clearly tokenising is useful, to help reduce the amount of space taken by source where you have limited RAM.</p>
+<p>You are then told the source length (14178 bytes) and Cyclic Redundancy Check (CRC) which is $EFDF. This can be used to verify that the source loaded without errors. In this case I am using “Jacksum” to do the CRC on my PC.</p>
+<pre><code>jacksum -a crc:16,1021,FFFF,false,false,0 -x adventure.pas
+
+efdf    14178   adventure.pas</code></pre>
+<p>You can see that both the file length (14178) and the checksum ($efdf) agree, therefore the file loaded reliably.</p>
+<p>You can re-check the CRC later by using the <strong>I</strong> (Info) option in the file menu. Of course, the CRC will change as you change the source.</p>
+<hr />
+<h2 id="append">Append</h2>
+<p>Append works similarly to Load, however the incoming source is appended to your existing file rather than replacing it.</p>
+<hr />
+<h2 id="save">Save</h2>
+<p>Save works similarly to List in the Editor, however line numbers are not shown at the start of each line. The intention here is to use Save to simply make a copy of your source, which you can then select in your terminal program, copy, and paste into a suitable file for saving on your PC/Mac.</p>
+<p><strong>WARNING</strong>: Do not replace existing good source with a source from your board until you have confirmed it is a good copy. I strongly suggest you save into a temporary file first, then check its file length and CRC before replacing a known-good file. To do this use the Info option to find the file’s CRC (Cyclic Redundancy Check) and file length. Then check on your PC that the temporary file you saved has the same length and CRC. See above for using Jacksum for calculating CRC values.</p>
+<hr />
+<h2 id="edit">Edit</h2>
+<p>Pressing <strong>E</strong> take you into the <a href="editor.htm">Editor</a>.</p>
+<hr />
+<h2 id="recover">Recover</h2>
+<p>This is designed to help you recover your source in the event that you press Reset. Pressing Reset sets the source to be empty. It does this by writing 0x00 to the first byte of the source area. The rest of the source is untouched. The Recover option does the following:</p>
+<ul>
+<li>Checks that the first byte of the source is 0x00</li>
+<li>If so it replaces it by a space.</li>
+</ul>
+<p>This effectively makes your source available again, with possibly the first byte changed from something else to a space. To avoid having the source corrupted by this process I suggest you start your source with a space, then changing the first byte to a space will not have any effect.</p>
+<hr />
+<h2 id="quit">Quit</h2>
+<p>Pressing <strong>Q</strong> takes you back to the main menu.</p>
+<hr />
+<h2 id="more-about-cyclic-redundancy-checks-crcs">More about Cyclic Redundancy Checks (CRCs)</h2>
+<p>CRC checks are designed to reliably detect burst errors in data communications. The code inside G-Pascal implements CRC-16-CCITT with the parameters as shown below. You can use <a href="https://jacksum.net/en/index.html">Jacksum</a> or your other favourite CRC generating program to compare the CRC generated by G-Pascal to the CRC of your file on disk.</p>
+<p>The parameters to Jacksum mean:</p>
+<ul>
+<li>16 Bit CRC</li>
+<li>Polynomial $1021 (without the leading bit), that is x<sup>16</sup> + x<sup>12</sup> + x<sup>5</sup> + 1</li>
+<li>Initial value $FFFF</li>
+<li>Mirror neither the input nor the output</li>
+<li>No XOR at the end.</li>
+</ul>
+<p>This checksum algorithm is otherwise known as CRC-16-CCITT or CRC-CCITT.</p>
+<p>To use Jacksum at the command line you can use these parameters:</p>
+<pre><code>jacksum -a crc:16,1021,FFFF,false,false,0 -x YOUR_FILE_HERE</code></pre>
+<p>As you can see from <a href="https://www.youtube.com/watch?v=izG7qT0EpBw">Ben Eater’s video</a> the CRC used here will detect any two-bit errors if they fall within the range of 32751 bits (4903 bytes) of each other. This would certainly be the case for reasonably small programs.</p>
+<h3 id="what-to-do-if-the-crc-disagrees">What to do if the CRC disagrees</h3>
+<p>First, check that the number of bytes is correct. If it is not then the CRC will certainly be different. It is easy to add an extra line at the start or the end of the source, so check that the number of lines is correct, and if necessary delete any extra blank lines at the start or end.</p>
+<p>Then check that the file on your PC/Mac does not have any Pascal reserved words in upper-case. The editor tokeniser changes all reserved words to lower-case, so if they are in upper-case on your PC then the CRC will fail.</p>
+<p>If you have loaded a program, and the CRC fails, try compiling or assembling it. Any errors in that process may show you where there are corrupted bytes.</p>
+<hr />
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check">Cyclic redundancy check - Wikipedia</a></li>
+<li><a href="https://www.youtube.com/watch?v=izG7qT0EpBw">How do CRCs work? - Ben Eater (YouTube)</a></li>
+<li><a href="https://jacksum.net/en/index.html">Jacksum</a></li>
+</ul>
+<hr />
+<h2 id="license">License</h2>
+<p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+</body>
+</html>

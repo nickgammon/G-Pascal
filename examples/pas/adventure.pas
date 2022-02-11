@@ -4,10 +4,7 @@
   Updated: January 2022 (40 years later!)
 }
 
-
 const
-
-newline = 10; { for linebreaks }
 
 false = 0;
 true = 1;
@@ -186,7 +183,6 @@ begin
   object [x] := 0
 end;  { of destroy }
 
-
 procedure initialize;
 var i : integer;
 begin
@@ -233,23 +229,23 @@ procedure describeroom;
     write ("You are ");
     case room of
       1: writeln ("at a plateau near a cliff. A rocky path leads south.");
-      2: writeln ("on a rocky path leading north and curving to the east.",chr(newline),
+      2: writeln ("on a rocky path leading north and curving to the east.\n",
                   "There is a slight breeze.");
       3: writeln ("at the entrance to a dark cave. The cave is east of here. A rocky path to the west curves north.");
-      4: writeln ("just inside a dark cave. Light comes from an entrance to the west.",chr(newline),
+      4: writeln ("just inside a dark cave. Light comes from an entrance to the west.\n",
                   "There is a dank, mouldy smell. A tunnel leads south.");
       5: writeln ("in a low north/south tunnel.");
       6: writeln ("in an oval cavern with an exit to the north. There is a forbidding stone staircase leading down.");
-      7: writeln ("in a high, square cave with walls of frozen ice. There are passages in many directions",chr(newline),
+      7: writeln ("in a high, square cave with walls of frozen ice. There are passages in many directions\n",
                   "and a stairway leading up.");
       8: writeln ("in a triangular side-chamber.");
       9: writeln ("in a musty-smelling alcove.");
       10: writeln ("in an eerie chamber - small squealing sounds come from the walls.");
-      11: writeln ("passing through an enormouse cave with a double pillar of green stone down the centre.", chr(newline),
+      11: writeln ("passing through an enormouse cave with a double pillar of green stone down the centre.\n",
                    "A big arch leads north and dank tunnels lead from the southeast and southwest corners.");
       12: writeln ("crouched in a malodorous tunnel. The only exit is the way you came.");
-      13: writeln ("a room which appears to only have an exit in the northwest corner. However you get the", chr(newline),
-                  "impression that others have somehow travelled onwards through this room - the exact", chr(newline),
+      13: writeln ("a room which appears to only have an exit in the northwest corner. However you get the\n",
+                  "impression that others have somehow travelled onwards through this room - the exact\n",
                   "method they used is not apparent.");
       14: writeln ("a secret room reached only by magic means. A high passage exits to the northwest.");
       15: writeln ("a depressing octagonal room. Eerie passages lead north and southwest.");
@@ -404,7 +400,7 @@ begin
   while line [ptr] = " " do
     ptr := ptr + 1;
   startword [x] := ptr;
-  while (line [ptr] <> newline) and
+  while (line [ptr] <> "\n") and
         (line [ptr] <> " ") do
   begin
     if word [x] and $ff0000 = 0 then
@@ -421,16 +417,16 @@ begin
   writeln;
   repeat
     read (line);
-    line [99] := newline;
+    line [99] := "\n";  { force newline at end }
     ptr := 0;
     for i := 1 to maxwords do
       getword (i);
     while line [ptr] = " " do
       ptr := ptr + 1;
-    if line [ptr] <> newline then
+    if line [ptr] <> "\n" then
     begin
       word [1] := 0;
-      writeln ("Please use no more than ", maxwords, " words", chr(newline))
+      writeln ("Please use no more than ", maxwords, " words\n")
     end
   until word [1] <> 0
 end;  { getline }
@@ -488,7 +484,7 @@ begin
     score := score + 100;
   if carrying (crown) then
     score := score + 100;
-  writeln (chr(newline), "Your score is ", score, " points, in ",
+  writeln ("\nYour score is ", score, " points, in ",
            turns, " turns.")
 end;  { givescore }
 
@@ -522,7 +518,7 @@ begin
       writeln (" is not very rewarding!");
       end;
   if room <> oldroom then
-    writeln ("There is a blinding flash of light, a loud burping noise,", chr(newline),
+    writeln ("There is a blinding flash of light, a loud burping noise,\n",
              "and you suddenly find ...")
 end; { wave }
 
@@ -584,7 +580,6 @@ end;  { look }
 procedure verb;
 var i : integer;
 begin
-
   writeln;
   i := 1;
   case word [1] of
@@ -644,8 +639,7 @@ begin
   until room = 0;
   givescore;
   if score = 300 then
-    writeln (chr(newline), chr(newline), "Congratulations!!",
-    chr(newline), chr(newline),
-    "You have completed your quest!")
+    writeln ("\n\nCongratulations!!\n\n",
+             "You have completed your quest!")
 
-end.  { main block }
+end .  { main block }

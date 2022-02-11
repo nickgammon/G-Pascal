@@ -7,12 +7,14 @@
 <div class='quick_link'> [G-Pascal info](pascal_compiler.htm)</div>
 <div class='quick_link'> [Assembler info](assembler.htm)</div>
 <div class='quick_link'> [Suggested hardware mods](hardware_mods.htm) </div>
+<div class='quick_link'> [Text editor](editor.htm) </div>
+<div class='quick_link'> [File menu](file_menu.htm) </div>
 <div class='quick_link'> [Adventure game](adventure.htm) </div>
 <div class='quick_link'> [More electronics](https://gammon.com.au/electronics) </div>
 
 ![](images/Board photo.png)
 
-I am pleased to announce **on-board** code for Ben Eater's 6502 computer board. This code, which is available HERE, can be burnt onto the EEPROM and has the following features:
+I am pleased to announce **on-board** code for Ben Eater's 6502 computer board. This code, which is available [here](/src), can be burnt onto the EEPROM and has the following features:
 
 * A **"tiny" Pascal compiler** (G-Pascal) which allows you to program the board in a high-level language. Whilst there are limitations in what can be done in a few KB of memory, the compiler supports:
     * CONST, VAR, FUNCTION and PROCEDURE declarations
@@ -76,11 +78,27 @@ I am pleased to announce **on-board** code for Ben Eater's 6502 computer board. 
     * Inserting and deleting lines
     * Find and replace
     * Tokenisation of code to reduce source code size
+    * Detailed notes about the [editor](editor.htm) and [how to load and save source](file_menu.htm).
+
+    ```
+    The commands are :
+
+     <A>ssemble
+     <C>ompile
+     <D>elete line number range
+     <F>ind   line number range . string .
+     <I>nsert line number (Terminate input with Ctrl+D)
+     <L>ist   line number range
+     <M>odify line number range
+     <Q>uit
+     <R>eplace line number range .old.new.options (options: i/q/g)
+     <S>yntax
+    ```
 
 * **Support functions**, such as:
     * RS232 interface for connecting a "dumb" terminal, or a PC/Mac
     * Support for the LCD interface described in Ben's videos
-    * Other support functions for use by your assembler code, such as multiplication and division
+    * Other support functions for use by your assembler code, such as multiplication and division, CRC calculations
     * Support for NMI (non-maskable interrupts) so that you can recover from runaway code
     * There is approximately 15k of space available on the EEPROM to add your own functions
 
@@ -146,7 +164,7 @@ Other example programs are [prime number generation](examples/pas/prime_numbers.
 
 Or, you can play with assembler coding and make LEDs blink. :)
 
-Example code HERE.
+Example code [here](examples/).
 
 The code is released under an extremely liberal license (MIT License), which basically means you can do anything at all you like with it, except claiming you wrote it yourself. ;)
 
@@ -158,7 +176,7 @@ Ben does a fabulous series of YouTube videos about wiring together this 6502 bre
 
 It really is extremely interesting and educational. I strongly recommend you watch the video series and consider supporting [Ben's Patreon](https://www.patreon.com/beneater).
 
-You can buy a [kit from Ben](https://eater.net/6502) however the parts described are readily available. It is just easier to buy from Ben. I don't have any commercial affiliation with him, I am just impressed by the work he has done in educating the community about how computers work.
+You can buy a [kit from Ben](https://eater.net/6502). Ben has put a lot of work into making these educational videos --- I suggest you support him and his future endeavours by buying his kits from him.
 
 ---
 
@@ -175,7 +193,9 @@ You may need to modify the way the code interfaces with the hardware, depending 
 * [Suggested hardware modifications](hardware_mods.htm) to Ben's 6502 board including accessing more of the on-board RAM, and connecting up the board to your PC/Mac
 * [G-Pascal compiler features](pascal_compiler.htm) and limitations
 * [Assembler features](assembler.htm) and limitations
-* Example code
+* [Example code](examples/)
+* [Text editor](editor.htm)
+* [File menu](file_menu.htm)
 * [History of G-Pascal](history.htm) and the assembler
 
 ---

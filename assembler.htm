@@ -168,7 +168,8 @@ start = *
 <li><p>NOLIST</p>
 <p>Same as “LIST 0”.</p></li>
 <li><p>ASSERT <em>expression</em></p>
-<p>Raises an error “Assertion failed” if <em>expression</em> is zero. This can be used to do compile-time checking. For example, you could check if a block of memory exceeded a certain size.</p></li>
+<p>Raises an error “Assertion failed” if <em>expression</em> is zero. This can be used to do compile-time checking. For example, you could check if a block of memory exceeded a certain size. You can also use it to check that the assembler is evaluating expressions correctly, for example:</p>
+<pre><code>  assert 2 + 2 == 4</code></pre></li>
 <li><p>ASC <em>string</em></p>
 <p>Insert the string into the code, with no terminator.</p>
 <pre class="asm"><code>  asc &quot;Hello, world!&quot;</code></pre></li>
@@ -179,15 +180,22 @@ start = *
 <li><p>STRING <em>string</em></p>
 <p>Same as ASCIIZ.</p></li>
 <li><p><em>label</em> EQU <em>address</em></p>
-<p>The specified label takes on the address of the evaluated expression. Alternatively, the address may be the symbol "*" which means “the current address”.</p></li>
+<p>The specified label takes on the address of the evaluated expression. Alternatively, the address may be the symbol "*" which means “the current address”.</p>
+<pre><code>EEPROM         =      $8000
+start_message  ASC    &quot;Hi there&quot;
+end_message    =      *
+message_length =      end_message - start_message   ; calculate message length</code></pre></li>
 <li><p><em>label</em> = <em>address</em></p>
 <p>Same as EQU.</p></li>
 <li><p>ORG <em>expression</em></p>
-<p>The output generation is relocated to whatever <em>expression</em> evaluates to, from this point on. If this line had a label the label evaluates to the address <em>before</em> the relocation.</p></li>
+<p>The output generation is relocated to whatever <em>expression</em> evaluates to, from this point on. If this line had a label the label evaluates to the address <em>before</em> the relocation.</p>
+<pre><code>   org $5000    ; output code at $5000 onwards now</code></pre></li>
 <li><p>DFB <em>expression</em> [, <em>expression</em> ]</p>
-<p>A single byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.</p></li>
+<p>A single byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.</p>
+<pre><code>  dfb $01,$02,$03,$04</code></pre></li>
 <li><p>DFW <em>expression</em> [, <em>expression</em> ]</p>
-<p>Two bytes (one word) are emitted to the output, which is the value of the expression. It must evaluate to 0x0000 to 0xFFFF. The bytes are emitted in little-endian order, that is the low-order byte first, followed by the high-order byte. Multiple words may be emitted separated by commas.</p></li>
+<p>Two bytes (one word) are emitted to the output, which is the value of the expression. It must evaluate to 0x0000 to 0xFFFF. The bytes are emitted in little-endian order, that is the low-order byte first, followed by the high-order byte. Multiple words may be emitted separated by commas.</p>
+<pre><code>  dfw $1234,$5678,$ABCD</code></pre></li>
 <li><p>WORD <em>expression</em> [, <em>expression</em> ]</p>
 <p>Same as DFW.</p></li>
 <li><p>BLK <em>expression</em></p>

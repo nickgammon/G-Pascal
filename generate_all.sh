@@ -1,11 +1,9 @@
 #! /bin/bash
 
-cd /var/www/G-Pascal
-
 # Note: the line with -ot (older than) is doing a modified-time check
 #       and also a test for if the destination (htm) file exists at all.
 
-for FILENAME in assembler hardware_mods history index pascal_compiler adventure
+for FILENAME in assembler hardware_mods history index pascal_compiler adventure editor file_menu
 do
   if [ "${FILENAME}.htm" -ot "markdown/${FILENAME}.md" ] || [ ! -f "${FILENAME}.htm" ]; then
         echo "Doing $FILENAME"

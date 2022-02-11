@@ -30,6 +30,12 @@
 <a href="hardware_mods.htm">Suggested hardware mods</a>
 </div>
 <div class="quick_link">
+<a href="editor.htm">Text editor</a>
+</div>
+<div class="quick_link">
+<a href="file_menu.htm">File menu</a>
+</div>
+<div class="quick_link">
 <a href="adventure.htm">Adventure game</a>
 </div>
 <div class="quick_link">
@@ -85,12 +91,25 @@ start = *
 <li>Inserting and deleting lines</li>
 <li>Find and replace</li>
 <li>Tokenisation of code to reduce source code size</li>
-</ul></li>
+<li>Detailed notes about the <a href="editor.htm">editor</a> and <a href="file_menu.htm">how to load and save source</a>.</li>
+</ul>
+<pre><code>The commands are :
+
+ &lt;A&gt;ssemble
+ &lt;C&gt;ompile
+ &lt;D&gt;elete line number range
+ &lt;F&gt;ind   line number range . string .
+ &lt;I&gt;nsert line number (Terminate input with Ctrl+D)
+ &lt;L&gt;ist   line number range
+ &lt;M&gt;odify line number range
+ &lt;Q&gt;uit
+ &lt;R&gt;eplace line number range .old.new.options (options: i/q/g)
+ &lt;S&gt;yntax</code></pre></li>
 <li><strong>Support functions</strong>, such as:
 <ul>
 <li>RS232 interface for connecting a “dumb” terminal, or a PC/Mac</li>
 <li>Support for the LCD interface described in Ben’s videos</li>
-<li>Other support functions for use by your assembler code, such as multiplication and division</li>
+<li>Other support functions for use by your assembler code, such as multiplication and division, CRC calculations</li>
 <li>Support for NMI (non-maskable interrupts) so that you can recover from runaway code</li>
 <li>There is approximately 15k of space available on the EEPROM to add your own functions</li>
 </ul></li>
@@ -135,13 +154,13 @@ start = *
 <p>As an example of what can be done, there is a (roughly) 700-line “Adventure” program available <a href="examples/pas/adventure.pas">here</a> for compiling. That demonstrates a lot of the features of the compiler and is a fun game to try out. Note that running this requires a small hardware modification to Ben’s board to make more of the RAM available, as described <a href="hardware_mods.htm#increased_ram">here</a>. This program was originally written in 1982 for the Apple II version of G-Pascal, and has been modified slightly to conform to the syntax of this compiler.</p>
 <p>Other example programs are <a href="examples/pas/prime_numbers.pas">prime number generation</a>, <a href="examples/pas/sqrt.pas">square roots calculation</a>, and a <a href="examples/pas/guessing_game.pas">guessing game</a>.</p>
 <p>Or, you can play with assembler coding and make LEDs blink. :)</p>
-<p>Example code HERE.</p>
+<p>Example code <a href="examples/">here</a>.</p>
 <p>The code is released under an extremely liberal license (MIT License), which basically means you can do anything at all you like with it, except claiming you wrote it yourself. ;)</p>
 <hr />
 <h2 id="ben-eaters-6502-board">Ben Eater’s 6502 board</h2>
 <p>Ben does a fabulous series of YouTube videos about wiring together this 6502 breadboard computer. The first in the series is <a href="https://www.youtube.com/watch?v=LnzuMJLZRdU">here</a>.</p>
 <p>It really is extremely interesting and educational. I strongly recommend you watch the video series and consider supporting <a href="https://www.patreon.com/beneater">Ben’s Patreon</a>.</p>
-<p>You can buy a <a href="https://eater.net/6502">kit from Ben</a> however the parts described are readily available. It is just easier to buy from Ben. I don’t have any commercial affiliation with him, I am just impressed by the work he has done in educating the community about how computers work.</p>
+<p>You can buy a <a href="https://eater.net/6502">kit from Ben</a>. Ben has put a lot of work into making these educational videos — I suggest you support him and his future endeavours by buying his kits from him.</p>
 <hr />
 <h2 id="support-for-other-6502-boards">Support for other 6502 boards</h2>
 <p>There is no particular reason this code wouldn’t run on other 6502 set-ups. You would need to be aware of the hardware addresses of things like your RAM (which presumably starts at 0x0000 because you need access to the 6502 hardware stack at 0x0100) and your ROM (which presumably covers 0xF000 to 0xFFFF because of the need to have NMI/Reset/IRQ vectors).</p>
@@ -152,7 +171,9 @@ start = *
 <li><a href="hardware_mods.htm">Suggested hardware modifications</a> to Ben’s 6502 board including accessing more of the on-board RAM, and connecting up the board to your PC/Mac</li>
 <li><a href="pascal_compiler.htm">G-Pascal compiler features</a> and limitations</li>
 <li><a href="assembler.htm">Assembler features</a> and limitations</li>
-<li>Example code</li>
+<li><a href="examples/">Example code</a></li>
+<li><a href="editor.htm">Text editor</a></li>
+<li><a href="file_menu.htm">File menu</a></li>
 <li><a href="history.htm">History of G-Pascal</a> and the assembler</li>
 </ul>
 <hr />
