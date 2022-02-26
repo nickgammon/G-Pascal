@@ -26,19 +26,24 @@
 <li><a href="#increased_ram">Increased RAM</a></li>
 </ul>
 <p><strong>Author</strong>: Nick Gammon (written in 2022)</p>
-<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="installation.htm">How to install</a>
+</div>
 <hr />
 <h2 id="rs232_interface">RS232 Interface (required)</h2>
 <p>In order to “talk” to Ben’s 6502 Board you need some way of interfacing a keyboard and monitor. You could conceivably use a “dumb terminal” but they may be hard to find these days. The simplest thing is to obtain a FTDI cable, available from eBay for around $US 10.</p>
 <p><img src="images/FTDI%20cable.jpg" /></p>
 <p>One end plugs into a USB port on your PC/Mac/Linux box, and the other end breaks out the six RS232 signals:</p>
 <ol type="1">
-<li>Ground — usually a <strong>black</strong> cable</li>
+<li>Ground — usually a <strong>black</strong> wire</li>
 <li>CTS (clear to send)</li>
 <li>Vcc (+5V)</li>
 <li>TxD (transmit data - PC to board)</li>
 <li>RxD (receive data - board to PC)</li>
-<li>RTS (request to send) — usually a <strong>green</strong> cable</li>
+<li>RTS (request to send) — usually a <strong>green</strong> wire</li>
 </ol>
 <p><img src="images/FTDI%20connection.png" /></p>
 <p>The order shown in the photos is from “above” the connector, in other words you cannot see the metal pins inside the connector (they are visible on the “bottom” side).</p>
@@ -112,6 +117,8 @@
 <p><img src="images/More%20RAM.png" /></p>
 <p>This increases the top of RAM from $3FFF to $5FFF. Basically if both A13 and A14 are high then the RAM output enable will be off. In other words, the RAM is disabled when <strong>both</strong> the 0x4000 and 0x2000 address bits are set (because we are “and”ing them together), which means that the RAM works up to 0x6000 rather than 0x4000 as it originally did.</p>
 <hr />
-<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
 </body>
 </html>

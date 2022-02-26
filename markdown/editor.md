@@ -5,31 +5,35 @@
 **Date**: February 2022
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
-<div class='quick_link'> [File menu](file_menu.htm) </div>
+<div class='quick_link'> [Loading and saving](file_menu.htm) </div>
 
 
 The inbuilt text editor is designed to allow you to try out small programs, and make modifications "on the fly" without having to download or upload code from your "main" computer.
 
 ## Editor commands
 
-You enter the editor by typing **E** at the main menu, after which you will see a colon prompt. Type **H** to see a list of editor commands:
+The editor is available from the main "shell" prompt. Type **H** to see a list of editor commands:
 
 ```
-The commands are :
+Available actions:
 
- <A>ssemble
- <C>ompile
- <D>elete line number range
- <F>ind   line number range . string .
- <I>nsert line number (Terminate input with Ctrl+D)
- <L>ist   line number range
- <M>odify line number range
- <Q>uit
- <R>eplace line number range .old.new.options (options: i/q/g)
- <S>yntax
+List/SAve   line_number_range
+Delete      line_number_range
+Insert/LOad after_line
+Find        line_number_range /target/flags
+Replace     line_number_range /target/replacement/flags
+
+Help
+INfo
+Memory first_address last_address
+Compile/Syntax/Assemble
+RUn/DEBug/Trace
+RECover
+(Actions may be abbreviated)
+(Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)
 ```
 
-You can assemble, compile (Pascal) or do a (Pascal) syntax check directly from the Editor (type **A**, **C** or **S**).
+You can assemble, compile (Pascal) or do a (Pascal) syntax check directly from the prompt (type **A**, **C** or **S**).
 
 The editor is line-based with each line having a number, automatically assigned. These numbers can be used to delete, insert, list, modify, find or replace. You need to press ENTER to have a command processed. Make sure you have "local echo" on in your terminal program (eg. miniterm) so that you can see your typing.
 
@@ -39,51 +43,66 @@ Commands have a line number range (if omitted, they affect all lines). For examp
 L1-10
 ```
 
-Do not put spaces before or after the "-" symbol.
+You may put spaces after the action, and between the line numbers if giving a range. You can also use a hyphen or comma to separate line numbers, e.g.
 
+
+```
+LIST 1-10
+LIST 1 10
+LIST 1, 10
+```
+
+Actions may be abbreviated. The minimal about to type is in upper case, so "L" would be LIST and not LOAD, and "S" would be SYNTAX and not SAVE.
+
+As a shortcut, the command R on its own will be interpreted as Run (not Replace) as Replace would always need a delimiter after it.
 
 ---
 
 ## Delete
 
-Use **D** to delete a range of lines (you cannot use **D** on its own to delete the entire source). If you want to delete *everything* just choose a big range, eg.
-
-```
-D1-9999
-```
-
-If you attempt to delete five or more lines you will be asked for confirmation, as a safety measure, in case you accidentally mistype the line number range.
+Use **D** to delete a range of lines (you cannot use **D** on its own to delete the entire source). If you want to delete *everything* type "delete all" (or "d all").
 
 ---
 
 ## Find
 
-Use **F** to find a string. The string delimiter is fixed as a period. This is intended to help you find lines with certain words on them. For example:
+Use **F** to find a string. The string delimiter can be any single character which is not a letter, number or space. This is intended to help you find lines with certain words on them. For example:
 
 ```
-F.procedure.
+F .procedure.
 ```
 
 The matching lines will be shown, with their line numbers, so you could do a List of around that spot.
 
+You may put options after the second delimiter as follows:
+
+  * G - global: find multiple occurrences on one line (this affects the number of matches reported)
+  * I - ignore case: match on both upper and lower-case versions of the target string
+  * Q - quiet: do not show matching lines, just show the count of matches
+
+For example:
+
+```
+F 1, 100 /begin/giq
+```
+
+That would search for "begin" between lines 1 and 100, and report on the number of occurrences, case insensitive. The lines would not be listed.
+
+```
+F 20 - 999 /begin/
+```
+
+That would list all lines with "begin" on them between lines 20 and 999 (or the end of the file, whichever came sooner).
 
 ---
 
 ## Insert
 
-Use **I** to insert new lines. Use **I** on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press Ctrl+D.
+Use **I** to insert new lines. Use **I** on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press **Esc**.
 
-**WARNING**: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that source is tokenised "on the fly" to save memory. This involves:
+**WARNING**: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that displaying the line numbers takes quite a few calculations, which take time.
 
-* Replacing two or more spaces by DLE/count (that is: 0x10 nn where nn is the number of spaces). The count has the high-order bit set to avoid confusing a run of 10 spaces with a newline.
-* Replacing reserved words by a single byte. There is a list of reserved words on the [Pascal compiler](pascal_compiler.htm) page.
-
-This tokenisation takes time. By the time a line has been tokenised more data has arrived from the serial port and been ignored.
-
-If you are planning to "dump" your source onto the board, then use the [File menu](file_menu.htm) and "Load" it. This inserts source differently:
-
-* The source is copied into memory as quickly as possible
-* When the loading is complete the source is tokenised afterwards in a batch (this may take a second or two).
+If you are planning to "dump" your source onto the board, then use LOAD and "Load" it. This inserts source without displaying the line numbers.
 
 ---
 
@@ -97,45 +116,45 @@ L42
 L50-60
 ```
 
-As an alternative, for exporting your file back to your PC/Mac, use the File menu and Save the source. This basically lists it without line numbers, suitable for copying from your terminal program and pasting back into a text editor on your PC.
+As an alternative, for exporting your file back to your PC/Mac, use SAVE to save the source. This lists it without line numbers, suitable for copying from your terminal program and pasting back into a text editor on your PC.
 
 Press Ctrl+C to abort a long listing.
 
----
-
-## Modify
-
-Modify:
-
-* Lists a line or range of lines
-* Delete the listed lines
-* Enters insert mode so you can replace them
-
-The intention here is to correct minor typos, particularly on a small number of lines. Since the lines are echoed as part of the modify process you can see what they used to contain, and retype them correctly, or use copy/paste on your PC to copy parts of them back. Since this effectively involves deleting the lines you are prompted if you attempt to modify five or more lines for confirmation.
-
-
----
-
-## Quit
-
-This returns you to the Main menu. Alternatively type **QF** to go directly to the [File menu](file_menu.htm). You would need to be in the Main menu to Run your code.
+Control characters in the source are shown with a carat before them. For example if you had 0x01 in your source it would show as ^A if you listed it.
 
 ---
 
 ## Replace
 
-This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the "find" string and the "replace" string, separated by periods. There are options you can place after the second period:
+This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the "find" string and the "replace" string, separated by a delimiter of your choice. The string delimiter can be any single character which is not a letter, number or space There are options you can place after the third delimiter:
 
-* i : ignore case (case-insensitive find)
-* q : quiet (do not list lines which are replaced)
-* g : global (do multiple replacements on a single line if possible)
+You may put options after the second delimiter as follows:
+
+  * G - global: find and replace multiple occurrences on one line
+  * I - ignore case: match on both upper and lower-case versions of the target string
+  * Q - quiet: do not show matching lines, just show the count of matches
+
 
 For example:
 
 ```
-R.fish.chips.g
-R1-20.dog.cat.i
+R .fish.chips.g
+R 1-20 .dog.cat.i
 ```
+
+---
+
+## Memory
+
+This lets you view any part of your RAM or ROM memory. You enter a start and end address, and the bytes in that range are displayed in hex, and also bytes in the range 0x20 to 0x7F are also displayed in ASCII on the right. eg.
+
+```
+: mem $300 $31f
+$0300: 7b 20 41 64 76 65 6e 74 75 72 65 2d 73 74 79 6c  {   A d v e n t u r e - s t y l
+$0310: 65 20 67 61 6d 65 0a 20 20 41 75 74 68 6f 72 3a  e   g a m e .     A u t h o r :
+```
+
+Press Ctrl+C to abort a long listing.
 
 
 ---
@@ -144,19 +163,10 @@ R1-20.dog.cat.i
 
 For large-scale changes I suggest keeping a copy of your source on your PC (you need to do this anyway as the board does not have file saving capability). For anything other than small one or two-line changes, it will be quicker and easier to change the source on your PC, and re-download it, rather than fiddling around in the Editor.
 
-The editor does not support cursor keys, backspacing, and so on, so it is not the easiest editor to work with, particularly compared to modern editors available on PC/Macs.
+The editor does not support cursor keys, so it is not the easiest editor to work with, particularly compared to modern editors available on PC/Macs.
 
 Keeping your original source elsewhere also protects you against rogue code which might overwrite your source, as there is no memory-protection hardware on these chips.
 
----
-
-## Tokenisation quirks
-
-* Reserved words will always be displayed in lower-case, regardless of how you entered them
-* As reserved words are stored internally as one byte, the Find and Replace commands in the Editor *cannot locate part of a reserved word*. For example, you cannot find BEG in BEGIN, or PROC in PROCEDURE.
-* It is permissable to locate part of a non-reserved word, unless that part is itself a reserved word. In other words, attempting to locate FR will successfully locate the word FRED, however trying to locate TO will *not* locate the word TOOL as TO is a reserved word.
-* As multiple spaces are stored as a two-byte code, the Find and Replace commands can only match the *exact* number of spaces. Remember that the space which is displayed following a reserved word is not actually stored in the file and should not be counted.
-* A line with mismatched quote symbols may display strangely. Quotes are detected in the display process, and reserved words are not expanded inside quotes.
 
 
 ---

@@ -17,11 +17,25 @@
    id="svg973"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
    sodipodi:docname="Serial connections.svg"
-   inkscape:export-filename="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/Serial connections.png"
+   inkscape:export-filename="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/images/Serial connections.png"
    inkscape:export-xdpi="142"
    inkscape:export-ydpi="142">
   <defs
      id="defs967">
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;"
+       inkscape:isstock="true">
+      <path
+         id="path871"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#ddf200;stroke-width:1pt;stroke-opacity:1;fill:#ddf200;fill-opacity:1"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
     <marker
        inkscape:isstock="true"
        style="overflow:visible"
@@ -61,9 +75,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="310.47458"
-     inkscape:cy="372.27103"
+     inkscape:zoom="2.8"
+     inkscape:cx="241.54501"
+     inkscape:cy="277.33848"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -84,7 +98,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -94,14 +108,14 @@
      id="layer1"
      transform="translate(-18.331852,-94.782738)">
     <image
-       sodipodi:absref="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/photo of serial connection.JPG"
-       xlink:href="photo of serial connection.JPG"
-       width="169.33333"
-       height="127"
-       preserveAspectRatio="none"
-       id="image1561"
+       sodipodi:absref="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/svg/../images/photo of serial connection.JPG"
+       xlink:href="../images/photo of serial connection.JPG"
+       y="94.782738"
        x="18.331852"
-       y="94.782738" />
+       id="image1561"
+       preserveAspectRatio="none"
+       height="127"
+       width="169.33333" />
     <path
        style="fill:none;stroke:#ddf200;stroke-width:0.79374999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart)"
        d="m 94.591323,178.50446 v 40.65959"
@@ -120,11 +134,11 @@
          y="218.42274"
          style="fill:#ddf200;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-opacity:1">Serial input to the board via 1k resistor</tspan></text>
     <path
-       sodipodi:nodetypes="ccc"
+       sodipodi:nodetypes="cccc"
        inkscape:connector-curvature="0"
        id="path2496"
-       d="m 101.00579,158.59288 v 40.65959 h 20.86912 v 2.53276"
-       style="fill:none;stroke:#ddf200;stroke-width:0.79374999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker2500)" />
+       d="m 101.00579,158.59288 v 26.16022 h 20.86912 l 0,14.55989"
+       style="fill:none;stroke:#ddf200;stroke-width:0.79400003;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend)" />
     <text
        id="text3410"
        y="205.32654"

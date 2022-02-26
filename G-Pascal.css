@@ -62,3 +62,8 @@ pre {
     color:#958ED8;
   }
 
+img {
+    max-height:800px;
+    max-width:600px;
+
+}

@@ -18,7 +18,16 @@
 </head>
 <body>
 <h1 id="what-is-g-pascal">What is G-Pascal?</h1>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<p><img src="images/G-Pascal%20version%201.jpg" /> <img src="images/G-Pascal%20version%202.jpg" /> <img src="images/G-Pascal%20version%203.jpg" /></p>
+<p>Author: Nick Gammon</p>
+<p>Date: February 2022</p>
+<hr />
+<h2 id="it-all-started-with-512-bytes-of-ram">It all started with 512 bytes of RAM</h2>
 <p>In 1979 I bought a Motorola 6800 evaluation kit, which involved a couple of printed circuit boards and a heap of components. I soldered it together and got it working. The “PC” had 512 bytes of RAM, and programs had to be keyed in through a small keyboard in hex (that is, raw machine code).</p>
+<p><img src="images/Motorola_hex_keypad.jpg" /></p>
 <p>Interesting though this was, it was very tedious hand-assembling programs and keying them in, byte by byte. After I expanded the computer with a RAM board (from Pennywise Peripherals) I had the idea of writing an assembler, to simplify writing code. My first version of this assembler had to be hand-coded in hex machine-code. I found that the 6800 instruction set had a lot of consistency about it. For example, the top 4 bits of an instruction would be the addressing mode, and the bottom 4 bits the opcode. For example with LDA (load accumulator):</p>
 <ul>
 <li>LDA (A immediate): $86</li>
@@ -42,11 +51,33 @@
 <li>A indirect: $Ax</li>
 </ul>
 <p>This made writing the assembler comparatively easy, because you basically worked out the addressing mode, which gave you 4 bits of the opcode, and the instruction name, which gave you the other 4 bits. Combining those gave you a complete opcode. There were some exceptions, of course, such as the “push” and “pull” instructions which didn’t have an addressing mode.</p>
-<p>Once this was finished I bought an EEPROM expansion board (also from Pennywise Peripherals) and burnt the assembler onto the EEPROM chips, giving me an on-board assembler that was available as soon as you powered up the board.</p>
-<p>Once I had an assembler I could keep enhancing it by writing new versions of the assembler in the earlier version. The EEPROM board had enough capacity that there was room for the old version (on one half) and the new, improved, version (on the other half). Thus I was able to keep “bootstrapping” the assembler into a newer and better version.</p>
+<p>Once this was finished I bought an UV EPROM expansion board (also from Pennywise Peripherals) and burnt the assembler onto the EPROM chips, giving me an on-board assembler that was available as soon as you powered up the board. (You erased memory by placing the chips inside a UV-emitting box for a few minutes).</p>
+<p><img src="images/Motorola_EPROM_board.jpg" /></p>
+<p>Once I had an assembler I could keep enhancing it by writing new versions of the assembler in the earlier version. The EPROM board had enough capacity that there was room for the old version (on one half) and the new, improved, version (on the other half). Thus I was able to keep “bootstrapping” the assembler into a newer and better version.</p>
+<hr />
 <h2 id="tiny-pascal">Tiny Pascal</h2>
+<p><img src="images/Byte%20article.png" /></p>
 <p>The compiler was originally written in 1979 for the Motorola 6800 after reading a series of articles in Byte magazine (September, October, and November in 1978) written by Kin-Man Chung and Herbert Yuen. That article described making a “Tiny” Pascal compiler written in Basic. That particular version was burnt onto UV-eraseable PROM, and kept on-board to my “personal” computer, along with a text editor and code to load/save programs.</p>
+<hr />
+<h2 id="g-pascal">G-Pascal</h2>
 <p>After I purchased an Apple II, I ported the compiler to the 6502 processor, and released a version in April 1982.</p>
-<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<p><img src="images/G-Pascal%20version%201.jpg" /></p>
+<p>Version 2 was released shortly afterwards, I can’t recall exactly the differences between them.</p>
+<p>In April 1983 I was contacted by Ian Webster, the editor of Australian Personal Computer magazine, who suggested that the new state-of-the-art computer would be the Commodore 64. As it had the same chip as the Apple II (the 6502) he suggested I port G-Pascal to the Commodore 64. I spent a few months adapting the compiler to work with the Commodore 64, and in particular added a whole lot of support for their graphics and sound features.</p>
+<p><img src="images/G-Pascal%20version%203.jpg" /></p>
+<p>This was released in November 1983 to favourable reviews.</p>
+<hr />
+<h2 id="today">Today?</h2>
+<p>G-Pascal fell into disuse gradually as more powerful computers arrived, with the Apple II, and Commodore 64 being superceded by more powerful machines. However after watching Ben Eater’s videos about his “6502 breadboard computer” I thought perhaps it was time to revive G-Pascal.</p>
+<p>I still had, thankfully, a copy of the source for the Commodore 64, in the form of a listing file. This was fortunate because I was able to load the source into Vasm, with a fair bit of mucking around, and confirmed that the generated code was the same as in 1983. Then it was a matter of removing the references to the Commodore 64 stuff, and adding in support for the VIA chip, the LCD, and some other features, like CRC checks of the source.</p>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/EPROM">EPROM - Wikipedia</a></li>
+<li><a href="https://archive.org/details/byte-magazine">Byte Magazine archives</a></li>
+</ul>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
 </body>
 </html>

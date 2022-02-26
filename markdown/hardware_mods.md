@@ -10,7 +10,8 @@
 
 **Author**: Nick Gammon (written in 2022)
 
-[Back to main G-Pascal page](index.htm)
+<div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [How to install](installation.htm)</div>
 
 ---
 
@@ -22,12 +23,12 @@ In order to "talk" to Ben's 6502 Board you need some way of interfacing a keyboa
 
 One end plugs into a USB port on your PC/Mac/Linux box, and the other end breaks out the six RS232 signals:
 
-1. Ground --- usually a **black** cable
+1. Ground --- usually a **black** wire
 2. CTS (clear to send)
 3. Vcc (+5V)
 4. TxD (transmit data - PC to board)
 5. RxD (receive data - board to PC)
-6. RTS (request to send) --- usually a **green** cable
+6. RTS (request to send) --- usually a **green** wire
 
 ![](images/FTDI connection.png)
 
@@ -137,4 +138,4 @@ This increases the top of RAM from $3FFF to $5FFF. Basically if both A13 and A14
 
 ---
 
-[Back to main G-Pascal page](index.htm)
+<div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>

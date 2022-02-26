@@ -1,4 +1,4 @@
-# G-Pascal for Ben's Eater's 6502 board
+# G-Pascal for Ben Eater's 6502 board
 
 **Author**: Nick Gammon
 
@@ -7,14 +7,34 @@
 <div class='quick_link'> [G-Pascal info](pascal_compiler.htm)</div>
 <div class='quick_link'> [Assembler info](assembler.htm)</div>
 <div class='quick_link'> [Suggested hardware mods](hardware_mods.htm) </div>
+<div class='quick_link'> [How to install](installation.htm)</div>
 <div class='quick_link'> [Text editor](editor.htm) </div>
 <div class='quick_link'> [File menu](file_menu.htm) </div>
 <div class='quick_link'> [Adventure game](adventure.htm) </div>
 <div class='quick_link'> [More electronics](https://gammon.com.au/electronics) </div>
 
-![](images/Board photo.png)
+## On-board assembler, tiny Pascal, and text editor for Ben Eater's board
 
-I am pleased to announce **on-board** code for Ben Eater's 6502 computer board. This code, which is available [here](/src), can be burnt onto the EEPROM and has the following features:
+### Includes:
+
+* A **6502 assembler** which lets you try out your assembler programming without having to keep removing the EEPROM chip and programming it externally. The assembler supports:
+    * The documented WD65C02 instruction set, with all operand modes
+    * Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.
+    * Relocation of the output to any memory address (ORG directive)
+    * Here is "hello world" in assembler:
+
+
+        ```asm
+              jmp begin   ; skip the message
+        hello asciiz "Hello, world!"
+        begin = *
+              lda #<hello
+              ldx #>hello
+              jsr print
+              rts
+        ```
+
+    * Detailed notes about the assembler [here](assembler.htm).
 
 * A **"tiny" Pascal compiler** (G-Pascal) which allows you to program the board in a high-level language. Whilst there are limitations in what can be done in a few KB of memory, the compiler supports:
     * CONST, VAR, FUNCTION and PROCEDURE declarations
@@ -49,58 +69,38 @@ I am pleased to announce **on-board** code for Ben Eater's 6502 computer board. 
     * Detailed notes about the compiler [here](pascal_compiler.htm).
 
 
-* A **6502 assembler** which lets you try out your assembler programming without having to keep removing the EEPROM chip and programming it externally. The assembler supports:
-    * The documented WD65C02 instruction set, with all operand modes
-    * Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.
-    * Relocation of the output to any memory address (ORG directive)
-    * Here is "hello world" in assembler:
-
-
-        ```asm
-        ; interface routines in the EEPROM
-        serial_print_message = $8012
-
-              jmp start   ; skip the message
-        hello asciiz "Hello, world!"
-        start = *
-              lda #<hello
-              ldx #>hello
-              jsr serial_print_message
-              rts
-        ```
-
-    * Detailed notes about the assembler [here](assembler.htm).
-
-
 
 * A **text editor** for keying in programs. It supports:
     * Loading and saving (via the RS232 interface)
     * Inserting and deleting lines
     * Find and replace
-    * Tokenisation of code to reduce source code size
     * Detailed notes about the [editor](editor.htm) and [how to load and save source](file_menu.htm).
 
     ```
-    The commands are :
+    Available actions:
 
-     <A>ssemble
-     <C>ompile
-     <D>elete line number range
-     <F>ind   line number range . string .
-     <I>nsert line number (Terminate input with Ctrl+D)
-     <L>ist   line number range
-     <M>odify line number range
-     <Q>uit
-     <R>eplace line number range .old.new.options (options: i/q/g)
-     <S>yntax
+    List/SAve   line_number_range
+    Delete      line_number_range
+    Insert/LOad after_line
+    Find        line_number_range /target/flags
+    Replace     line_number_range /target/replacement/flags
+
+    Help
+    INfo
+    Memory      first_address last_address
+    Compile/Syntax/Assemble
+    RUn/DEBug/Trace
+    RECover
+    (Actions may be abbreviated)
+    (Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)
     ```
 
 * **Support functions**, such as:
     * RS232 interface for connecting a "dumb" terminal, or a PC/Mac
     * Support for the LCD interface described in Ben's videos
-    * Other support functions for use by your assembler code, such as multiplication and division, CRC calculations
+    * Other support functions for use by your assembler code, such as multiplication and division, CRC calculations, binary-to-decimal conversion
     * Support for NMI (non-maskable interrupts) so that you can recover from runaway code
-    * There is approximately 15k of space available on the EEPROM to add your own functions
+    * There is approximately 12k of space available on the EEPROM to add your own functions
 
 Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:
 
@@ -121,6 +121,9 @@ Both the Pascal compiler and assembler are quite fast. Any program that will fit
 ---
 
 ## Hardware modifications suggested/required
+
+
+![](images/Board photo.png)
 
 * RS232 interface (required)
 
@@ -196,6 +199,7 @@ You may need to modify the way the code interfaces with the hardware, depending 
 * [Example code](examples/)
 * [Text editor](editor.htm)
 * [File menu](file_menu.htm)
+* [How to install](installation.htm)
 * [History of G-Pascal](history.htm) and the assembler
 
 ---
@@ -203,3 +207,5 @@ You may need to modify the way the code interfaces with the hardware, depending 
 ## License
 
 Information and images on this site are licensed under the [Creative Commons Attribution 3.0 Australia License](https://creativecommons.org/licenses/by/3.0/au/) unless stated otherwise.
+
+Source code licensed under the [MIT License](doc/license.txt).

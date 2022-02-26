@@ -26,97 +26,94 @@
 <a href="index.htm">Back to main G-Pascal page</a>
 </div>
 <div class="quick_link">
-<a href="file_menu.htm">File menu</a>
+<a href="file_menu.htm">Loading and saving</a>
 </div>
 <p>The inbuilt text editor is designed to allow you to try out small programs, and make modifications “on the fly” without having to download or upload code from your “main” computer.</p>
 <h2 id="editor-commands">Editor commands</h2>
-<p>You enter the editor by typing <strong>E</strong> at the main menu, after which you will see a colon prompt. Type <strong>H</strong> to see a list of editor commands:</p>
-<pre><code>The commands are :
+<p>The editor is available from the main “shell” prompt. Type <strong>H</strong> to see a list of editor commands:</p>
+<pre><code>Available actions:
 
- &lt;A&gt;ssemble
- &lt;C&gt;ompile
- &lt;D&gt;elete line number range
- &lt;F&gt;ind   line number range . string .
- &lt;I&gt;nsert line number (Terminate input with Ctrl+D)
- &lt;L&gt;ist   line number range
- &lt;M&gt;odify line number range
- &lt;Q&gt;uit
- &lt;R&gt;eplace line number range .old.new.options (options: i/q/g)
- &lt;S&gt;yntax</code></pre>
-<p>You can assemble, compile (Pascal) or do a (Pascal) syntax check directly from the Editor (type <strong>A</strong>, <strong>C</strong> or <strong>S</strong>).</p>
+List/SAve   line_number_range
+Delete      line_number_range
+Insert/LOad after_line
+Find        line_number_range /target/flags
+Replace     line_number_range /target/replacement/flags
+
+Help
+INfo
+Memory first_address last_address
+Compile/Syntax/Assemble
+RUn/DEBug/Trace
+RECover
+(Actions may be abbreviated)
+(Flags: &#39;I&#39;gnore case, &#39;G&#39;lobal, &#39;Q&#39;uiet)</code></pre>
+<p>You can assemble, compile (Pascal) or do a (Pascal) syntax check directly from the prompt (type <strong>A</strong>, <strong>C</strong> or <strong>S</strong>).</p>
 <p>The editor is line-based with each line having a number, automatically assigned. These numbers can be used to delete, insert, list, modify, find or replace. You need to press ENTER to have a command processed. Make sure you have “local echo” on in your terminal program (eg. miniterm) so that you can see your typing.</p>
 <p>Commands have a line number range (if omitted, they affect all lines). For example to list lines 1 to 10:</p>
 <pre><code>L1-10</code></pre>
-<p>Do not put spaces before or after the “-” symbol.</p>
+<p>You may put spaces after the action, and between the line numbers if giving a range. You can also use a hyphen or comma to separate line numbers, e.g.</p>
+<pre><code>LIST 1-10
+LIST 1 10
+LIST 1, 10</code></pre>
+<p>Actions may be abbreviated. The minimal about to type is in upper case, so “L” would be LIST and not LOAD, and “S” would be SYNTAX and not SAVE.</p>
+<p>As a shortcut, the command R on its own will be interpreted as Run (not Replace) as Replace would always need a delimiter after it.</p>
 <hr />
 <h2 id="delete">Delete</h2>
-<p>Use <strong>D</strong> to delete a range of lines (you cannot use <strong>D</strong> on its own to delete the entire source). If you want to delete <em>everything</em> just choose a big range, eg.</p>
-<pre><code>D1-9999</code></pre>
-<p>If you attempt to delete five or more lines you will be asked for confirmation, as a safety measure, in case you accidentally mistype the line number range.</p>
+<p>Use <strong>D</strong> to delete a range of lines (you cannot use <strong>D</strong> on its own to delete the entire source). If you want to delete <em>everything</em> type “delete all” (or “d all”).</p>
 <hr />
 <h2 id="find">Find</h2>
-<p>Use <strong>F</strong> to find a string. The string delimiter is fixed as a period. This is intended to help you find lines with certain words on them. For example:</p>
-<pre><code>F.procedure.</code></pre>
+<p>Use <strong>F</strong> to find a string. The string delimiter can be any single character which is not a letter, number or space. This is intended to help you find lines with certain words on them. For example:</p>
+<pre><code>F .procedure.</code></pre>
 <p>The matching lines will be shown, with their line numbers, so you could do a List of around that spot.</p>
+<p>You may put options after the second delimiter as follows:</p>
+<ul>
+<li>G - global: find multiple occurrences on one line (this affects the number of matches reported)</li>
+<li>I - ignore case: match on both upper and lower-case versions of the target string</li>
+<li>Q - quiet: do not show matching lines, just show the count of matches</li>
+</ul>
+<p>For example:</p>
+<pre><code>F 1, 100 /begin/giq</code></pre>
+<p>That would search for “begin” between lines 1 and 100, and report on the number of occurrences, case insensitive. The lines would not be listed.</p>
+<pre><code>F 20 - 999 /begin/</code></pre>
+<p>That would list all lines with “begin” on them between lines 20 and 999 (or the end of the file, whichever came sooner).</p>
 <hr />
 <h2 id="insert">Insert</h2>
-<p>Use <strong>I</strong> to insert new lines. Use <strong>I</strong> on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press Ctrl+D.</p>
-<p><strong>WARNING</strong>: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that source is tokenised “on the fly” to save memory. This involves:</p>
-<ul>
-<li>Replacing two or more spaces by DLE/count (that is: 0x10 nn where nn is the number of spaces). The count has the high-order bit set to avoid confusing a run of 10 spaces with a newline.</li>
-<li>Replacing reserved words by a single byte. There is a list of reserved words on the <a href="pascal_compiler.htm">Pascal compiler</a> page.</li>
-</ul>
-<p>This tokenisation takes time. By the time a line has been tokenised more data has arrived from the serial port and been ignored.</p>
-<p>If you are planning to “dump” your source onto the board, then use the <a href="file_menu.htm">File menu</a> and “Load” it. This inserts source differently:</p>
-<ul>
-<li>The source is copied into memory as quickly as possible</li>
-<li>When the loading is complete the source is tokenised afterwards in a batch (this may take a second or two).</li>
-</ul>
+<p>Use <strong>I</strong> to insert new lines. Use <strong>I</strong> on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press <strong>Esc</strong>.</p>
+<p><strong>WARNING</strong>: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that displaying the line numbers takes quite a few calculations, which take time.</p>
+<p>If you are planning to “dump” your source onto the board, then use LOAD and “Load” it. This inserts source without displaying the line numbers.</p>
 <hr />
 <h2 id="list">List</h2>
 <p>Use <strong>L</strong> on its own to list the entire source. Otherwise list one line or a range, for example:</p>
 <pre><code>L
 L42
 L50-60</code></pre>
-<p>As an alternative, for exporting your file back to your PC/Mac, use the File menu and Save the source. This basically lists it without line numbers, suitable for copying from your terminal program and pasting back into a text editor on your PC.</p>
+<p>As an alternative, for exporting your file back to your PC/Mac, use SAVE to save the source. This lists it without line numbers, suitable for copying from your terminal program and pasting back into a text editor on your PC.</p>
 <p>Press Ctrl+C to abort a long listing.</p>
-<hr />
-<h2 id="modify">Modify</h2>
-<p>Modify:</p>
-<ul>
-<li>Lists a line or range of lines</li>
-<li>Delete the listed lines</li>
-<li>Enters insert mode so you can replace them</li>
-</ul>
-<p>The intention here is to correct minor typos, particularly on a small number of lines. Since the lines are echoed as part of the modify process you can see what they used to contain, and retype them correctly, or use copy/paste on your PC to copy parts of them back. Since this effectively involves deleting the lines you are prompted if you attempt to modify five or more lines for confirmation.</p>
-<hr />
-<h2 id="quit">Quit</h2>
-<p>This returns you to the Main menu. Alternatively type <strong>QF</strong> to go directly to the <a href="file_menu.htm">File menu</a>. You would need to be in the Main menu to Run your code.</p>
+<p>Control characters in the source are shown with a carat before them. For example if you had 0x01 in your source it would show as ^A if you listed it.</p>
 <hr />
 <h2 id="replace">Replace</h2>
-<p>This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the “find” string and the “replace” string, separated by periods. There are options you can place after the second period:</p>
+<p>This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the “find” string and the “replace” string, separated by a delimiter of your choice. The string delimiter can be any single character which is not a letter, number or space There are options you can place after the third delimiter:</p>
+<p>You may put options after the second delimiter as follows:</p>
 <ul>
-<li>i : ignore case (case-insensitive find)</li>
-<li>q : quiet (do not list lines which are replaced)</li>
-<li>g : global (do multiple replacements on a single line if possible)</li>
+<li>G - global: find and replace multiple occurrences on one line</li>
+<li>I - ignore case: match on both upper and lower-case versions of the target string</li>
+<li>Q - quiet: do not show matching lines, just show the count of matches</li>
 </ul>
 <p>For example:</p>
-<pre><code>R.fish.chips.g
-R1-20.dog.cat.i</code></pre>
+<pre><code>R .fish.chips.g
+R 1-20 .dog.cat.i</code></pre>
+<hr />
+<h2 id="memory">Memory</h2>
+<p>This lets you view any part of your RAM or ROM memory. You enter a start and end address, and the bytes in that range are displayed in hex, and also bytes in the range 0x20 to 0x7F are also displayed in ASCII on the right. eg.</p>
+<pre><code>: mem $300 $31f
+$0300: 7b 20 41 64 76 65 6e 74 75 72 65 2d 73 74 79 6c  {   A d v e n t u r e - s t y l
+$0310: 65 20 67 61 6d 65 0a 20 20 41 75 74 68 6f 72 3a  e   g a m e .     A u t h o r :</code></pre>
+<p>Press Ctrl+C to abort a long listing.</p>
 <hr />
 <h2 id="recommendation">Recommendation</h2>
 <p>For large-scale changes I suggest keeping a copy of your source on your PC (you need to do this anyway as the board does not have file saving capability). For anything other than small one or two-line changes, it will be quicker and easier to change the source on your PC, and re-download it, rather than fiddling around in the Editor.</p>
-<p>The editor does not support cursor keys, backspacing, and so on, so it is not the easiest editor to work with, particularly compared to modern editors available on PC/Macs.</p>
+<p>The editor does not support cursor keys, so it is not the easiest editor to work with, particularly compared to modern editors available on PC/Macs.</p>
 <p>Keeping your original source elsewhere also protects you against rogue code which might overwrite your source, as there is no memory-protection hardware on these chips.</p>
-<hr />
-<h2 id="tokenisation-quirks">Tokenisation quirks</h2>
-<ul>
-<li>Reserved words will always be displayed in lower-case, regardless of how you entered them</li>
-<li>As reserved words are stored internally as one byte, the Find and Replace commands in the Editor <em>cannot locate part of a reserved word</em>. For example, you cannot find BEG in BEGIN, or PROC in PROCEDURE.</li>
-<li>It is permissable to locate part of a non-reserved word, unless that part is itself a reserved word. In other words, attempting to locate FR will successfully locate the word FRED, however trying to locate TO will <em>not</em> locate the word TOOL as TO is a reserved word.</li>
-<li>As multiple spaces are stored as a two-byte code, the Find and Replace commands can only match the <em>exact</em> number of spaces. Remember that the space which is displayed following a reserved word is not actually stored in the file and should not be counted.</li>
-<li>A line with mismatched quote symbols may display strangely. Quotes are detected in the display process, and reserved words are not expanded inside quotes.</li>
-</ul>
 <hr />
 <div class="quick_link">
 <a href="index.htm">Back to main G-Pascal page</a>

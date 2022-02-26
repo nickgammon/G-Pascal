@@ -26,6 +26,7 @@
 <li><a href="#Limitations">Limitations</a></li>
 <li><a href="#how_to_compile">How to enter and compile a program</a></li>
 <li><a href="#extensions">Extensions and syntax notes</a></li>
+<li><a href="#reading">Reading and writing to the terminal</a></li>
 <li><a href="#machine_code">Calling machine code</a></li>
 <li><a href="#differences">Differences to C</a></li>
 <li><a href="#via_adapter">Accessing the VIA (Versatile Interface Adapater) pins</a></li>
@@ -39,7 +40,18 @@
 <li><a href="#credits">Credits</a></li>
 </ul>
 <p><strong>Author</strong>: Nick Gammon (written in 2022)</p>
-<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="assembler.htm">Assembler info</a>
+</div>
+<div class="quick_link">
+<a href="editor.htm">Text editor</a>
+</div>
+<div class="quick_link">
+<a href="file_menu.htm">File menu</a>
+</div>
 <h2 id="introduction">Introduction</h2>
 <p>The G-Pascal compiler is a “tiny” Pascal compiler, entirely resident in the EEPROM, and available immediately after resetting your board.</p>
 <hr />
@@ -60,6 +72,7 @@
 <h2 id="Limitations">Limitations</h2>
 <ul>
 <li>Integers are only three bytes and range in value from -8388608 to 8388607.</li>
+<li>A quirk of the numeric literal parser means you cannot directly use the numeric literal -8388608 in a program. A workaround it to use $800000 instead as that is the hex equivalent of that value, or to use (-8388607 - 1).</li>
 <li>Char variables are one byte long and range in value from 0 to 255. Char and integer variables can be used interchangeably, however data stored into a char variable will be truncated to a single byte.</li>
 <li>There is no type-checking.</li>
 <li>There are no type definitions.</li>
@@ -72,10 +85,10 @@
 <hr />
 <h2 id="how_to_compile">How to enter and compile a program</h2>
 <ol type="1">
-<li><p>Enter the Editor from the main menu (type E) and use that to enter your program. Alternatively load it from your PC using the File menu. The Editor is described in a separate page.</p></li>
-<li><p>Type “S” from the main menu to syntax-check the code. This is slightly faster than attempting to compile it. This step is optional.</p></li>
+<li><p>Use the Editor to enter your program (type “I” to insert text). Alternatively load it from your PC by using “LOAD”. The Editor is described <a href="editor.htm">here</a>.</p></li>
+<li><p>Type “S” to syntax-check the code. This is slightly faster than attempting to compile it. This step is optional.</p></li>
 <li><p>When it is error-free type “C” to compile it and produce P-codes.</p></li>
-<li><p>If it compiles without errors type “R” from the main menu to run the code. Alternatively type D to debug or T to trace it.</p></li>
+<li><p>If it compiles without errors type “R” to run the code. Alternatively type D to debug or T to trace it.</p></li>
 <li><p>If the code does not appear to be doing anything try typing Ctrl+C to abort it, Ctrl+T to trace it, or Ctrl+D to enter debugging mode. Alternatively press the NMI switch (if installed) to do a warm start, recovering control of the processor and retaining your source code.</p></li>
 </ol>
 <hr />
@@ -85,7 +98,7 @@
 <li><p>String literals up to three bytes long can be used as constants. For example:</p>
 <pre class="pas"><code>  var foo : integer ;
   begin
-    foo := &#39;a&#39;;
+    foo := &#39;a&#39;;    { writes: 97 }
     writeln (foo);
   end .</code></pre>
 <p>This will display 97 as that is the value of the letter ‘a’.</p>
@@ -103,7 +116,7 @@
   \\    backslash
   \Xnn  where nn is one or two hex digits (eg. \x0A \X42 \x9 )</code></pre>
 <p>The letter following the backslash is not case-dependent. For the \Xnn form, if there is potential confusion if the character following the escape sequence happens to be a hex digit then you should use two digits. Only the first two digits are considered when parsing.</p></li>
-<li><p>You may use an <strong>else</strong> clause with the <strong>case</strong> statement, to specify a statement to be executed if no case matches.</p></li>
+<li><p>You may use an <strong>else</strong> clause with the <strong>case</strong> statement, to specify a statement to be executed if no case matches. Case selectors may be expressions, not just constants.</p></li>
 <li><p>Numeric constants may be one of:</p>
 <ul>
 <li>Signed decimal numbers (eg. -10, 42, +666)</li>
@@ -124,12 +137,15 @@ foo := memc [$5678];</code></pre>
 <li><p><strong>write</strong>, <strong>writeln</strong> and <strong>lcdwrite</strong> statements may take the following arguments:</p>
 <ul>
 <li><p>String literals of any length: these will be written “as is”.</p></li>
+<li><p>An <em>expression</em>, which is written as a signed decimal number.</p></li>
 <li><p><strong>chr</strong> ( <em>expression</em> ) — this converts the value of the expression to a character and writes that, for example:</p>
 <pre class="pas"><code>write ( chr (65) );</code></pre>
 <p>That would write the letter “A”.</p></li>
 <li><p><strong>hex</strong> ( <em>expression</em> ) — this writes the value of the expression as a 6-character hex number.</p></li>
+<li><p>See below for more examples.</p></li>
 </ul></li>
-<li><p>Random numbers can be obtained by calling the <strong>random</strong> function. These are pseudo-random numbers generated with an initial seed internally of 0xFFFFFFFF. Thus they will be the same every time the processor is reset. You can change the seed by using <strong>mem</strong> to change the current value in memory. A possible way of seeding the numbers in an unpredictable way (eg. for games) is to use an internal value in memory which increments every time the code is waiting for a keypress from the user. Since the time between keypresses will be unpredictable (up to a point) the random numbers should look random enough for casual applications.</p></li>
+<li><p>Random numbers can be obtained by calling the <strong>random</strong> function. These are pseudo-random numbers generated with an initial seed internally of 0xFFFFFFFF. Thus they will be the same every time the processor is reset. You can change the seed by using <strong>mem</strong> to change the current value in memory. A possible way of seeding the numbers in an unpredictable way (eg. for games) is to use an internal value in memory which increments every time the code is waiting for a keypress from the user. Since the time between keypresses will be unpredictable (up to a point) the random numbers should look random enough for casual applications. The numbers returned will be in the range -8388608 to 8388607. You can reduce that to (say) a number from 1 to 10 by doing this:</p>
+<pre><code>writeln (random mod 10 + 1);</code></pre></li>
 <li><p>You can obtain the address of a variable by using <strong>address</strong> ( <em>variable</em> ). This could be used to pass the address of a variable to a function, which could then use <strong>mem</strong> to change that variable, thus effectively passing a pointer to a function rather than a value.</p></li>
 <li><p>Comments are between braces, or bracket-asterisk, see examples below. Comments may not be nested. The two different sorts of comment symbols are treated interchangeably, so you could conceivably start with one and end with another, see below.</p>
 <pre class="pas"><code> { my comment }
@@ -138,31 +154,102 @@ foo := memc [$5678];</code></pre>
 <li><p>There is no <strong>boolean</strong> type, however any variable could be considered a boolean, and you could declare:</p>
 <pre class="pas"><code>const true = 1; false = 0;</code></pre>
 <p>The results of conditional comparisons (eg. greater-than, less-than) will always be 0 (false) or 1 (true).</p></li>
-<li><p>The compiler is not case-sensitive. Reserved words (such as “procedure”) are tokenised in the Editor and will always display in lower-case with a preceding space.</p></li>
+<li><p>Any statement (like <strong>if</strong>) which tests for true or false will consider 0 to be false and any other value to be true.</p></li>
+<li><p>The compiler is not case-sensitive.</p></li>
 <li><p>Identifier names can be any length (within reason), must start with a letter, and after that be letters, numbers or the underscore character. All characters of the name are significant.</p></li>
 <li><p>Arrays start at index 0.</p></li>
+<li><p>You can use <strong>assert</strong> to do a runtime assertion (unlike the assembler which does a compile-time assertion). This can be used to “bail out” if some variable has an unexpected value, eg.</p>
+<pre><code>assert (2 + 2 = 4);</code></pre></li>
+<li><p>You can reseed the random number generator by calling <strong>randomseed</strong> with some number as an argument.</p></li>
+<li><p>You can get the typing latency (a number which is incremented while waiting for keyboard input) by calling <strong>latency</strong>.</p></li>
+<li><p>Thus you could reseed the random number generator with a fairly unpredictable number like this:</p>
+<pre><code>randomseed (latency);</code></pre></li>
 </ul>
+<hr />
+<h3 id="reading">Reading and writing to the terminal</h3>
+<h4 id="read">Read</h4>
+<p>The built-in statement READ (which is a reserved word) can read from your terminal in three ways:</p>
+<ul>
+<li><p>Read into an INTEGER variable</p>
+<p>A line of input is accepted from the user, and the first integer found on that line (bypassing leading spaces) is placed into the variable. If the input on that line could not be parsed into a (signed) integer then hex $800000 (decimal -8388608) is placed in the variable as an “error” marker. The integer is obtained by calling the compiler’s token parser, so any input that resolves to a number is acceptable (for example, a binary or hex integer). Any other text on that line is discarded without comment. eg.</p>
+<pre><code>var i : integer;
+begin
+  repeat
+    write (&quot;Enter a number: &quot;);
+    read (i);
+    writeln (&quot;You entered: &quot;, i)
+  until i = 0
+end.</code></pre>
+<p>Note that because of the way the token parser works you will get an error trying to compare to -8388608. Instead, compare to $800000. For example:</p>
+<pre><code>read (i);
+if i = $800000 then
+  begin
+  writeln (&quot;Bad number entered&quot;)
+  end;</code></pre></li>
+<li><p>Read into a CHAR variable</p>
+<p>A single character is accepted from the user without waiting for a newline. This “blocks”, that is control does not return to the program until a character has been typed. This is placed in the variable.</p></li>
+<li><p>Read into a CHAR array.</p>
+<p>A line of input is accepted from the user, which is placed into the array, up to the array maximum length. The line will be terminated by a newline (hex $0a, decimal 10).</p></li>
+</ul>
+<p>Multiple variables can be read into (eg. READ (a, b, c)) however each one is treated exactly as if they appeared in separate READ statements, and thus to read three numbers (for example) you would have to enter them on three lines. An alternative would be to read into a CHAR array, and parse multiple numbers yourself.</p>
+<p>To read without blocking use GETKEY which returns the current key as a number (eg. 65 for the letter ‘A’) or zero if no key is pressed. GETKEY clears the “read” key, so if you need to check if a key is pressed and also find out what key that is, you would need to save it, for example:</p>
+<pre><code>var myKey : char;
+begin
+  write (&quot;Press a key ...&quot;);
+  repeat
+    myKey := getkey;
+  until myKey;
+  writeln (&quot;You entered &quot;, myKey)
+end .</code></pre>
+<h4 id="write-and-writeln">WRITE and WRITELN</h4>
+<p>The built-in statement WRITE (which is a reserved word) can be used to write numbers, string literals, hex numbers or characters.</p>
+<p>WRITELN behaves the same as WRITE except that it appends a newline character after writing its parameters. WRITELN may be used without any arguments in order to simply output a newline.</p>
+<ul>
+<li><p>Write a number</p>
+<p>If you write a literal number, or a variable (which can be an array element), or an expression, that number is written in decimal. For example:</p>
+<pre><code>var i : integer;
+begin
+  i := 666;
+  write (i, &quot; &quot;, 1234567, &quot; &quot;, 5 * 8)  { writes: 666 1234567 40 }
+end.</code></pre></li>
+<li><p>Write a number in hex</p>
+<p>To write a number in hex, use HEX (expression), e.g.</p>
+<pre><code>var i : integer;
+begin
+  i := 666;
+  writeln (hex (i))   { writes: 00029a }
+end.</code></pre></li>
+<li><p>Write a number as an ASCII character</p>
+<p>To convert a number into its ASCII (printable) equivalent, use CHR (expression), e.g.</p>
+<pre><code>var i : integer;
+begin
+  i := 65;
+  writeln (chr (i))  { writes: A }
+end.</code></pre></li>
+<li><p>Write a literal string</p>
+<p>Literal strings (like “Hello, world”) can be used in a WRITE statement, e.g.</p>
+<pre><code>begin
+  writeln (&quot;Hello, world&quot;)
+end .</code></pre>
+<p>As mentioned earlier literal strings may include control characters by using escape (backslash) codes, so you can embed newlines, e.g.</p>
+<pre><code>begin
+  writeln (&quot;Hello, world.\nEnjoy learning Pascal.&quot;)
+end .</code></pre></li>
+</ul>
+<p>WRITE and WRITELN can take any number of parameters, these are just written one after the other without intervening spaces.</p>
 <hr />
 <h3 id="machine_code">Calling machine code</h3>
 <p>You can call machine code (eg. that you produced with the assembler) by using <strong>call</strong>.</p>
 <p>You can “seed” the A, X, Y and status registers prior to the call by using <strong>memc</strong>. For example:</p>
-<pre class="pas"><code>memc [$16] := 22;  { A register }
-memc [$17] := 33;  { X register }
-memc [$18] := 44;  { Y register }
-memc [$19] := %00000010;   { status register P: NV1BDIZC - see image below
+<pre class="pas"><code>memc [$10] := 22;  { A register }
+memc [$11] := 33;  { X register }
+memc [$12] := 44;  { Y register }
+memc [$13] := %00000010;   { status register P: NV1BDIZC - see image below
                              - example sets Z flag }
 call ($5000);      { call the machine-code function, which should end with an RTS }
                    { the values of A,X,Y,P after the call are now in the above addresses }</code></pre>
 <p><img src="images/6502%20status%20register.png" /></p>
-<p>These addresses ($16 to $19) are “well-known” addresses used by G-Pascal. They will always be used for this purpose.</p>
-<p>A couple more well-known addresses are:</p>
-<ul>
-<li>$0F … $12 (4 bytes) — the current random number. Change this to re-seed it.</li>
-<li>$13 … $15 (3 bytes) — the current “typing latency” figure. This is incremented while the system waits for a keypress.</li>
-</ul>
-<p>You could re-seed the random-number generator thus:</p>
-<pre class="pas"><code>mem [$F] := mem [$13];  { re-seed random number }</code></pre>
-<p>That would copy the typing latency figure into the 3 high-order bytes of the current random number, thus re-seeding it.</p>
+<p>These addresses ($10 to $13) are “well-known” addresses used by G-Pascal. They will always be used for this purpose.</p>
 <hr />
 <h3 id="via_adapter">Accessing the VIA (Versatile Interface Adapater) pins</h3>
 <p>There are three inbuilt procedures and functions to control the 16 pins on the VIA chip, which operate similarly to the ones on the Arduino.</p>
@@ -190,9 +277,9 @@ foo := digitalRead (3);  { read PA3 }</code></pre>
 <ul>
 <li><p>Procedures and functions must be declared at the <em>start</em> of a block, not in the middle.</p></li>
 <li><p>The order is important. CONST first, then VAR, then procedure/function declarations, then BEGIN. eg.</p>
-<pre class="pas"><code>const limit = 10;   { &lt;-- this is the start of a block: CONST before VAR }
-var k: integer;     { we declare variables and constants here - BEFORE &quot;begin&quot; }
-line : array [100] of char;  { array of 101 items }
+<pre class="pas"><code>const LIMIT = 10;                { &lt;-- this is the start of a block: CONST before VAR }
+var k    : integer;              { we declare variables and constants here - BEFORE &quot;begin&quot; }
+    line : array [100] of char;  { array of 101 items }
 
 function foo;       { and functions and procedures - this is the start of another block}
   { constants and variables would go here, if needed }
@@ -201,7 +288,7 @@ begin
 end;                { end of the function block - semicolon is required }
 
 begin               { end of declarations - now we have the main block statements }
- for k := 1 to limit do
+ for k := 1 to LIMIT do
    writeln (&quot;square of &quot;, k, &quot; is &quot;, k * k);
  write (foo)        { call function }
 end.</code></pre></li>
@@ -212,23 +299,23 @@ end.</code></pre></li>
 </ul>
 <h3 id="things-to-be-careful-of">Things to be careful of</h3>
 <ul>
-<li><p>Functions which do not assign to the function return value give undefined results.</p></li>
+<li><p>Functions which do not assign to the function return value return zero.</p></li>
 <li><p>Variables are not initialised and therefore their initial contents are undefined.</p></li>
-<li><p>Multiplication discards high-order bits if result is too large.</p></li>
+<li><p>Multiplication discards high-order bits if the result is too large.</p></li>
 <li><p>Divide remainder is always positive (ie. MOD always gives a positive result, regardless of operand signs)</p></li>
 <li><p>Function arguments are always integers and always return an integer.</p></li>
 <li><p>Divide-by-zero raises an error and stops execution. Check for a zero divisor if you don’t want that to happen.</p></li>
 <li><p>One to three-byte strings can be used as integer constants</p>
 <p>eg. a := “abc”; write (a); –&gt; Result: 6513249 (ie. 0x636261 or “abc”)</p>
 <p>The first character is the low-order byte in the number (little endian), explaining the above results.</p></li>
-<li><p>Maximum arguments to a procedure/function is 85 (255 / 3) due to internal coding</p></li>
+<li><p>Maximum number of arguments to a procedure/function is 85 (255 / 3) due to internal coding</p></li>
 <li><p>Procedures or functions may be nested (declared within another procedure or function) up to 127 levels of depth.</p></li>
 <li><p>There is no <strong>return</strong> statement, unlike C. For a function to return a value you assign to the function name. See the example just above where inside the function foo an assignment is made to foo. That is setting the function return value.</p></li>
 <li><p>Check the <a href="G-Pascal%20syntax%20diagram.xhtml">syntax diagram</a> if you are unsure.</p></li>
 </ul>
 <hr />
 <h2 id="directives">Compiler directives</h2>
-<p>Compiler directives are placed inside comments, with a “%”</p>
+<p>Compiler directives are placed inside comments, with a “%” in front of them.</p>
 <ul>
 <li>{%L} - list during compile (source code and current P-code address)</li>
 <li>{%P} - show generated P-codes during compile - only works during compile (not syntax check)</li>
@@ -240,7 +327,7 @@ end.</code></pre></li>
 <h2 id="debugging">Debugging</h2>
 <p>If your program seems to be producing strange results you can either Trace or Debug it.</p>
 <h3 id="trace-mode">Trace mode</h3>
-<p>If you select &lt;T&gt;race instead of &lt;R&gt;un when you go to start execution, you will see something like this:</p>
+<p>If you select Trace instead of Run when you go to start execution, you will see something like this:</p>
 <pre><code>(0590)  00 d0 07 00
 (0594)  14 3d 1c 00
 (0595)  3d 1c 00 2c
@@ -261,7 +348,7 @@ end.</code></pre></li>
 <p><strong>Tip</strong>: If you add {%L} to your source, and recompile it, the P-code addresses detected in the trace may have changed because adding to the source file makes it longer, and thus the generated P-codes (which follow the source) will be at different addresses. Thus you may need to do a Trace again to make the addressess in the listing agree with the addresses in the Trace.</p>
 <p>You can also start tracing in the middle of execution by typing Ctrl+T.</p>
 <h3 id="debug-mode">Debug mode</h3>
-<p>If you select &lt;D&gt;ebug instead of &lt;R&gt;un when you go to start execution, you will see something like this:</p>
+<p>If you select Debug instead of Run when you go to start execution, you will see something like this:</p>
 <pre><code>(0537)  16 3d 18 00
  Stack: 5810 = 02 00 00 d0 07 00 d0 07 00
  Base:  5fff = 05 04 53 49 5a 45
@@ -368,13 +455,11 @@ end.</code></pre>
 551  primes</code></pre>
 <hr />
 <h2 id="reserved_words">Reserved words</h2>
-<p>The following words are reserved by the compiler. They are also tokenised in the source, so they will always be displayed in lower-case with a preceding space. They may not be used as identifiers in the compiler or labels in the assembler.</p>
-<pre><code>abs, address, and, array, begin, call, case, char, chr, const,
-cursor, delay, digitalread, digitalwrite, div, do, downto, else,
-end, for, function, getkey, hex, if, integer, lcdclear, lcdhome,
-lcdpos, lcdwrite, mem, memc, mod, not, of, or, pinmode, procedure,
-random, read, repeat, shl, shr, then, to, until, var, while, write,
-writeln, xor</code></pre>
+<p>The following words are reserved by the compiler. They may not be used as identifiers (variables, constants, function or procedure names) in the compiler.</p>
+<pre><code>address, and, array, begin, call, case, char, chr, const,
+div, do, downto, else, end, for, function, hex, if, integer,
+mem, memc, mod, not, of, or, procedure, read, repeat, shl,
+shr, then, to, until, var, while, write, writeln, xor</code></pre>
 <hr />
 <h2 id="memory_layout">Memory layout</h2>
 <p><img src="images/Compiler%20memory%20organisation.svg.png" /></p>
@@ -385,7 +470,9 @@ writeln, xor</code></pre>
 <li><p>Syntax diagrams generated from the “Bottlecaps” Railroad Diagram Generator available <a href="https://bottlecaps.de/rr/ui#expression">here</a>.</p></li>
 </ul>
 <hr />
-<p><a href="index.htm">Back to main G-Pascal page</a></p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
 <hr />
 <h2 id="license">License</h2>
 <p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>

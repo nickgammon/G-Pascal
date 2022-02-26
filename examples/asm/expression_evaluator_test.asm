@@ -2,6 +2,8 @@
 ; expression evaluator test
 ;
 
+  rts   ; in case you execute this
+
 ; PRECEDENCE 1
 
  assert $FFFFFF == ~0   ; negation
@@ -51,8 +53,8 @@
 
  assert 42 < 666               ; less than
  assert 42 <= 42               ; less than or equal
- assert 12345678 > 12345677    ; greater than
- assert 12345678 >= 12345678   ; greater than or equal
+ assert 1234567 >  1234566     ; greater than
+ assert 1234567 >= 1234567     ; greater than or equal
 
 ; PRECEDENCE 9
 

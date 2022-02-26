@@ -17,7 +17,7 @@
   <![endif]-->
 </head>
 <body>
-<h1 id="g-pascal-for-bens-eaters-6502-board">G-Pascal for Ben’s Eater’s 6502 board</h1>
+<h1 id="g-pascal-for-ben-eaters-6502-board">G-Pascal for Ben Eater’s 6502 board</h1>
 <p><strong>Author</strong>: Nick Gammon</p>
 <p><strong>Date written</strong>: February 2022</p>
 <div class="quick_link">
@@ -28,6 +28,9 @@
 </div>
 <div class="quick_link">
 <a href="hardware_mods.htm">Suggested hardware mods</a>
+</div>
+<div class="quick_link">
+<a href="installation.htm">How to install</a>
 </div>
 <div class="quick_link">
 <a href="editor.htm">Text editor</a>
@@ -41,9 +44,24 @@
 <div class="quick_link">
 <a href="https://gammon.com.au/electronics">More electronics</a>
 </div>
-<p><img src="images/Board%20photo.png" /></p>
-<p>I am pleased to announce <strong>on-board</strong> code for Ben Eater’s 6502 computer board. This code, which is available HERE, can be burnt onto the EEPROM and has the following features:</p>
+<h2 id="on-board-assembler-tiny-pascal-and-text-editor-for-ben-eaters-board">On-board assembler, tiny Pascal, and text editor for Ben Eater’s board</h2>
+<h3 id="includes">Includes:</h3>
 <ul>
+<li>A <strong>6502 assembler</strong> which lets you try out your assembler programming without having to keep removing the EEPROM chip and programming it externally. The assembler supports:
+<ul>
+<li><p>The documented WD65C02 instruction set, with all operand modes</p></li>
+<li><p>Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.</p></li>
+<li><p>Relocation of the output to any memory address (ORG directive)</p></li>
+<li><p>Here is “hello world” in assembler:</p>
+<pre class="asm"><code>      jmp begin   ; skip the message
+hello asciiz &quot;Hello, world!&quot;
+begin = *
+      lda #&lt;hello
+      ldx #&gt;hello
+      jsr print
+      rts</code></pre></li>
+<li><p>Detailed notes about the assembler <a href="assembler.htm">here</a>.</p></li>
+</ul></li>
 <li>A <strong>“tiny” Pascal compiler</strong> (G-Pascal) which allows you to program the board in a high-level language. Whilst there are limitations in what can be done in a few KB of memory, the compiler supports:
 <ul>
 <li><p>CONST, VAR, FUNCTION and PROCEDURE declarations</p></li>
@@ -67,51 +85,36 @@ end.</code></pre>
 end.</code></pre></li>
 <li><p>Detailed notes about the compiler <a href="pascal_compiler.htm">here</a>.</p></li>
 </ul></li>
-<li>A <strong>6502 assembler</strong> which lets you try out your assembler programming without having to keep removing the EEPROM chip and programming it externally. The assembler supports:
-<ul>
-<li><p>The documented WD65C02 instruction set, with all operand modes</p></li>
-<li><p>Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.</p></li>
-<li><p>Relocation of the output to any memory address (ORG directive)</p></li>
-<li><p>Here is “hello world” in assembler:</p>
-<pre class="asm"><code>; interface routines in the EEPROM
-serial_print_message = $8012
-
-      jmp start   ; skip the message
-hello asciiz &quot;Hello, world!&quot;
-start = *
-      lda #&lt;hello
-      ldx #&gt;hello
-      jsr serial_print_message
-      rts</code></pre></li>
-<li><p>Detailed notes about the assembler <a href="assembler.htm">here</a>.</p></li>
-</ul></li>
 <li>A <strong>text editor</strong> for keying in programs. It supports:
 <ul>
 <li>Loading and saving (via the RS232 interface)</li>
 <li>Inserting and deleting lines</li>
 <li>Find and replace</li>
-<li>Tokenisation of code to reduce source code size</li>
 <li>Detailed notes about the <a href="editor.htm">editor</a> and <a href="file_menu.htm">how to load and save source</a>.</li>
 </ul>
-<pre><code>The commands are :
+<pre><code>Available actions:
 
- &lt;A&gt;ssemble
- &lt;C&gt;ompile
- &lt;D&gt;elete line number range
- &lt;F&gt;ind   line number range . string .
- &lt;I&gt;nsert line number (Terminate input with Ctrl+D)
- &lt;L&gt;ist   line number range
- &lt;M&gt;odify line number range
- &lt;Q&gt;uit
- &lt;R&gt;eplace line number range .old.new.options (options: i/q/g)
- &lt;S&gt;yntax</code></pre></li>
+List/SAve   line_number_range
+Delete      line_number_range
+Insert/LOad after_line
+Find        line_number_range /target/flags
+Replace     line_number_range /target/replacement/flags
+
+Help
+INfo
+Memory first_address last_address
+CompilE/Syntax/Assemble
+RUn/DEBug/Trace
+RECover
+(Actions may be abbreviated)
+(Flags: &#39;I&#39;gnore case, &#39;G&#39;lobal, &#39;Q&#39;uiet)</code></pre></li>
 <li><strong>Support functions</strong>, such as:
 <ul>
 <li>RS232 interface for connecting a “dumb” terminal, or a PC/Mac</li>
 <li>Support for the LCD interface described in Ben’s videos</li>
 <li>Other support functions for use by your assembler code, such as multiplication and division, CRC calculations</li>
 <li>Support for NMI (non-maskable interrupts) so that you can recover from runaway code</li>
-<li>There is approximately 15k of space available on the EEPROM to add your own functions</li>
+<li>There is approximately 12k of space available on the EEPROM to add your own functions</li>
 </ul></li>
 </ul>
 <p>Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:</p>
@@ -131,6 +134,7 @@ start = *
 </ul>
 <hr />
 <h2 id="hardware-modifications-suggestedrequired">Hardware modifications suggested/required</h2>
+<p><img src="images/Board%20photo.png" /></p>
 <ul>
 <li><p>RS232 interface (required)</p>
 <p>To interface with the compiler, text editor and assembler you clearly need some way to “talk” to Ben’s 6502 board. The on-board code supports interfacing with a serial interface running at 4800 baud. To do this you will need to use an FTDI cable, available on eBay for around $US 10. The wiring for it is <a href="hardware_mods.htm#rs232_interface">here</a>.</p></li>
@@ -174,10 +178,12 @@ start = *
 <li><a href="examples/">Example code</a></li>
 <li><a href="editor.htm">Text editor</a></li>
 <li><a href="file_menu.htm">File menu</a></li>
+<li><a href="installation.htm">How to install</a></li>
 <li><a href="history.htm">History of G-Pascal</a> and the assembler</li>
 </ul>
 <hr />
 <h2 id="license">License</h2>
 <p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+<p>Source code licensed under the <a href="doc/license.txt">MIT License</a>.</p>
 </body>
 </html>

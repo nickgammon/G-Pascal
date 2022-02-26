@@ -7,6 +7,7 @@
 * [Limitations](#Limitations)
 * [How to enter and compile a program](#how_to_compile)
 * [Extensions and syntax notes](#extensions)
+* [Reading and writing to the terminal](#reading)
 * [Calling machine code](#machine_code)
 * [Differences to C](#differences)
 * [Accessing the VIA (Versatile Interface Adapater) pins](#via_adapter)
@@ -21,7 +22,10 @@
 
 **Author**: Nick Gammon (written in 2022)
 
-[Back to main G-Pascal page](index.htm)
+<div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [Assembler info](assembler.htm)</div>
+<div class='quick_link'> [Text editor](editor.htm) </div>
+<div class='quick_link'> [File menu](file_menu.htm) </div>
 
 
 ## Introduction
@@ -49,6 +53,7 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
 ## Limitations {#Limitations}
 
 * Integers are only three bytes and range in value from -8388608 to 8388607.
+* A quirk of the numeric literal parser means you cannot directly use the numeric literal -8388608 in a program. A workaround it to use $800000 instead as that is the hex equivalent of that value, or to use (-8388607 - 1).
 * Char variables are one byte long and range in value from 0 to 255. Char and integer variables can be used interchangeably, however data stored into a char variable will be truncated to a single byte.
 * There is no type-checking.
 * There are no type definitions.
@@ -62,13 +67,13 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
 
 ## How to enter and compile a program {#how_to_compile}
 
-1. Enter the Editor from the main menu (type E) and use that to enter your program. Alternatively load it from your PC using the File menu. The Editor is described in a separate page.
+1. Use the Editor to enter your program (type "I" to insert text). Alternatively load it from your PC by using "LOAD". The Editor is described [here](editor.htm).
 
-2. Type "S" from the main menu to syntax-check the code. This is slightly faster than attempting to compile it. This step is optional.
+2. Type "S" to syntax-check the code. This is slightly faster than attempting to compile it. This step is optional.
 
 3. When it is error-free type "C" to compile it and produce P-codes.
 
-4. If it compiles without errors type "R" from the main menu to run the code. Alternatively type D to debug or T to trace it.
+4. If it compiles without errors type "R" to run the code. Alternatively type D to debug or T to trace it.
 
 5. If the code does not appear to be doing anything try typing Ctrl+C to abort it, Ctrl+T to trace it, or Ctrl+D to enter debugging mode. Alternatively press the NMI switch (if installed) to do a warm start, recovering control of the processor and retaining your source code.
 
@@ -84,7 +89,7 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
     ```pas
       var foo : integer ;
       begin
-        foo := 'a';
+        foo := 'a';    { writes: 97 }
         writeln (foo);
       end .
     ```
@@ -108,7 +113,7 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
 
     The letter following the backslash is not case-dependent. For the \\Xnn form, if there is potential confusion if the character following the escape sequence happens to be a hex digit then you should use two digits. Only the first two digits are considered when parsing.
 
-* You may use an **else** clause with the **case** statement, to specify a statement to be executed if no case matches.
+* You may use an **else** clause with the **case** statement, to specify a statement to be executed if no case matches. Case selectors may be expressions, not just constants.
 * Numeric constants may be one of:
     * Signed decimal numbers (eg. -10, 42, +666)
     * Hexadecimal constants (eg. $1234)
@@ -133,6 +138,7 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
 * **lcdpos** (line, column) moves the cursor on the LCD screen to the specified position (zero-relative).
 * **write**, **writeln** and **lcdwrite** statements may take the following arguments:
     * String literals of any length: these will be written "as is".
+    * An *expression*, which is written as a signed decimal number.
     * **chr** ( *expression* ) --- this converts the value of the expression to a character and writes that, for example:
 
 
@@ -140,12 +146,17 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
         write ( chr (65) );
         ```
 
-
         That would write the letter "A".
 
     * **hex**  ( *expression* ) --- this writes the value of the expression as a 6-character hex number.
+    * See below for more examples.
 
-* Random numbers can be obtained by calling the **random** function. These are pseudo-random numbers generated with an initial seed internally of 0xFFFFFFFF. Thus they will be the same every time the processor is reset. You can change the seed by using **mem** to change the current value in memory. A possible way of seeding the numbers in an unpredictable way (eg. for games) is to use an internal value in memory which increments every time the code is waiting for a keypress from the user. Since the time between keypresses will be unpredictable (up to a point) the random numbers should look random enough for casual applications.
+* Random numbers can be obtained by calling the **random** function. These are pseudo-random numbers generated with an initial seed internally of 0xFFFFFFFF. Thus they will be the same every time the processor is reset. You can change the seed by using **mem** to change the current value in memory. A possible way of seeding the numbers in an unpredictable way (eg. for games) is to use an internal value in memory which increments every time the code is waiting for a keypress from the user. Since the time between keypresses will be unpredictable (up to a point) the random numbers should look random enough for casual applications. The numbers returned will be in the range -8388608 to 8388607. You can reduce that to (say) a number from 1 to 10 by doing this:
+
+    ```
+    writeln (random mod 10 + 1);
+    ```
+
 
 * You can obtain the address of a variable by using **address** ( *variable* ). This could be used to pass the address of a variable to a function, which could then use **mem** to change that variable, thus effectively passing a pointer to a function rather than a value.
 
@@ -169,12 +180,150 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
 
     The results of conditional comparisons (eg. greater-than, less-than) will always be 0 (false) or 1 (true).
 
-* The compiler is not case-sensitive. Reserved words (such as "procedure") are tokenised in the Editor and will always display in lower-case with a preceding space.
+* Any statement (like **if**) which tests for true or false will consider 0 to be false and any other value to be true.
+
+* The compiler is not case-sensitive.
 
 * Identifier names can be any length (within reason), must start with a letter, and after that be letters, numbers or the underscore character. All characters of the name are significant.
 
 * Arrays start at index 0.
 
+* You can use **assert** to do a runtime assertion (unlike the assembler which does a compile-time assertion). This can be used to "bail out" if some variable has an unexpected value, eg.
+
+    ```
+    assert (2 + 2 = 4);
+    ```
+* You can reseed the random number generator by calling **randomseed** with some number as an argument.
+
+* You can get the typing latency (a number which is incremented while waiting for keyboard input) by calling **latency**.
+
+* Thus you could reseed the random number generator with a fairly unpredictable number like this:
+
+    ```
+    randomseed (latency);
+    ```
+
+---
+
+### Reading and writing to the terminal {#reading}
+
+#### Read
+
+The built-in statement READ (which is a reserved word) can read from your terminal in three ways:
+
+* Read into an INTEGER variable
+
+    A line of input is accepted from the user, and the first integer found on that line (bypassing leading spaces) is placed into the variable. If the input on that line could not be parsed into a (signed) integer then hex $800000 (decimal -8388608) is placed in the variable as an "error" marker. The integer is obtained by calling the compiler's token parser, so any input that resolves to a number is acceptable (for example, a binary or hex integer). Any other text on that line is discarded without comment. eg.
+
+    ```
+    var i : integer;
+    begin
+      repeat
+        write ("Enter a number: ");
+        read (i);
+        writeln ("You entered: ", i)
+      until i = 0
+    end.
+    ```
+
+    Note that because of the way the token parser works you will get an error trying to compare to -8388608. Instead, compare to $800000. For example:
+
+    ```
+    read (i);
+    if i = $800000 then
+      begin
+      writeln ("Bad number entered")
+      end;
+    ```
+
+
+
+
+* Read into a CHAR variable
+
+    A single character is accepted from the user without waiting for a newline. This "blocks", that is control does not return to the program until a character has been typed. This is placed in the variable.
+
+* Read into a CHAR array.
+
+    A line of input is accepted from the user, which is placed into the array, up to the array maximum length. The line will be terminated by a newline (hex $0a, decimal 10).
+
+Multiple variables can be read into (eg. READ (a, b, c)) however each one is treated exactly as if they appeared in separate READ statements, and thus to read three numbers (for example) you would have to enter them on three lines. An alternative would be to read into a CHAR array, and parse multiple numbers yourself.
+
+To read without blocking use GETKEY which returns the current key as a number (eg. 65 for the letter 'A') or zero if no key is pressed. GETKEY clears the "read" key, so if you need to check if a key is pressed and also find out what key that is, you would need to save it, for example:
+
+```
+var myKey : char;
+begin
+  write ("Press a key ...");
+  repeat
+    myKey := getkey;
+  until myKey;
+  writeln ("You entered ", myKey)
+end .
+```
+
+
+#### WRITE and WRITELN
+
+The built-in statement WRITE (which is a reserved word) can be used to write numbers, string literals, hex numbers or characters.
+
+WRITELN behaves the same as WRITE except that it appends a newline character after writing its parameters. WRITELN may be used without any arguments in order to simply output a newline.
+
+* Write a number
+
+    If you write a literal number, or a variable (which can be an array element), or an expression, that number is written in decimal. For example:
+
+    ```
+    var i : integer;
+    begin
+      i := 666;
+      write (i, " ", 1234567, " ", 5 * 8)  { writes: 666 1234567 40 }
+    end.
+    ```
+
+* Write a number in hex
+
+    To write a number in hex, use HEX (expression), e.g.
+
+    ```
+    var i : integer;
+    begin
+      i := 666;
+      writeln (hex (i))   { writes: 00029a }
+    end.
+    ```
+
+* Write a number as an ASCII character
+
+    To convert a number into its ASCII (printable) equivalent, use CHR (expression), e.g.
+
+    ```
+    var i : integer;
+    begin
+      i := 65;
+      writeln (chr (i))  { writes: A }
+    end.
+    ```
+
+* Write a literal string
+
+    Literal strings (like "Hello, world") can be used in a WRITE statement, e.g.
+
+    ```
+    begin
+      writeln ("Hello, world")
+    end .
+    ```
+
+    As mentioned earlier literal strings may include control characters by using escape (backslash) codes, so you can embed newlines, e.g.
+
+    ```
+    begin
+      writeln ("Hello, world.\nEnjoy learning Pascal.")
+    end .
+    ```
+
+WRITE and WRITELN can take any number of parameters, these are just written one after the other without intervening spaces.
 
 ---
 
@@ -186,10 +335,10 @@ You can "seed" the A, X, Y and status registers prior to the call by using **mem
 
 
 ```pas
-memc [$16] := 22;  { A register }
-memc [$17] := 33;  { X register }
-memc [$18] := 44;  { Y register }
-memc [$19] := %00000010;   { status register P: NV1BDIZC - see image below
+memc [$10] := 22;  { A register }
+memc [$11] := 33;  { X register }
+memc [$12] := 44;  { Y register }
+memc [$13] := %00000010;   { status register P: NV1BDIZC - see image below
                              - example sets Z flag }
 call ($5000);      { call the machine-code function, which should end with an RTS }
                    { the values of A,X,Y,P after the call are now in the above addresses }
@@ -199,21 +348,7 @@ call ($5000);      { call the machine-code function, which should end with an RT
 ![](images/6502 status register.png)
 
 
-These addresses ($16 to $19) are "well-known" addresses used by G-Pascal. They will always be used for this purpose.
-
-A couple more well-known addresses are:
-
-* $0F ... $12 (4 bytes) --- the current random number. Change this to re-seed it.
-* $13 ... $15 (3 bytes) --- the current "typing latency" figure. This is incremented while the system waits for a keypress.
-
-You could re-seed the random-number generator thus:
-
-
-```pas
-mem [$F] := mem [$13];  { re-seed random number }
-```
-
-That would copy the typing latency figure into the 3 high-order bytes of the current random number, thus re-seeding it.
+These addresses ($10 to $13) are "well-known" addresses used by G-Pascal. They will always be used for this purpose.
 
 ---
 
@@ -267,9 +402,9 @@ If you are used to C (or C++) you may find yourself getting a lot of error messa
 
 
     ```pas
-    const limit = 10;   { <-- this is the start of a block: CONST before VAR }
-    var k: integer;     { we declare variables and constants here - BEFORE "begin" }
-    line : array [100] of char;  { array of 101 items }
+    const LIMIT = 10;                { <-- this is the start of a block: CONST before VAR }
+    var k    : integer;              { we declare variables and constants here - BEFORE "begin" }
+        line : array [100] of char;  { array of 101 items }
 
     function foo;       { and functions and procedures - this is the start of another block}
       { constants and variables would go here, if needed }
@@ -278,7 +413,7 @@ If you are used to C (or C++) you may find yourself getting a lot of error messa
     end;                { end of the function block - semicolon is required }
 
     begin               { end of declarations - now we have the main block statements }
-     for k := 1 to limit do
+     for k := 1 to LIMIT do
        writeln ("square of ", k, " is ", k * k);
      write (foo)        { call function }
     end.
@@ -296,9 +431,9 @@ put BEGIN ... END around them.
 
 ### Things to be careful of
 
-* Functions which do not assign to the function return value give undefined results.
+* Functions which do not assign to the function return value return zero.
 * Variables are not initialised and therefore their initial contents are undefined.
-* Multiplication discards high-order bits if result is too large.
+* Multiplication discards high-order bits if the result is too large.
 * Divide remainder is always positive (ie. MOD always gives a positive result, regardless of operand signs)
 * Function arguments are always integers and always return an integer.
 * Divide-by-zero raises an error and stops execution. Check for a zero divisor if you don't want that to happen.
@@ -308,7 +443,7 @@ put BEGIN ... END around them.
 
     The first character is the low-order byte in the number (little endian), explaining the above results.
 
-* Maximum arguments to a procedure/function is 85 (255 / 3) due to internal coding
+* Maximum number of arguments to a procedure/function is 85 (255 / 3) due to internal coding
 * Procedures or functions may be nested (declared within another procedure or function) up to 127 levels of depth.
 * There is no **return** statement, unlike C. For a function to return a value you assign to the function name. See the example just above where inside the function foo an assignment is made to foo. That is setting the function return value.
 * Check the [syntax diagram](G-Pascal syntax diagram.xhtml) if you are unsure.
@@ -317,7 +452,7 @@ put BEGIN ... END around them.
 
 ## Compiler directives {#directives}
 
-Compiler directives are placed inside comments, with a "%"
+Compiler directives are placed inside comments, with a "%" in front of them.
 
 * {%L} - list during compile (source code and current P-code address)
 * {%P} - show generated P-codes during compile - only works during compile (not syntax check)
@@ -335,7 +470,7 @@ If your program seems to be producing strange results you can either Trace or De
 
 ### Trace mode
 
-If you select \<T\>race instead of \<R\>un when you go to start execution, you will see something like this:
+If you select Trace instead of Run when you go to start execution, you will see something like this:
 
 
 ```
@@ -374,7 +509,7 @@ You can also start tracing in the middle of execution by typing Ctrl+T.
 
 ### Debug mode
 
-If you select \<D\>ebug instead of \<R\>un when you go to start execution, you will see something like this:
+If you select Debug instead of Run when you go to start execution, you will see something like this:
 
 
 
@@ -519,16 +654,13 @@ Running
 
 ## Reserved words {#reserved_words}
 
-The following words are reserved by the compiler. They are also tokenised in the source, so they will always be displayed in lower-case with a preceding space. They may not be used as identifiers in the compiler or labels in the assembler.
-
+The following words are reserved by the compiler. They may not be used as identifiers (variables, constants, function or procedure names) in the compiler.
 
 ```
-abs, address, and, array, begin, call, case, char, chr, const,
-cursor, delay, digitalread, digitalwrite, div, do, downto, else,
-end, for, function, getkey, hex, if, integer, lcdclear, lcdhome,
-lcdpos, lcdwrite, mem, memc, mod, not, of, or, pinmode, procedure,
-random, read, repeat, shl, shr, then, to, until, var, while, write,
-writeln, xor
+address, and, array, begin, call, case, char, chr, const,
+div, do, downto, else, end, for, function, hex, if, integer,
+mem, memc, mod, not, of, or, procedure, read, repeat, shl,
+shr, then, to, until, var, while, write, writeln, xor
 ```
 
 ---
@@ -548,7 +680,7 @@ writeln, xor
 
 ---
 
-[Back to main G-Pascal page](index.htm)
+<div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
 
 
 ---

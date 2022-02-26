@@ -21,19 +21,7 @@ procedure_identifier ::= identifier
 
 function_identifier ::= identifier
 
-
 integer ::= ( '+' | '-' )? digit+
-
-digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-
-letter ::= "A" | "B" | "C" | "D" | "E" | "F" | "G"
-       | "H" | "I" | "J" | "K" | "L" | "M" | "N"
-       | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
-       | "V" | "W" | "X" | "Y" | "Z" | "a" | "b"
-       | "c" | "d" | "e" | "f" | "g" | "h" | "i"
-       | "j" | "k" | "l" | "m" | "n" | "o" | "p"
-       | "q" | "r" | "s" | "t" | "u" | "v" | "w"
-       | "x" | "y" | "z"
 
 string ::= ('"' ([^"] | '""')+ '"') | ("'" ([^']| "''")+ "'")
 
@@ -49,10 +37,7 @@ factor ::= constant |
            'not' factor |
            '(' expression ')' |
            ('mem' | 'memc') '[' expression ']' |
-           'random' |
-           'address' '(' variable_identifier ')' |
-           'abs' '(' expression ')' |
-           'digitalread' '(' expression ',' expression ')'
+           'address' '(' variable_identifier ')'
 
 
 variable ::= variable_identifier ( '[' expression ']')?
@@ -73,11 +58,17 @@ statement ::= (variable ':=' expression |
               ('write' | 'lcdwrite' ) '(' writeable_expression (',' writeable_expression)* ')' |
               'writeln' ('(' writeable_expression (',' writeable_expression)* ')')? |
               'call' '(' expression ')' |
-              ('mem' | 'memc' ) '[' expression ']' ':=' expression |
-              'lcdhome' |
-              'lcdclear' |
-              'lcdpos' '(' expression ',' expression ')' |
-              'digitalwrite' '(' expression ',' expression ')'
+              ('mem' | 'memc' ) '[' expression ']' ':=' expression
              )?
 
+digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+letter ::= "A" | "B" | "C" | "D" | "E" | "F" | "G"
+       | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+       | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
+       | "V" | "W" | "X" | "Y" | "Z" | "a" | "b"
+       | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+       | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+       | "q" | "r" | "s" | "t" | "u" | "v" | "w"
+       | "x" | "y" | "z"
 

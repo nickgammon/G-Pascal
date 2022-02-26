@@ -5,6 +5,9 @@
 **Date written**: February 2022
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [G-Pascal info](pascal_compiler.htm)</div>
+<div class='quick_link'> [Text editor](editor.htm) </div>
+<div class='quick_link'> [File menu](file_menu.htm) </div>
 
 ## Contents
 
@@ -21,6 +24,7 @@
 * [How to co-exist with Pascal code?](#co_exist)
 * [Access to EEPROM functions and variables](#eeprom_functions)
 * [Accessing the VIA (Versatile Interface Adapater) pins](#via_adapter)
+* [Debugging](#debugging)
 * [Credits](#credits)
 
 **Author**: Nick Gammon (written in 2022)
@@ -42,15 +46,12 @@ The G-Pascal assembler is a 65C02 assembler, entirely resident in the EEPROM, an
 
 
     ```asm
-    ; interface routines in the EEPROM
-    serial_print_message = $8012
-
-          jmp start   ; skip the message
+          jmp begin   ; skip the message
     hello asciiz "Hello, world!"
-    start = *
+    begin = *
           lda #<hello
           ldx #>hello
-          jsr serial_print_message
+          jsr print
           rts
     ```
 
@@ -59,11 +60,11 @@ The G-Pascal assembler is a 65C02 assembler, entirely resident in the EEPROM, an
 
 ## How to enter and assemble a program {#how_to_assemble}
 
-1. Enter the Editor from the main menu (type E) and use that to enter your program. Alternatively load it from your PC using the File menu. The Editor is described in a separate page.
+1. Use the Editor to enter your program (type "I" to insert text). Alternatively load it from your PC by using "LOAD". The Editor is described in a separate page.
 
-2. Type "A" from the main menu to assemble it and produce machine code.
+2. Type "A" to assemble it and produce machine code.
 
-3. If it assembles without errors type "R" from the main menu to run the code. It will automatically start running at the location of the first byte of emitted machine code. It is probably useful to put a JMP there to go to where you want the code to start executing. Put a RTS at the end of your code to return to the G-Pascal system.
+3. If it assembles without errors type "R" to run the code. It will automatically start running at the location of the first byte of emitted machine code. It is probably useful to put a JMP there to go to where you want the code to start executing. Put a RTS at the end of your code to return to the G-Pascal system. Alternatively, JMP RESTART to do a "warm start" if you aren't sure a RTS will take you back to where you started.
 
 ---
 
@@ -165,17 +166,17 @@ Operands are separated from the opcode by one or more spaces.
 
     The expression evaluator combines values using operators following the following precedence list, as obtained from the vasm documentation:
 
-        1. + - ! ~ (unary +/- sign, not, complement),  also < (low-byte) > (high byte)
-        2. << >> (shift left, shift right)
-        3. & (bitwise and)
-        4. ^ (bitwise exclusive-or)
-        5. | (bitwise inclusive-or)
-        6. * / % (multiply, divide, modulo)
-        7. + - (plus, minus)
-        8. < > <= >= (less, greater, less or equal, greater or equal)
-        9. == != <> (equality, inequality)
-        10. && (logical and)
-        11. || (logical or)
+         1.   + - ! ~ (unary +/- sign, not, complement),  also < (low-byte) > (high byte)
+         2.   << >> (shift left, shift right)
+         3.   & (bitwise and)
+         4.   ^ (bitwise exclusive-or)
+         5.   | (bitwise inclusive-or)
+         6.   * / % (multiply, divide, modulo)
+         7.   + - (plus, minus)
+         8.   < > <= >= (less, greater, less or equal, greater or equal)
+         9.   == != <> (equality, inequality)
+        10.   && (logical and)
+        11.   || (logical or)
 
     The high-byte and low-byte operators are unary operators with a high precedence. Depending on their location in the expression they are not considered to be comparison operators. For example
   :
@@ -269,10 +270,10 @@ The following assembler directives are supported:
     The specified label takes on the address of the evaluated expression. Alternatively, the address may be the symbol "*" which means "the current address".
 
     ```
-    EEPROM         =      $8000
+    EEPROM         EQU    $8000
     start_message  ASC    "Hi there"
-    end_message    =      *
-    message_length =      end_message - start_message   ; calculate message length
+    end_message    EQU    *
+    message_length EQU    end_message - start_message   ; calculate message length
     ```
 
 
@@ -334,7 +335,7 @@ The following assembler directives are supported:
       ORG $4800     ; code is to be placed at $4800 (growing updwards)
     ```
 
-
+    You will not get an error if you have already created symbols (labels), however once the symbol table has been relocated the library symbols will be reloaded into the new location, and your existing symbols discarded.
 
 ---
 
@@ -393,14 +394,13 @@ That ensures that the Pascal compiler symbol table also starts lower in memory, 
   ORG $5800     ; code is to be placed at $5800 (growing upwards)
 
 ; interface routines in the EEPROM
-serial_print_message = $8012
 
-      jmp start   ; skip the message
+      jmp begin   ; skip the message
 hello asciiz "Hello, world!\n"
-start = *
+begin = *
       lda #<hello
       ldx #>hello
-      jsr serial_print_message
+      jsr print
       rts
 ```
 
@@ -431,30 +431,17 @@ If you don't have the extended RAM mod then change $5800 in the above examples t
 
 ## Access to EEPROM functions and variables {#eeprom_functions}
 
+Some useful "exposed" function addresses, plus some zero-page addresses, are pre-loaded into the symbol table (there are around 80 of them, taking around 1630 bytes of RAM in the process). This lets you call various subroutines, like PRINT for outputting to the terminal, DIGITALREAD, DIGITALWRITE, PINMODE and so on, without having to work out where they are in the EEPROM.
 
-There are various useful functions exposed in the EEPROM code by way of a "jump table" at the very start of the code. This consists of a series of 3-byte JMP instructions which jump to the start of the functions. The intention here is that, even if the functions move around in subsequent releases of the EEPROM code, the jump tables will always be in the same place, and thus code that relies on them will still work.
+If you are desperately short of RAM, and want to avoid these being loaded into the symbol table by the assembler, you could recompile the source, omitting or commenting-out some or all of those in assembler.inc. Look for assembler_library_functions_table. Leave the table there, but omit some or all of the contents.
 
-A list of the jump tables is [here](examples/asm/on_board_entry_points.asm). You could copy/paste part or all of that file into your project. For space reasons you may choose to only use the parts relevant to a particular project, as each line stands on its own.
-
-There are also the addresses of "well known" zero-page locations which are used by some of the functions.
+A list of them is with explanations [here](doc/on_board_functions_and_variables.txt).
 
 Example of using the inbuilt functions to multiply two numbers and display the result:
 
 
 
 ```asm
-;
-;  zero-page locations used by this code
-;
-reg            = $0000 ; (3 bytes) work "register" used in various places
-value          = $0006 ; (3 bytes) used by the assembler expression evaluator
-value2         = $0009 ; (3 bytes) used by the assembler expression evaluator
-;
-;  functions used by this code
-;
-exp_multiply   = $8081     ; VALUE := VALUE * VALUE2 (may overflow and the overflow is lost)
-dsp_bin        = $809c     ; write the number in REG (3 bytes) to the serial port (in decimal)
-
 ;
 ;  put 47302 into value
 ;
@@ -473,18 +460,13 @@ dsp_bin        = $809c     ; write the number in REG (3 bytes) to the serial por
   stz value2+2
 ;
 ;  multiply them to get the result 2601610
+;  exp_multiply multiplies value by value2 and puts the result in value
 ;
   jsr exp_multiply
 ;
-;  display the result
+;  display the result (displays value)
 ;
-  lda value
-  sta reg
-  lda value+1
-  sta reg+1
-  lda value+2
-  sta reg+2
-  jsr dsp_bin
+  jsr display_in_decimal
 ; done!
   rts
 ```
@@ -496,7 +478,7 @@ dsp_bin        = $809c     ; write the number in REG (3 bytes) to the serial por
 
 There are three utility functions in the EEPROM code to control the 16 pins on the VIA chip, which operate similarly to the ones on the Arduino.
 
-The functions are in the [exposed functions jump table](examples/asm/on_board_entry_points.asm).
+The functions are in the [exposed functions list](doc/on_board_functions_and_variables.txt).
 
 The VIA ports are PA0 to PA7 (pins 2 to 9 on the chip) and PB0 to PB7 (pins 10 to 17 on the chip). For the purposes of these functions they are numbered 0 to 15, where 0 is PA0, 1 is PA1, 8 is PB0 and 15 is PB7, and so on for the ones in-between.
 
@@ -528,23 +510,14 @@ Example:
 ;
 ;  digitalWrite example
 ;
-  jmp start     ; skip the variable declarations
-
-;
-;  VIA functions
-;
-pinmode_           = $809f     ; sets the pin mode - pin:0 to 15; mode: 0 or 1 : pin in A, mode in X
-digitalread_       = $80a2     ; reads a pin - pin:0 to 15; Pin to read is in in A. Returns zero or non-zero in A.
-digitalwrite_      = $80a5     ; writes to a pin - pin:0 to 15; value: 0 or 1 : pin in A, mode in X
-
-delay_             = $80ae     ; delay for YYXX ms (Y = high-order byte, X = lo-order byte)
+  jmp begin     ; skip the variable declarations
 
 counter   dfb 0     ; how many toggles we did
 pin_state dfb 0     ; current pin state
 
 ITERATIONS = 20     ; how many times to loop (this will be 10 flashes)
 
-start:
+begin:
 
   stz pin_state
   stz counter
@@ -554,7 +527,7 @@ start:
 ;
   lda #2   ; Port PA2
   ldx #1   ; write mode
-  jsr pinmode_
+  jsr pinmode
 
 
 write_loop:
@@ -566,13 +539,13 @@ write_loop:
   sta pin_state
   tax
   lda #2   ; Port PA2
-  jsr digitalwrite_
+  jsr digitalwrite
 ;
 ;  delay 500 ms
 ;
   ldx #<500
   ldy #>500
-  jsr delay_
+  jsr delay
 ;
 ;  do it ITERATIONS times
 ;
@@ -586,15 +559,101 @@ write_loop:
   rts
 ```
 
+---
+
+## Debugging {#debugging}
+
+
+### Inserting breakpoints
+
+One technique is to put BRK instructions into your code. The processor actually advances two bytes after a breakpoint, so the byte after BRK is reserved for a breakpoint number. Thus, if you are uncertain if your code has reached a particular spot you can put a BRK there, followed by a breakpoint number, e.g.
+
+```
+   BRK
+   DFB 1    ; breakpoint #1
+```
+
+Now if that gets executed you will see something like this:
+
+```
+BRK executed at address $9969, A = $00, X = $01, Y = $01, P = $32, S = $f4, id = $01
+Stack: 8c 9b 42 9b 5f 97
+```
+
+The breakpoint processing displays the address of the BRK, followed by the A, X, Y registers, followed by the processor flags (P) and the stack pointer (S). Also the byte after the break is shown as the break "ID".
+
+Then it displays the stack from S+6 onwards. This is because the processor takes 3 bytes of stack to handle the BRK, plus the breakpoint handler pushes A and X onto the stack before saving the stack register. Finally, the stack register points at the first unused spot, not the last used spot. Thus the bytes shown should be what was on the stack when the break occurred. Assuming for a moment that you haven't (in your code) pushed registers onto the stack, then you should see a stack "traceback" being the last few JSR addresses.
+
+Be aware that the JSR pushes the program counter + 2 onto the stack (not + 3). Thus you need to add one to each address to see what the address after the JSR was (or subtract 2 to find the address of the JSR itself). So in the example above, the stack traceback was (from earliest to latest):
+
+* $9760  --- for the JSR at $975D
+* $9B43  --- for the JSR at $9B40
+* $9B8D  --- for the JSR at $9B8A
+
+Remember that the high-order byte is pushed first by the JSR so you have to read the bytes from right to left. Thus "5F 97" becomes $975F, and then adding one gives you $9760.
+
+From the above we conclude that, in this case, a JSR at $975D called something (you can find what by looking at your listing), and then a JSR at $9B40 called something, and finally a JSR at $9B8A called something. Then the BRK was reached.
+
+You could sprinkle multiple BRK instructions through your code to confirm or deny that certain parts of code are executed each with their own unique breakpoint "ID" so you can see which one was reached (without having to match the breakpoint address to the generated code address).
+
+### Debugging prints
+
+Another technique is to put "debugging prints" inside your code. This could be used instead of inserting BRK instructions if you just want a breadcrumb trail of what is being executed and in what order. For example:
+
+```
+;
+;  Debug point: A is point code
+;
+
+debug_message asciiz "Debug point "
+
+debug_point:
+  phx
+  phy
+  pha
+  lda #<debug_message
+  ldx #>debug_message
+  jsr print
+  pla
+  jsr COUT    ; output the point code
+  jsr CROUT   ; newline
+  ply
+  plx
+  rts
+```
+
+Now in your code you could do something like this:
+
+```
+  pha             ; save A
+  lda #'A'        ; debug point A
+  jsr debug_point ; display message
+  pla             ; retrieve A
+```
+
+### View memory
+
+You can use the MEMORY command to view any range of memory. For example, to look at the zero-page registers:
+
+```
+: mem $0 $1f
+$0000: d3 c7 00 da c9 00 00 00 00 ff ff ff ff 00 00 00  . . . . . . . . . . . . . . . .
+$0010: 00 00 00 00 00 00 00 37 c6 00 00 00 00 00 00 00 . . . . . . . 7 . . . . . . . .
+```
+
+Press Ctrl+C to abort a long listing.
 
 ---
 
 
-## Credits {#credits}
+## Credits and references {#credits}
 
 * **Vasm** portable and retargetable assembler was used to assemble the G-Pascal EEPROM binary file. It is available from <http://sun.hasenbraten.de/vasm/>
-
-
+* Expression evaluation ideas from [Expression Evaluation](https://www.geeksforgeeks.org/expression-evaluation/) on the GeeksForGeeks website. It is based on the [Shunting-yard algorithm by Edsger Dijkstra ](https://en.wikipedia.org/wiki/Shunting-yard_algorithm)
+* CRC code from [More CRC Calculations by Greg Cook](http://www.6502.org/source/integers/crc-more.html)
+* [Jacksum](https://jacksum.net/en/index.html) was used to confirm CRC calculations
+* [Endianness - Wikipedia](https://en.wikipedia.org/wiki/Endianness)
+* Multiplication and division algorithms from [Multiplying and Dividing on the 6502 by Neil Parker](https://llx.com/Neil/a2/mult.html)
 
 ---
 
