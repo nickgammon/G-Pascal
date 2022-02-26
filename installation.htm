@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>installation</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="installation">Installation</h1>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="hardware_mods.htm">Suggested hardware mods</a>
+</div>
+<hr />
+<h2 id="hardware-modifications">Hardware modifications</h2>
+<p>You need to make the <a href="hardware_mods.htm">suggested hardware modifications</a> — or at least the one for the serial interface — in order to communicate with the G-Pascal system.</p>
+<hr />
+<h2 id="assemble-source">Assemble source</h2>
+<p>The source to the G-Pascal system is <a href="/src">here</a>.</p>
+<p>If you have installed the hardware mod to give you more memory, change the line in the source:</p>
+<pre><code>HIGHEST_RAM = $3FFF    ; original board hardware</code></pre>
+<p>to be:</p>
+<pre><code>HIGHEST_RAM = $5FFF    ; with suggested additional AND gate</code></pre>
+<p>You can assemble it yourself by downloading <strong>Vasm</strong> from <a href="http://sun.hasenbraten.de/vasm/" class="uri">http://sun.hasenbraten.de/vasm/</a>:</p>
+<pre><code>vasm6502_oldstyle gpascal.asm -wdc02 -esc -Fbin -o gpascal.bin -dotdir -L gpascal.list</code></pre>
+<p>Or, just use the gpascal.bin file already in that directory.</p>
+<hr />
+<h2 id="burn-eeprom">Burn EEPROM</h2>
+<p>Install gpascal.bin onto your EEPROM as follows:</p>
+<pre><code>minipro -p AT28C256 -w gpascal.bin</code></pre>
+<p>Minipro is available from <a href="https://gitlab.com/DavidGriffith/minipro">https://gitlab.com/DavidGriffith/minipro</a>.</p>
+<hr />
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="hardware_mods.htm">Suggested hardware mods</a>
+</div>
+<hr />
+<h2 id="license">License</h2>
+<p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+<p>Source code licensed under the <a href="doc/license.txt">MIT License</a>.</p>
+</body>
+</html>
