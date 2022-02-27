@@ -40,7 +40,7 @@ Replace     line_number_range /target/replacement/flags
 
 Help
 INfo
-Memory first_address last_address
+Memory      first_address last_address
 Compile/Syntax/Assemble
 RUn/DEBug/Trace
 RECover
@@ -100,9 +100,13 @@ Source CRC       $1de5</code></pre>
 <p>First, check that the number of bytes is correct. If it is not then the CRC will certainly be different. It is easy to add an extra line at the start or the end of the source, so check that the number of lines is correct, and if necessary delete any extra blank lines at the start or end.</p>
 <p>If you have loaded a program, and the CRC fails, try compiling or assembling it. Any errors in that process may show you where there are corrupted bytes.</p>
 <p>If you cannot resolve the difference try loading or saving the same file again. Also try removing trailing spaces which are hard to spot in the source, and may make the versions on your PC and Ben’s Board different. The source in G-Pascal always has a trailing newline at the end of every line (including the last) so make sure your file on disk ends with a newline.</p>
+<p>The editor discards newlines when accepting input. You should make sure that your file on disk ends with newlines only (0x0A) and not carriage-return (0x0D) as well. Modern editors have methods of converting files to newline-only endings. Personally I use <a href="https://www.geany.org/">Geany</a>.</p>
 <hr />
 <div class="quick_link">
 <a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="editor.htm">Text editor</a>
 </div>
 <hr />
 <h2 id="references">References</h2>
@@ -112,6 +116,7 @@ Source CRC       $1de5</code></pre>
 <li><a href="https://jacksum.net/en/index.html">Jacksum</a></li>
 <li><a href="http://srecord.sourceforge.net/crc16-ccitt.html">CRC16-CCITT</a></li>
 <li><a href="https://nptel.ac.in/content/storage2/courses/106105080/pdf/M3L2.pdf">Error Detection and Correction</a> (PDF)</li>
+<li><a href="https://www.geany.org/">Geany text editor</a></li>
 </ul>
 <hr />
 <h2 id="license">License</h2>

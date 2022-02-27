@@ -152,6 +152,7 @@ begin = *
 <li><p>Parentheses may be used to force the order of evaluation of operators.</p></li>
 <li><p>Labels, if used in expressions, take on the value of the address of that label.</p></li>
 <li><p>Expressions are evaluated internally to 24 bits of precision, and then truncated to 16 bits at the end of the expression evaluation. This means that operations which might overflow 16 bits may still evaluate correctly. eg. lda # ($8000 &lt;&lt; 4) &gt;&gt; 12 would generate a9 80 (that is, lda #$80) because the high-order bit was not lost during the initial shift left (it was still in the range of a 24-bit value).</p></li>
+<li><p>A quirk of the numeric literal parser means you cannot directly use the numeric literal -8388608 in a program. A workaround it to use $800000 instead as that is the hex equivalent of that value, or to use (-8388607 - 1). This is because the parser allows a number of up to 23 bits (0 to 8388607) and then sets the high-order bit to make it negative if you provided a minus sign.</p></li>
 </ul>
 <hr />
 <h2 id="directives">Directives</h2>
@@ -366,8 +367,21 @@ write_loop:
   rts</code></pre>
 <hr />
 <h2 id="debugging">Debugging</h2>
+<p>Debugging assembler code can be a pain. Below are a few suggestions.</p>
+<h3 id="toggling-an-led">Toggling an LED</h3>
+<p>You can use a handful of instructions to toggle one of the VIA pins, like this:</p>
+<pre><code>VIA_PORTA   = $7FF1
+DEBUG_MASK = %00010000
+
+  pha
+  lda #DEBUG_MASK     ; toggle debug flag
+  tsb VIA_PORTA       ; turn it on
+  trb VIA_PORTA       ; turn it off
+  pla</code></pre>
+<p>The VIA pins are set to output by default in the hardware initialisation routines (to avoid floating inputs to the chip).</p>
+<p>This toggling is very fast, you would not see it with the naked eye. An oscilloscope or logic analyser could show if that port was toggled. Alternatively leave it on (omit the “trb” instruction) and then you could see if a particular code path had been traversed.</p>
 <h3 id="inserting-breakpoints">Inserting breakpoints</h3>
-<p>One technique is to put BRK instructions into your code. The processor actually advances two bytes after a breakpoint, so the byte after BRK is reserved for a breakpoint number. Thus, if you are uncertain if your code has reached a particular spot you can put a BRK there, followed by a breakpoint number, e.g.</p>
+<p>Another technique is to put BRK instructions into your code. The processor actually advances two bytes after a breakpoint, so the byte after BRK is reserved for a breakpoint number. Thus, if you are uncertain if your code has reached a particular spot you can put a BRK there, followed by a breakpoint number, e.g.</p>
 <pre><code>   BRK
    DFB 1    ; breakpoint #1</code></pre>
 <p>Now if that gets executed you will see something like this:</p>

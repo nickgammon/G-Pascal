@@ -52,7 +52,7 @@ LIST 1 10
 LIST 1, 10
 ```
 
-Actions may be abbreviated. The minimal about to type is in upper case, so "L" would be LIST and not LOAD, and "S" would be SYNTAX and not SAVE.
+Actions may be abbreviated. The minimal amount to type is in upper case, so "L" would be LIST and not LOAD, and "S" would be SYNTAX and not SAVE.
 
 As a shortcut, the command R on its own will be interpreted as Run (not Replace) as Replace would always need a delimiter after it.
 
@@ -60,13 +60,13 @@ As a shortcut, the command R on its own will be interpreted as Run (not Replace)
 
 ## Delete
 
-Use **D** to delete a range of lines (you cannot use **D** on its own to delete the entire source). If you want to delete *everything* type "delete all" (or "d all").
+Use DELETE to delete a range of lines (you cannot use DELETE on its own to delete the entire source). If you want to delete *everything* type "delete all" (or "d all").
 
 ---
 
 ## Find
 
-Use **F** to find a string. The string delimiter can be any single character which is not a letter, number or space. This is intended to help you find lines with certain words on them. For example:
+Use FIND to find a string. The string delimiter can be any single character which is not a letter, number or space. This is intended to help you find lines with certain words on them. For example:
 
 ```
 F .procedure.
@@ -98,9 +98,9 @@ That would list all lines with "begin" on them between lines 20 and 999 (or the 
 
 ## Insert
 
-Use **I** to insert new lines. Use **I** on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press **Esc**.
+Use INSERT to insert new lines. Use **I** on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press **Esc**.
 
-**WARNING**: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that displaying the line numbers takes quite a few calculations, which take time.
+**WARNING**: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that displaying the line numbers takes quite a few calculations (binary to decimal conversion), which take time.
 
 If you are planning to "dump" your source onto the board, then use LOAD and "Load" it. This inserts source without displaying the line numbers.
 
@@ -108,7 +108,8 @@ If you are planning to "dump" your source onto the board, then use LOAD and "Loa
 
 ## List
 
-Use **L** on its own to list the entire source. Otherwise list one line or a range, for example:
+Use LIST on its own to list the entire source. Otherwise list one line or a range, for example:
+Use LIST on its own to list the entire source. Otherwise list one line or a range, for example:
 
 ```
 L
@@ -126,9 +127,9 @@ Control characters in the source are shown with a carat before them. For example
 
 ## Replace
 
-This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the "find" string and the "replace" string, separated by a delimiter of your choice. The string delimiter can be any single character which is not a letter, number or space There are options you can place after the third delimiter:
+This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the "find" string and the "replace" string, separated by a delimiter of your choice. The string delimiter can be any single character which is not a letter, number or space.
 
-You may put options after the second delimiter as follows:
+There are options you can place after the third delimiter:
 
   * G - global: find and replace multiple occurrences on one line
   * I - ignore case: match on both upper and lower-case versions of the target string
@@ -139,7 +140,7 @@ For example:
 
 ```
 R .fish.chips.g
-R 1-20 .dog.cat.i
+R 1-20 /dog/cat/ i
 ```
 
 ---

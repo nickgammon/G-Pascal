@@ -197,6 +197,7 @@ Operands are separated from the opcode by one or more spaces.
 
 * Expressions are evaluated internally to 24 bits of precision, and then truncated to 16 bits at the end of the expression evaluation. This means that operations which might overflow 16 bits may still evaluate correctly. eg. lda # ($8000 << 4) >> 12 would generate a9 80 (that is, lda #$80) because the high-order bit was not lost during the initial shift left (it was still in the range of a 24-bit value).
 
+* A quirk of the numeric literal parser means you cannot directly use the numeric literal -8388608 in a program. A workaround it to use $800000 instead as that is the hex equivalent of that value, or to use (-8388607 - 1). This is because the parser allows a number of up to 23 bits (0 to 8388607) and then sets the high-order bit to make it negative if you provided a minus sign.
 
 ---
 
@@ -405,9 +406,9 @@ begin = *
 ```
 
 
-Load and compile the above assembler code, which relocates itself to $5800 and with the symbol table moved to $5800 to avoid a clash with the symbols.
+Load and assemble (LOAD then ASS) the above assembler code, which relocates itself to $5800 and with the symbol table moved to $5800 to avoid a clash with the symbols.
 
-You can test that on its own now by going to the main menu and selecting \<R\>un. The runtime system automatically starts running at the first *emitted* object code. In this case, that is the "jmp start" instruction.
+You can test that on its own now by typing RUN. The runtime system automatically starts running at the first *emitted* object code. In this case, that is the "jmp start" instruction.
 
 
 ```pas
@@ -563,10 +564,32 @@ write_loop:
 
 ## Debugging {#debugging}
 
+Debugging assembler code can be a pain. Below are a few suggestions.
+
+### Toggling an LED
+
+You can use a handful of instructions to toggle one of the VIA pins, like this:
+
+```
+VIA_PORTA  = $7FF1
+DEBUG_MASK = %00010000
+
+  pha
+  lda #DEBUG_MASK     ; toggle debug flag
+  tsb VIA_PORTA       ; turn it on
+  trb VIA_PORTA       ; turn it off
+  pla
+```
+
+The VIA pins are set to output by default in the hardware initialisation routines (to avoid floating inputs to the chip).
+
+This toggling is very fast, you would not see it with the naked eye. An oscilloscope or logic analyser could show if that port was toggled. Alternatively leave it on (omit the "trb" instruction) and then you could see if a particular code path had been traversed.
+
+
 
 ### Inserting breakpoints
 
-One technique is to put BRK instructions into your code. The processor actually advances two bytes after a breakpoint, so the byte after BRK is reserved for a breakpoint number. Thus, if you are uncertain if your code has reached a particular spot you can put a BRK there, followed by a breakpoint number, e.g.
+Another technique is to put BRK instructions into your code. The processor actually advances two bytes after a breakpoint, so the byte after BRK is reserved for a breakpoint number. Thus, if you are uncertain if your code has reached a particular spot you can put a BRK there, followed by a breakpoint number, e.g.
 
 ```
    BRK
@@ -595,6 +618,8 @@ Remember that the high-order byte is pushed first by the JSR so you have to read
 From the above we conclude that, in this case, a JSR at $975D called something (you can find what by looking at your listing), and then a JSR at $9B40 called something, and finally a JSR at $9B8A called something. Then the BRK was reached.
 
 You could sprinkle multiple BRK instructions through your code to confirm or deny that certain parts of code are executed each with their own unique breakpoint "ID" so you can see which one was reached (without having to match the breakpoint address to the generated code address).
+
+If you do not put an "ID" byte after the BRK, then the code shown will simply be the opcode of the next instruction in the source.
 
 ### Debugging prints
 

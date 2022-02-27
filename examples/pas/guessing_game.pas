@@ -28,7 +28,7 @@ begin
   for i := 1 to numdigits do
     number [i] := "0" + random mod (largestdigit + 1);
 
-  writeln ("I am thinking of a ", numdigits,
+  writeln ("I am thinking of a ", numdigits, " digit",
            " number with each digit in the range 0 to ",
            largestdigit, ".");
   writeln ("Try to guess the number.");

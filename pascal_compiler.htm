@@ -146,7 +146,11 @@ foo := memc [$5678];</code></pre>
 </ul></li>
 <li><p>Random numbers can be obtained by calling the <strong>random</strong> function. These are pseudo-random numbers generated with an initial seed internally of 0xFFFFFFFF. Thus they will be the same every time the processor is reset. You can change the seed by using <strong>mem</strong> to change the current value in memory. A possible way of seeding the numbers in an unpredictable way (eg. for games) is to use an internal value in memory which increments every time the code is waiting for a keypress from the user. Since the time between keypresses will be unpredictable (up to a point) the random numbers should look random enough for casual applications. The numbers returned will be in the range -8388608 to 8388607. You can reduce that to (say) a number from 1 to 10 by doing this:</p>
 <pre><code>writeln (random mod 10 + 1);</code></pre></li>
-<li><p>You can obtain the address of a variable by using <strong>address</strong> ( <em>variable</em> ). This could be used to pass the address of a variable to a function, which could then use <strong>mem</strong> to change that variable, thus effectively passing a pointer to a function rather than a value.</p></li>
+<li><p>You can reseed the random number generator by calling <strong>randomseed</strong> with some number as an argument.</p></li>
+<li><p>You can get the typing latency (a number which is incremented while waiting for keyboard input) by calling <strong>latency</strong>.</p></li>
+<li><p>Thus you could reseed the random number generator with a fairly unpredictable number like this:</p>
+<pre><code>randomseed (latency);</code></pre></li>
+<li><p>You can obtain the address of a variable by using <strong>address</strong> ( <em>variable</em> ). This could be used to pass the address of a variable to a function, which could then use <strong>mem</strong> to change that variable, thus effectively passing a pointer to a function rather than a value. Note that arrays grow downwards in memory, not upwards.</p></li>
 <li><p>Comments are between braces, or bracket-asterisk, see examples below. Comments may not be nested. The two different sorts of comment symbols are treated interchangeably, so you could conceivably start with one and end with another, see below.</p>
 <pre class="pas"><code> { my comment }
  (* my comment *)
@@ -159,11 +163,7 @@ foo := memc [$5678];</code></pre>
 <li><p>Identifier names can be any length (within reason), must start with a letter, and after that be letters, numbers or the underscore character. All characters of the name are significant.</p></li>
 <li><p>Arrays start at index 0.</p></li>
 <li><p>You can use <strong>assert</strong> to do a runtime assertion (unlike the assembler which does a compile-time assertion). This can be used to “bail out” if some variable has an unexpected value, eg.</p>
-<pre><code>assert (2 + 2 = 4);</code></pre></li>
-<li><p>You can reseed the random number generator by calling <strong>randomseed</strong> with some number as an argument.</p></li>
-<li><p>You can get the typing latency (a number which is incremented while waiting for keyboard input) by calling <strong>latency</strong>.</p></li>
-<li><p>Thus you could reseed the random number generator with a fairly unpredictable number like this:</p>
-<pre><code>randomseed (latency);</code></pre></li>
+<pre><code>assert (2 + 2 &lt;&gt; 4);</code></pre></li>
 </ul>
 <hr />
 <h3 id="reading">Reading and writing to the terminal</h3>
@@ -192,7 +192,7 @@ if i = $800000 then
 <p>A line of input is accepted from the user, which is placed into the array, up to the array maximum length. The line will be terminated by a newline (hex $0a, decimal 10).</p></li>
 </ul>
 <p>Multiple variables can be read into (eg. READ (a, b, c)) however each one is treated exactly as if they appeared in separate READ statements, and thus to read three numbers (for example) you would have to enter them on three lines. An alternative would be to read into a CHAR array, and parse multiple numbers yourself.</p>
-<p>To read without blocking use GETKEY which returns the current key as a number (eg. 65 for the letter ‘A’) or zero if no key is pressed. GETKEY clears the “read” key, so if you need to check if a key is pressed and also find out what key that is, you would need to save it, for example:</p>
+<p>To read without blocking use GETKEY which returns the current key as a number (eg. 65 for the letter ‘A’) or zero if no key is pressed. GETKEY marks the character as read, so if you need to check if a key is pressed and also find out what key that is, you would need to save it in a variable, for example:</p>
 <pre><code>var myKey : char;
 begin
   write (&quot;Press a key ...&quot;);
@@ -237,6 +237,8 @@ end .</code></pre>
 end .</code></pre></li>
 </ul>
 <p>WRITE and WRITELN can take any number of parameters, these are just written one after the other without intervening spaces.</p>
+<h4 id="lcdwrite">LCDWRITE</h4>
+<p>To write the the LCD display use LCDWRITE with the same arguments as WRITE (described above).</p>
 <hr />
 <h3 id="machine_code">Calling machine code</h3>
 <p>You can call machine code (eg. that you produced with the assembler) by using <strong>call</strong>.</p>
@@ -277,7 +279,7 @@ foo := digitalRead (3);  { read PA3 }</code></pre>
 <ul>
 <li><p>Procedures and functions must be declared at the <em>start</em> of a block, not in the middle.</p></li>
 <li><p>The order is important. CONST first, then VAR, then procedure/function declarations, then BEGIN. eg.</p>
-<pre class="pas"><code>const LIMIT = 10;                { &lt;-- this is the start of a block: CONST before VAR }
+<pre><code>const LIMIT = 10;                { &lt;-- this is the start of a block: CONST before VAR }
 var k    : integer;              { we declare variables and constants here - BEFORE &quot;begin&quot; }
     line : array [100] of char;  { array of 101 items }
 

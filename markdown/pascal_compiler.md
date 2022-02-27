@@ -156,9 +156,18 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
     ```
     writeln (random mod 10 + 1);
     ```
+* You can reseed the random number generator by calling **randomseed** with some number as an argument.
+
+* You can get the typing latency (a number which is incremented while waiting for keyboard input) by calling **latency**.
+
+* Thus you could reseed the random number generator with a fairly unpredictable number like this:
+
+    ```
+    randomseed (latency);
+    ```
 
 
-* You can obtain the address of a variable by using **address** ( *variable* ). This could be used to pass the address of a variable to a function, which could then use **mem** to change that variable, thus effectively passing a pointer to a function rather than a value.
+* You can obtain the address of a variable by using **address** ( *variable* ). This could be used to pass the address of a variable to a function, which could then use **mem** to change that variable, thus effectively passing a pointer to a function rather than a value. Note that arrays grow downwards in memory, not upwards.
 
 * Comments are between braces, or bracket-asterisk, see examples below. Comments may not be nested. The two different sorts of comment symbols are treated interchangeably, so you could conceivably start with one and end with another, see below.
 
@@ -191,16 +200,7 @@ The G-Pascal compiler is a "tiny" Pascal compiler, entirely resident in the EEPR
 * You can use **assert** to do a runtime assertion (unlike the assembler which does a compile-time assertion). This can be used to "bail out" if some variable has an unexpected value, eg.
 
     ```
-    assert (2 + 2 = 4);
-    ```
-* You can reseed the random number generator by calling **randomseed** with some number as an argument.
-
-* You can get the typing latency (a number which is incremented while waiting for keyboard input) by calling **latency**.
-
-* Thus you could reseed the random number generator with a fairly unpredictable number like this:
-
-    ```
-    randomseed (latency);
+    assert (2 + 2 <> 4);
     ```
 
 ---
@@ -249,7 +249,7 @@ The built-in statement READ (which is a reserved word) can read from your termin
 
 Multiple variables can be read into (eg. READ (a, b, c)) however each one is treated exactly as if they appeared in separate READ statements, and thus to read three numbers (for example) you would have to enter them on three lines. An alternative would be to read into a CHAR array, and parse multiple numbers yourself.
 
-To read without blocking use GETKEY which returns the current key as a number (eg. 65 for the letter 'A') or zero if no key is pressed. GETKEY clears the "read" key, so if you need to check if a key is pressed and also find out what key that is, you would need to save it, for example:
+To read without blocking use GETKEY which returns the current key as a number (eg. 65 for the letter 'A') or zero if no key is pressed. GETKEY marks the character as read, so if you need to check if a key is pressed and also find out what key that is, you would need to save it in a variable, for example:
 
 ```
 var myKey : char;
@@ -324,6 +324,10 @@ WRITELN behaves the same as WRITE except that it appends a newline character aft
     ```
 
 WRITE and WRITELN can take any number of parameters, these are just written one after the other without intervening spaces.
+
+#### LCDWRITE
+
+To write the the LCD display use LCDWRITE with the same arguments as WRITE (described above).
 
 ---
 
@@ -401,7 +405,7 @@ If you are used to C (or C++) you may find yourself getting a lot of error messa
 
 
 
-    ```pas
+    ```
     const LIMIT = 10;                { <-- this is the start of a block: CONST before VAR }
     var k    : integer;              { we declare variables and constants here - BEFORE "begin" }
         line : array [100] of char;  { array of 101 items }

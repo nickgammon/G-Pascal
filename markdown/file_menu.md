@@ -22,7 +22,7 @@ Replace     line_number_range /target/replacement/flags
 
 Help
 INfo
-Memory first_address last_address
+Memory      first_address last_address
 Compile/Syntax/Assemble
 RUn/DEBug/Trace
 RECover
@@ -129,9 +129,12 @@ If you have loaded a program, and the CRC fails, try compiling or assembling it.
 
 If you cannot resolve the difference try loading or saving the same file again. Also try removing trailing spaces which are hard to spot in the source, and may make the versions on your PC and Ben's Board different. The source in G-Pascal always has a trailing newline at the end of every line (including the last) so make sure your file on disk ends with a newline.
 
+The editor discards newlines when accepting input. You should make sure that your file on disk ends with newlines only (0x0A) and not carriage-return (0x0D) as well. Modern editors have methods of converting files to newline-only endings. Personally I use [Geany](https://www.geany.org/).
+
 ---
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [Text editor](editor.htm) </div>
 
 
 ---
@@ -143,7 +146,7 @@ If you cannot resolve the difference try loading or saving the same file again. 
 * [Jacksum](https://jacksum.net/en/index.html)
 * [CRC16-CCITT](http://srecord.sourceforge.net/crc16-ccitt.html)
 * [Error Detection and Correction](https://nptel.ac.in/content/storage2/courses/106105080/pdf/M3L2.pdf) (PDF)
-
+* [Geany text editor](https://www.geany.org/)
 
 ---
 

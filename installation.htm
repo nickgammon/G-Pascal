@@ -38,10 +38,27 @@
 <pre><code>vasm6502_oldstyle gpascal.asm -wdc02 -esc -Fbin -o gpascal.bin -dotdir -L gpascal.list</code></pre>
 <p>Or, just use the gpascal.bin file already in that directory.</p>
 <hr />
+<h3 id="installing-vasm">Installing Vasm</h3>
+<p>(Instructions for Linux, should work the same on the Mac, perhaps install Cygwin or MS-VSC++ for Windows)</p>
+<ol type="1">
+<li><p>Download vasm from <a href="http://sun.hasenbraten.de/vasm/release/vasm.tar.gz" class="uri">http://sun.hasenbraten.de/vasm/release/vasm.tar.gz</a></p></li>
+<li><p>Unzip the archive, eg.</p>
+<pre><code>tar xzf vasm.tar.gz</code></pre></li>
+<li><p>Change to the vasm directory:</p>
+<pre><code>cd vasm</code></pre></li>
+<li><p>Build the source:</p>
+<pre><code>make CPU=6502 SYNTAX=oldstyle</code></pre>
+<p>If you are not using Linux see <a href="http://sun.hasenbraten.de/vasm/index.php?view=compile">Vasm Compilation Instructions</a>. You may need to replace the word “make” with “make -f Makefile.Cygwin” or “make -f Makefile.Win32”.</p></li>
+<li><p>Copy the executable somewhere handy if you wish. For example:</p>
+<pre><code>sudo cp vasm6502_oldstyle /usr/local/bin/
+sudo chmod o+rx /usr/local/bin/vasm6502_oldstyle</code></pre></li>
+</ol>
+<hr />
 <h2 id="burn-eeprom">Burn EEPROM</h2>
 <p>Install gpascal.bin onto your EEPROM as follows:</p>
 <pre><code>minipro -p AT28C256 -w gpascal.bin</code></pre>
 <p>Minipro is available from <a href="https://gitlab.com/DavidGriffith/minipro">https://gitlab.com/DavidGriffith/minipro</a>.</p>
+<p>Alternatively use your own programmer and programming utility and follow the instructions you used to put the code onto the EEPROM when building Ben’s Board.</p>
 <hr />
 <div class="quick_link">
 <a href="index.htm">Back to main G-Pascal page</a>
