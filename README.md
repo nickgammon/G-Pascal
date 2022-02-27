@@ -1,6 +1,6 @@
 # G-Pascal and Assembler for Ben Eater's 6502 breadboard PC
 
-## On-board assembler, tiny Pascal, and text editor for Ben Eater's board
+## On-board assembler, tiny Pascal, and text editor for [Ben Eater's board](https://eater.net/6502)
 
 Full documentation can be viewed at <https://gammon.com.au/G-Pascal>
 
