@@ -2362,11 +2362,11 @@ assembler_library_functions_table:
   makeAsmLibraryFunction "value2",               VALUE2
   makeAsmLibraryFunction "typing_latency",       typing_latency
   makeAsmLibraryFunction "tknjmp",               TKNJMP
-  makeAsmLibraryFunction "start",                START
+  makeAsmLibraryFunction "reset",                START
   makeAsmLibraryFunction "srce",                 SRCE
   makeAsmLibraryFunction "serial_print_message", serial_print_message
   makeAsmLibraryFunction "serial_available",     serial_available
-  makeAsmLibraryFunction "restart",              RESTART
+  makeAsmLibraryFunction "nmi",                  RESTART
   makeAsmLibraryFunction "remain",               REMAIN
   makeAsmLibraryFunction "random",               random
   makeAsmLibraryFunction "putsp",                PUTSP

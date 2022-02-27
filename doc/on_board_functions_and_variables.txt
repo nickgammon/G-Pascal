@@ -5,8 +5,8 @@
 ;  More documentation in the EEPROM source code.
 ;
 
-  start                 ; where RESET takes us - a cold start (does not return)
-  restart               ; where NMI takes us - a warm start  (does not return)
+  reset                 ; where RESET takes us - a cold start (does not return)
+  nmi                   ; where NMI takes us - a warm start  (does not return)
   hardware_init         ; initialises the VIA (65C22) and the LCD (returns)
 ;
 ;  Serial port functions

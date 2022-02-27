@@ -1165,7 +1165,7 @@ editor_insert_no_line_number:
   inc  current_line
   bne  editor_insert_not_newline
   inc  current_line+1
-editor_insert_not_newline
+editor_insert_not_newline:
   sta  (PCODE),y
   tax                ; for detecting final newline
   inc  PCODE
@@ -1203,6 +1203,12 @@ editor_insert_backspace_not_at_start:
   sta PCODE+1
   lda (PCODE),y
   tax                      ; this is now the last character we inserted
+;
+;  however we don't want them backspacing over a previous line, so if we detect a newline
+;  just go back up and put it back (and increment PCODE back to where it was)
+;
+  cmp #NL
+  beq editor_insert_not_newline
   bra editor_insert_loop
 
 editor_insert_done:
