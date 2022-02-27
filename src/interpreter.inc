@@ -18,62 +18,62 @@
 
 ;                 Code            Description                         Arguments
 ;                 ----            -----------------------------       -----------------------
-PCODE_LIT     = 	$00 ; Dec:  0 - Load constant                     - 3-byte literal (number)
+PCODE_LIT     =   $00 ; Dec:  0 - Load constant                     - 3-byte literal (number)
 PCODE_STACK   =   $01 ; Dec:  1 - Alter runtime stack to address    - 2-byte stack address
-PCODE_NEG     = 	$02 ; Dec:  2 - Unary minus 0 - (sp)              - none
+PCODE_NEG     =   $02 ; Dec:  2 - Unary minus 0 - (sp)              - none
 PCODE_LIB_CALL =  $03 ; Dec:  3 - Call library function/procedure   - absolute address
-PCODE_ADD     = 	$04 ; Dec:  4 - Add (sp) to (sp - 1)              - none
-PCODE_SUB     = 	$06 ; Dec:  6 - Subtract (sp) from (sp - 1)       - none
-PCODE_MUL     = 	$08 ; Dec:  8 - Multiply (sp) * (sp - 1)          - none
-PCODE_DIV     = 	$0A ; Dec: 10 - Divide (sp - 1) / (sp)            - none
-PCODE_MOD     = 	$0B ; Dec: 11 - Modulus (sp - 1) MOD (sp)         - none
-PCODE_ADRNN   = 	$0C ; Dec: 12 - Address of integer                - level, displ
-PCODE_ADRNC   = 	$0D ; Dec: 13 - Address of character              - level, displ
-PCODE_ADRAN   = 	$0E ; Dec: 14 - Address of integer array          - level, displ
-PCODE_ADRAC   = 	$0F ; Dec: 15 - Address of character array        - level, displ
-PCODE_EQL     = 	$10 ; Dec: 16 - Test (sp - 1) == (sp)             - none
-PCODE_FINISHD = 	$11 ; Dec: 17 - Stop run (end program)            - none
-PCODE_NEQ     = 	$12 ; Dec: 18 - Test (sp - 1) != (sp)             - none
-PCODE_LSS     = 	$14 ; Dec: 20 - Test (sp - 1) < (sp)              - none
-PCODE_GEQ     = 	$16 ; Dec: 22 - Test (sp - 1) >= (sp)             - none
-PCODE_GTR     = 	$18 ; Dec: 24 - Test (sp - 1) > (sp)              - none
-PCODE_LEQ     = 	$19 ; Dec: 25 - Test (sp - 1) <= (sp)             - none
-PCODE_ORR     = 	$1A ; Dec: 26 - OR  (sp - 1) | (sp)               - none
-PCODE_AND     = 	$1B ; Dec: 27 - AND (sp - 1) & (sp)               - none
-PCODE_INP     = 	$1C ; Dec: 28 - Input number                      - none
-PCODE_INPC    = 	$1D ; Dec: 29 - Input character                   - none
-PCODE_OUT     = 	$1E ; Dec: 30 - Output number                     - none
-PCODE_OUTC    = 	$1F ; Dec: 31 - Output character                  - none
-PCODE_EOR     = 	$20 ; Dec: 32 - Not (sp) (logical negate)         - none
-PCODE_OUH     = 	$21 ; Dec: 33 - Output hex number                 - none
-PCODE_SHL     = 	$22 ; Dec: 34 - Shift left (sp) bits              - none
-PCODE_OUS     = 	$23 ; Dec: 35 - Output string                     - length, string
-PCODE_SHR     = 	$24 ; Dec: 36 - Shift right (sp) bits             - none
-PCODE_INS     = 	$25 ; Dec: 37 - Input string into array           - max, level, displ
-PCODE_INC     = 	$26 ; Dec: 38 - Increment (sp) by 1               - none
-PCODE_CLL     = 	$27 ; Dec: 39 - Relative procedure/function call  - level, relative address
-PCODE_DEC     = 	$28 ; Dec: 40 - Decrement (sp) by 1               - none
-PCODE_RTN     = 	$29 ; Dec: 41 - Procedure/function return         - none
-PCODE_MOV     = 	$2A ; Dec: 42 - Copy (sp) to (sp + 1)             - none
-PCODE_CLA     = 	$2B ; Dec: 43 - Call absolute address             - none
-PCODE_LOD     = 	$2C ; Dec: 44 - Load integer onto stack           - level, displ
-PCODE_LODC    = 	$2D ; Dec: 45 - Load character onto stack         - level, displ
-PCODE_LDA     = 	$2E ; Dec: 46 - Load absolute address integer     - none
-PCODE_LDAC    = 	$2F ; Dec: 47 - Load absolute address character   - none
-PCODE_LDI     = 	$30 ; Dec: 48 - Load integer indexed              - level, displ
-PCODE_LDIC    = 	$31 ; Dec: 49 - Load character indexed            - level, displ
-PCODE_STO     = 	$32 ; Dec: 50 - Store integer                     - level, displ
-PCODE_STOC    = 	$33 ; Dec: 51 - Store character                   - level, displ
-PCODE_STA     = 	$34 ; Dec: 52 - Store integer absolute address    - none
-PCODE_STAC    = 	$35 ; Dec: 53 - Store character absolute address  - none
-PCODE_STI     = 	$36 ; Dec: 54 - Store integer indexed             - level, displ
-PCODE_STIC    = 	$37 ; Dec: 55 - Store character indexed           - level, displ
-PCODE_ABSCLL  = 	$38 ; Dec: 56 - Absolute procedure/function call  - level, absolute address
-PCODE_XOR     = 	$3A ; Dec: 58 - XOR (sp - 1) ^ (sp)               - none
-PCODE_INT     = 	$3B ; Dec: 59 - Increment stack pointer           - increment
-PCODE_JMP     = 	$3C ; Dec: 60 - Jump unconditionally              - relative address
-PCODE_JMZ     = 	$3D ; Dec: 61 - Jump if (sp) zero                 - relative address
-PCODE_JM1     = 	$3E ; Dec: 62 - Jump if (sp) not zero             - relative address
+PCODE_ADD     =   $04 ; Dec:  4 - Add (sp) to (sp - 1)              - none
+PCODE_SUB     =   $06 ; Dec:  6 - Subtract (sp) from (sp - 1)       - none
+PCODE_MUL     =   $08 ; Dec:  8 - Multiply (sp) * (sp - 1)          - none
+PCODE_DIV     =   $0A ; Dec: 10 - Divide (sp - 1) / (sp)            - none
+PCODE_MOD     =   $0B ; Dec: 11 - Modulus (sp - 1) MOD (sp)         - none
+PCODE_ADRNN   =   $0C ; Dec: 12 - Address of integer                - level, displ
+PCODE_ADRNC   =   $0D ; Dec: 13 - Address of character              - level, displ
+PCODE_ADRAN   =   $0E ; Dec: 14 - Address of integer array          - level, displ
+PCODE_ADRAC   =   $0F ; Dec: 15 - Address of character array        - level, displ
+PCODE_EQL     =   $10 ; Dec: 16 - Test (sp - 1) == (sp)             - none
+PCODE_FINISHD =   $11 ; Dec: 17 - Stop run (end program)            - none
+PCODE_NEQ     =   $12 ; Dec: 18 - Test (sp - 1) != (sp)             - none
+PCODE_LSS     =   $14 ; Dec: 20 - Test (sp - 1) < (sp)              - none
+PCODE_GEQ     =   $16 ; Dec: 22 - Test (sp - 1) >= (sp)             - none
+PCODE_GTR     =   $18 ; Dec: 24 - Test (sp - 1) > (sp)              - none
+PCODE_LEQ     =   $19 ; Dec: 25 - Test (sp - 1) <= (sp)             - none
+PCODE_ORR     =   $1A ; Dec: 26 - OR  (sp - 1) | (sp)               - none
+PCODE_AND     =   $1B ; Dec: 27 - AND (sp - 1) & (sp)               - none
+PCODE_INP     =   $1C ; Dec: 28 - Input number                      - none
+PCODE_INPC    =   $1D ; Dec: 29 - Input character                   - none
+PCODE_OUT     =   $1E ; Dec: 30 - Output number                     - none
+PCODE_OUTC    =   $1F ; Dec: 31 - Output character                  - none
+PCODE_EOR     =   $20 ; Dec: 32 - Not (sp) (logical negate)         - none
+PCODE_OUH     =   $21 ; Dec: 33 - Output hex number                 - none
+PCODE_SHL     =   $22 ; Dec: 34 - Shift left (sp) bits              - none
+PCODE_OUS     =   $23 ; Dec: 35 - Output string                     - length, string
+PCODE_SHR     =   $24 ; Dec: 36 - Shift right (sp) bits             - none
+PCODE_INS     =   $25 ; Dec: 37 - Input string into array           - max, level, displ
+PCODE_INC     =   $26 ; Dec: 38 - Increment (sp) by 1               - none
+PCODE_CLL     =   $27 ; Dec: 39 - Relative procedure/function call  - level, relative address
+PCODE_DEC     =   $28 ; Dec: 40 - Decrement (sp) by 1               - none
+PCODE_RTN     =   $29 ; Dec: 41 - Procedure/function return         - none
+PCODE_MOV     =   $2A ; Dec: 42 - Copy (sp) to (sp + 1)             - none
+PCODE_CLA     =   $2B ; Dec: 43 - Call absolute address             - none
+PCODE_LOD     =   $2C ; Dec: 44 - Load integer onto stack           - level, displ
+PCODE_LODC    =   $2D ; Dec: 45 - Load character onto stack         - level, displ
+PCODE_LDA     =   $2E ; Dec: 46 - Load absolute address integer     - none
+PCODE_LDAC    =   $2F ; Dec: 47 - Load absolute address character   - none
+PCODE_LDI     =   $30 ; Dec: 48 - Load integer indexed              - level, displ
+PCODE_LDIC    =   $31 ; Dec: 49 - Load character indexed            - level, displ
+PCODE_STO     =   $32 ; Dec: 50 - Store integer                     - level, displ
+PCODE_STOC    =   $33 ; Dec: 51 - Store character                   - level, displ
+PCODE_STA     =   $34 ; Dec: 52 - Store integer absolute address    - none
+PCODE_STAC    =   $35 ; Dec: 53 - Store character absolute address  - none
+PCODE_STI     =   $36 ; Dec: 54 - Store integer indexed             - level, displ
+PCODE_STIC    =   $37 ; Dec: 55 - Store character indexed           - level, displ
+PCODE_ABSCLL  =   $38 ; Dec: 56 - Absolute procedure/function call  - level, absolute address
+PCODE_XOR     =   $3A ; Dec: 58 - XOR (sp - 1) ^ (sp)               - none
+PCODE_INT     =   $3B ; Dec: 59 - Increment stack pointer           - increment
+PCODE_JMP     =   $3C ; Dec: 60 - Jump unconditionally              - relative address
+PCODE_JMZ     =   $3D ; Dec: 61 - Jump if (sp) zero                 - relative address
+PCODE_JM1     =   $3E ; Dec: 62 - Jump if (sp) not zero             - relative address
 PCODE_OUTCR   =   $40 ; Dec: 64 - Output a carriage-return          - none
 PCODE_LCD_WRITE_NUM = $42 ; Dec: 66 - Write number to LCD           - none
 PCODE_LCD_WRITE_STR = $43 ; Dec: 67 - Write string to LCD           - none
@@ -92,71 +92,71 @@ PCODE_LAST    =   PCODE_LCD_WRITE_CHR  ; PUT THIS LAST! (error check)           
 ;  Y is zero when starting to execute these routines
 ;
 execution_address_table  =  *
-  word  EX_LIT             ; $00 = LIT     	Load constant
+  word  EX_LIT             ; $00 = LIT      Load constant
   word  EX_NEW_STACK       ; $01 =          Change stack to addr
-  word  EX_NEG             ; $02 = NEG     	Unary minus: 0 - (sp)
+  word  EX_NEG             ; $02 = NEG      Unary minus: 0 - (sp)
   word  EX_LIB_CALL        ; $03 = LIB_CALL Library function call
-  word  EX_ADD             ; $04 = ADD     	Add (sp) to (sp - 1)
+  word  EX_ADD             ; $04 = ADD      Add (sp) to (sp - 1)
   word  EX_INVINS          ; $05 =          NOT IMPLEMENTED
-  word  EX_SUB             ; $06 = SUB     	Subtract (sp) from (sp - 1)
+  word  EX_SUB             ; $06 = SUB      Subtract (sp) from (sp - 1)
   word  EX_INVINS          ; $07 =          NOT IMPLEMENTED
-  word  EX_MUL             ; $08 = MUL     	Multiply (sp) * (sp - 1)
+  word  EX_MUL             ; $08 = MUL      Multiply (sp) * (sp - 1)
   word  EX_INVINS          ; $09 =          NOT IMPLEMENTED
-  word  EX_DIV             ; $0A = DIV     	Divide (sp - 1) / (sp)
-  word  EX_MOD             ; $0B = MOD     	Modulus (sp - 1) MOD (sp)
-  word  EX_ADRNN           ; $0C = ADRNN   	Address of integer
-  word  EX_ADRNC           ; $0D = ADRNC   	Address of character
-  word  EX_ADRAN           ; $0E = ADRAN   	Address of integer array
-  word  EX_ADRAC           ; $0F = ADRAC   	Address of character array
-  word  EX_EQL             ; $10 = EQL     	Test (sp - 1) == (sp)
-  word  EX_FINISHD         ; $11 = FINISHD 	Stop run (end program)
-  word  EX_NEQ             ; $12 = NEQ     	Test (sp - 1) != (sp)
+  word  EX_DIV             ; $0A = DIV      Divide (sp - 1) / (sp)
+  word  EX_MOD             ; $0B = MOD      Modulus (sp - 1) MOD (sp)
+  word  EX_ADRNN           ; $0C = ADRNN    Address of integer
+  word  EX_ADRNC           ; $0D = ADRNC    Address of character
+  word  EX_ADRAN           ; $0E = ADRAN    Address of integer array
+  word  EX_ADRAC           ; $0F = ADRAC    Address of character array
+  word  EX_EQL             ; $10 = EQL      Test (sp - 1) == (sp)
+  word  EX_FINISHD         ; $11 = FINISHD  Stop run (end program)
+  word  EX_NEQ             ; $12 = NEQ      Test (sp - 1) != (sp)
   word  EX_INVINS          ; $13 =          NOT IMPLEMENTED
-  word  EX_LSS             ; $14 = LSS     	Test (sp - 1) < (sp)
+  word  EX_LSS             ; $14 = LSS      Test (sp - 1) < (sp)
   word  EX_INVINS          ; $15 =          NOT IMPLEMENTED
-  word  EX_GEQ             ; $16 = GEQ     	Test (sp - 1) >= (sp)
+  word  EX_GEQ             ; $16 = GEQ      Test (sp - 1) >= (sp)
   word  EX_INVINS          ; $17 =          NOT IMPLEMENTED
-  word  EX_GTR             ; $18 = GTR     	Test (sp - 1) > (sp)
-  word  EX_LEQ             ; $19 = LEQ     	Test (sp - 1) <= (sp)
-  word  EX_ORR             ; $1A = ORR     	OR  (sp - 1) | (sp)
-  word  EX_AND             ; $1B = AND     	AND (sp - 1) & (sp)
-  word  EX_INP             ; $1C = INP     	Input number
-  word  EX_INPC            ; $1D = INPC    	Input character
-  word  EX_OUT             ; $1E = OUT     	Output number
-  word  EX_OUTC            ; $1F = OUTC    	Output character
-  word  EX_EOR             ; $20 = EOR     	Not (sp) (logical negate)
-  word  EX_OUH             ; $21 = OUH     	Output hex number
-  word  EX_SHL             ; $22 = SHL     	Shift left (sp) bits
-  word  EX_OUS             ; $23 = OUS     	Output string
-  word  EX_SHR             ; $24 = SHR     	Shift right (sp) bits
-  word  EX_INS             ; $25 = INS     	Input string into array
-  word  EX_INC             ; $26 = INC     	Increment (sp) by 1
-  word  EX_CLL             ; $27 = CLL     	Relative procedure/function call
-  word  EX_DEC             ; $28 = DEC     	Decrement (sp) by 1
-  word  EX_RTN             ; $29 = RTN     	Procedure/function return
-  word  EX_MOV             ; $2A = MOV     	Copy (sp) to (sp + 1)
-  word  EX_CLA             ; $2B = CLA     	Call absolute address
-  word  EX_LOD             ; $2C = LOD     	Load integer onto stack
-  word  EX_LODC            ; $2D = LODC    	Load character onto stack
-  word  EX_LDA             ; $2E = LDA     	Load absolute address integer
-  word  EX_LDAC            ; $2F = LDAC    	Load absolute address character
-  word  EX_LDI             ; $30 = LDI     	Load integer indexed
-  word  EX_LDIC            ; $31 = LDIC    	Load character indexed
-  word  EX_STO             ; $32 = STO     	Store integer
-  word  EX_STOC            ; $33 = STOC    	Store character
-  word  EX_STA             ; $34 = STA     	Store integer absolute address
-  word  EX_STAC            ; $35 = STAC    	Store character absolute address
-  word  EX_STI             ; $36 = STI     	Store integer indexed
-  word  EX_STIC            ; $37 = STIC    	Store character indexed
-  word  EX_ABSCLL          ; $38 = ABSCLL  	Absolute procedure/function call
+  word  EX_GTR             ; $18 = GTR      Test (sp - 1) > (sp)
+  word  EX_LEQ             ; $19 = LEQ      Test (sp - 1) <= (sp)
+  word  EX_ORR             ; $1A = ORR      OR  (sp - 1) | (sp)
+  word  EX_AND             ; $1B = AND      AND (sp - 1) & (sp)
+  word  EX_INP             ; $1C = INP      Input number
+  word  EX_INPC            ; $1D = INPC     Input character
+  word  EX_OUT             ; $1E = OUT      Output number
+  word  EX_OUTC            ; $1F = OUTC     Output character
+  word  EX_EOR             ; $20 = EOR      Not (sp) (logical negate)
+  word  EX_OUH             ; $21 = OUH      Output hex number
+  word  EX_SHL             ; $22 = SHL      Shift left (sp) bits
+  word  EX_OUS             ; $23 = OUS      Output string
+  word  EX_SHR             ; $24 = SHR      Shift right (sp) bits
+  word  EX_INS             ; $25 = INS      Input string into array
+  word  EX_INC             ; $26 = INC      Increment (sp) by 1
+  word  EX_CLL             ; $27 = CLL      Relative procedure/function call
+  word  EX_DEC             ; $28 = DEC      Decrement (sp) by 1
+  word  EX_RTN             ; $29 = RTN      Procedure/function return
+  word  EX_MOV             ; $2A = MOV      Copy (sp) to (sp + 1)
+  word  EX_CLA             ; $2B = CLA      Call absolute address
+  word  EX_LOD             ; $2C = LOD      Load integer onto stack
+  word  EX_LODC            ; $2D = LODC     Load character onto stack
+  word  EX_LDA             ; $2E = LDA      Load absolute address integer
+  word  EX_LDAC            ; $2F = LDAC     Load absolute address character
+  word  EX_LDI             ; $30 = LDI      Load integer indexed
+  word  EX_LDIC            ; $31 = LDIC     Load character indexed
+  word  EX_STO             ; $32 = STO      Store integer
+  word  EX_STOC            ; $33 = STOC     Store character
+  word  EX_STA             ; $34 = STA      Store integer absolute address
+  word  EX_STAC            ; $35 = STAC     Store character absolute address
+  word  EX_STI             ; $36 = STI      Store integer indexed
+  word  EX_STIC            ; $37 = STIC     Store character indexed
+  word  EX_ABSCLL          ; $38 = ABSCLL   Absolute procedure/function call
   word  EX_INVINS          ; $39 =          NOT IMPLEMENTED
-  word  EX_XOR             ; $3A = XOR     	XOR (sp - 1) ^ (sp)
-  word  EX_INT             ; $3B = INT     	Increment stack pointer
-  word  EX_JMP             ; $3C = JMP     	Jump unconditionally
-  word  EX_JMZ             ; $3D = JMZ     	Jump if (sp) zero
-  word  EX_JM1             ; $3E = JM1     	Jump if (sp) not zero
+  word  EX_XOR             ; $3A = XOR      XOR (sp - 1) ^ (sp)
+  word  EX_INT             ; $3B = INT      Increment stack pointer
+  word  EX_JMP             ; $3C = JMP      Jump unconditionally
+  word  EX_JMZ             ; $3D = JMZ      Jump if (sp) zero
+  word  EX_JM1             ; $3E = JM1      Jump if (sp) not zero
   word  EX_INVINS          ; $3F =          NOT IMPLEMENTED
-  word  EX_OUTCR           ; $40 = OUTCR   	Output a carriage-return
+  word  EX_OUTCR           ; $40 = OUTCR    Output a carriage-return
   word  EX_INVINS          ; $41 =          NOT IMPLEMENTED
   word  EX_LCD_WRITE_NUM   ; $42 = LCD_WRITE_NUM  Write number to LCD
   word  EX_LCD_WRITE_STR   ; $43 = LCD_WRITE_STR  Write string to LCD
@@ -1060,7 +1060,7 @@ EX_STAC:
   ldy  #0
   beq  EX_STA5
 ;
-;   	Store character indexed
+;     Store character indexed
 ;
 EX_STIC:
   jsr  PULTOP
@@ -1070,7 +1070,7 @@ EX_STIC:
   ldy  #2
   bne  EX_STO5
 ;
-;   	Store integer indexed
+;     Store integer indexed
 ;
 EX_STI :
   jsr  PULTOP

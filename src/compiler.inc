@@ -393,7 +393,7 @@ SIM1     PHA
          PLA
          CMP  #'-'
          BNE  SIM3
-         LDA  #PCODE_NEG      ; NEG     	Negate (sp)
+         LDA  #PCODE_NEG      ; NEG       Negate (sp)
          JSR  GENNOP     ; NEGATE
 SIM3     LDA  token_type
          CMP  #'+'
@@ -415,7 +415,7 @@ SIM4     PHA
          BEQ  SIM6
          CMP  #TOKEN_XOR          ; XOR
          BEQ  SIM8
-         LDA  #PCODE_ORR          ; ORR     	OR  (sp - 1) | (sp)
+         LDA  #PCODE_ORR          ; ORR       OR  (sp - 1) | (sp)
 SIM7     JSR  GENNOP
          JMP  SIM3
 SIM5     LDA  #PCODE_SUB          ; MINUS
@@ -688,18 +688,18 @@ EXPTB3   ASC    '='
          word   EXPR7
          DFB  0
 ;
-EXPR2    LDA  #PCODE_EQL       ; EQL     	Test (sp - 1) == (sp)
+EXPR2    LDA  #PCODE_EQL       ; EQL      Test (sp - 1) == (sp)
 EXPR8    JSR  GENNOP
          RTS
-EXPR3    LDA  #PCODE_NEQ       ; NEQ     	Test (sp - 1) != (sp)
+EXPR3    LDA  #PCODE_NEQ       ; NEQ      Test (sp - 1) != (sp)
          BNE  EXPR8
-EXPR4    LDA  #PCODE_LSS       ; LSS     	Test (sp - 1) < (sp)
+EXPR4    LDA  #PCODE_LSS       ; LSS      Test (sp - 1) < (sp)
          BNE  EXPR8
-EXPR5    LDA  #PCODE_GEQ       ; GEQ     	Test (sp - 1) >= (sp)
+EXPR5    LDA  #PCODE_GEQ       ; GEQ      Test (sp - 1) >= (sp)
          BNE  EXPR8
-EXPR6    LDA  #PCODE_GTR       ; GTR     	Test (sp - 1) > (sp)
+EXPR6    LDA  #PCODE_GTR       ; GTR      Test (sp - 1) > (sp)
          BNE  EXPR8
-EXPR7    LDA  #PCODE_LEQ       ; LEQ     	Test (sp - 1) <= (sp)
+EXPR7    LDA  #PCODE_LEQ       ; LEQ      Test (sp - 1) <= (sp)
          BNE  EXPR8
 ;
 ; STATEMENT
@@ -843,7 +843,7 @@ WRIT1    =  *          ; here if not string
          CMP  #TOKEN_HEX       ; HEX?
          BEQ  W_HEX      ; yes
          JSR  EXPRES     ; just ordinary number - get it
-         LDA  #PCODE_OUT        ; OUT     	Output number
+         LDA  #PCODE_OUT        ; OUT       Output number
          JSR  GENNOP
 WRIT5    LDA  token_type
          CMP  #','
@@ -853,7 +853,7 @@ WRIT5    LDA  token_type
 ; here for write (chr(x))
 ;
 W_CHR    =  *
-         LDA  #PCODE_OUTC   ; OUTC    	Output character
+         LDA  #PCODE_OUTC   ; OUTC      Output character
 W_CHR1   =  *
          JSR  WAIT_1     ; process expression in parentheses
          JMP  WRIT5      ; back for next item
@@ -861,7 +861,7 @@ W_CHR1   =  *
 ; here for write (hex(x))
 ;
 W_HEX    =  *
-         LDA  #PCODE_OUH        ; OUH     	Output hex number
+         LDA  #PCODE_OUH        ; OUH       Output hex number
          BNE  W_CHR1
 
 ;
@@ -896,7 +896,7 @@ WRITE_LCD1    =  *            ; here if not string
          CMP  #TOKEN_HEX      ; HEX?
          BEQ  WRITE_LDC_HEX   ; yes
          JSR  EXPRES          ; just ordinary number - get it
-         LDA  #PCODE_LCD_WRITE_NUM        ; OUT     	Output number
+         LDA  #PCODE_LCD_WRITE_NUM        ; OUT       Output number
          JSR  GENNOP
 WRITE_LCD5    LDA  token_type
          CMP  #','
@@ -906,7 +906,7 @@ WRITE_LCD5    LDA  token_type
 ; here for lcdwrite (chr(x))
 ;
 WRITE_LDC_CHR    =  *
-         LDA  #PCODE_LCD_WRITE_CHR   ; OUTC    	Output character
+         LDA  #PCODE_LCD_WRITE_CHR   ; OUTC     Output character
 WRITE_LDC_CHR1   =  *
          JSR  WAIT_1          ; process expression in parentheses
          JMP  WRITE_LCD5      ; back for next item
@@ -914,7 +914,7 @@ WRITE_LDC_CHR1   =  *
 ; here for lcdwrite (hex(x))
 ;
 WRITE_LDC_HEX    =  *
-         LDA  #PCODE_LCD_WRITE_HEX        ; OUH     	Output hex number
+         LDA  #PCODE_LCD_WRITE_HEX        ; OUH       Output hex number
          BNE  WRITE_LDC_CHR1
 
 ;
@@ -1112,7 +1112,7 @@ IF       JSR  GETEXPR
          JSR  CHKTKN
          JSR  pas_get_token
          JSR  PSHPCODE
-         LDA  #PCODE_JMZ     ; JMZ     	Jump if (sp) zero
+         LDA  #PCODE_JMZ     ; JMZ      Jump if (sp) zero
          JSR  GENNJM
          JSR  STMNT
          LDA  token_type
@@ -1157,7 +1157,7 @@ REP1     JSR  pas_get_token
          JSR  GETEXPR
          JSR  PULWRK
          JSR  WRK_OPND
-         LDA  #PCODE_JMZ         ; JMZ     	Jump if (sp) zero
+         LDA  #PCODE_JMZ         ; JMZ      Jump if (sp) zero
          JMP  GENRJMP
 ;
 ; WHILE
@@ -1165,7 +1165,7 @@ REP1     JSR  pas_get_token
 WHILE    JSR  PSHPCODE
          JSR  GETEXPR
          JSR  PSHPCODE
-         LDA  #PCODE_JMZ       ; JMZ     	Jump if (sp) zero
+         LDA  #PCODE_JMZ       ; JMZ      Jump if (sp) zero
          JSR  GENNJM
          LDA  #TOKEN_DO
          LDX  #18             ; ERROR: DO expected
@@ -1176,7 +1176,7 @@ WHILE    JSR  PSHPCODE
          JSR  WRK_WRKD
          JSR  PULWRK
          JSR  WRK_OPND
-         LDA  #PCODE_JMP     ; JMP     	Jump unconditionally
+         LDA  #PCODE_JMP     ; JMP      Jump unconditionally
          JSR  GENRJMP
          JSR  WRKD_WRK
          JMP  FIXAD
@@ -1192,10 +1192,10 @@ CASE     JSR  GETEXPR
 CASE7    LDA  #0
          STA  COUNT2
 CASE2    =  *
-         LDA  #PCODE_MOV  ; make copy of selector:  MOV     	Copy (sp) to (sp + 1)
+         LDA  #PCODE_MOV  ; make copy of selector:  MOV       Copy (sp) to (sp + 1)
          JSR  GENNOP
          JSR  GETEXPR    ; next expression to compare
-         LDA  #PCODE_EQL       ;  EQL     	Test (sp - 1) == (sp)
+         LDA  #PCODE_EQL       ;  EQL       Test (sp - 1) == (sp)
          JSR  GENNOP
          LDA  token_type
          CMP  #':'
@@ -1204,12 +1204,12 @@ CASE2    =  *
          LDX  #5      ; ERROR: , or : expected
          JSR  CHKTKN
          JSR  PSHPCODE
-         LDA  #PCODE_JM1     ; JM1     	Jump if (sp) not zero
+         LDA  #PCODE_JM1     ; JM1      Jump if (sp) not zero
          JSR  GENNJM
          INC  COUNT2
          JMP  CASE2
 CASE1    JSR  PCD_WRKD
-         LDA  #PCODE_JMZ     ; JMZ     	Jump if (sp) zero
+         LDA  #PCODE_JMZ     ; JMZ      Jump if (sp) zero
          JSR  GENNJM
          LDA  COUNT2
          BEQ  CASE3
@@ -1294,7 +1294,7 @@ FOR3     LDA  COUNT1
          PLA
          STA  COUNT1
          JSR  PSHPCODE
-         LDA  #PCODE_MOV     ; MOV     	Copy (sp) to (sp + 1)
+         LDA  #PCODE_MOV     ; MOV      Copy (sp) to (sp + 1)
          JSR  GENNOP
          JSR  GET_LEV
          JSR  GET_OFF
@@ -1302,13 +1302,13 @@ FOR3     LDA  COUNT1
          CLC
          ADC  #PCODE_LOD  ; Load integer onto stack or PCODE_LODC if a char
          JSR  GENADR
-         LDA  #PCODE_GEQ        ; UP (GEQ): GEQ     	Test (sp - 1) >= (sp)
+         LDA  #PCODE_GEQ        ; UP (GEQ): GEQ       Test (sp - 1) >= (sp)
          LDX  COUNT1
          BEQ  FOR4
-         LDA  #PCODE_LEQ        ; DOWN (LEQ): LEQ     	Test (sp - 1) <= (sp)
+         LDA  #PCODE_LEQ        ; DOWN (LEQ): LEQ       Test (sp - 1) <= (sp)
 FOR4     JSR  GENNOP
          JSR  PSHPCODE
-         LDA  #PCODE_JMZ       ;  JMZ     	Jump if (sp) zero
+         LDA  #PCODE_JMZ       ;  JMZ       Jump if (sp) zero
          JSR  GENNJM
          LDA  COUNT1
          PHA
@@ -1326,16 +1326,16 @@ FOR4     JSR  GENNOP
          JSR  GET_OFF
          LDA  DATTYP
          CLC
-         ADC  #PCODE_LOD       ; LOD     	Load integer onto stack
+         ADC  #PCODE_LOD       ; LOD      Load integer onto stack
          JSR  GENADR
          PLA
          STA  COUNT1
-         LDA  #PCODE_INC     ; INC     	Increment (sp) by 1
+         LDA  #PCODE_INC     ; INC      Increment (sp) by 1
          LDX  COUNT1
          BEQ  FOR5
-         LDA  #PCODE_DEC        ; DEC     	Decrement (sp) by 1
+         LDA  #PCODE_DEC        ; DEC       Decrement (sp) by 1
 FOR5     JSR  GENNOP
-         LDA  #PCODE_STO       ; STO     	Store integer
+         LDA  #PCODE_STO       ; STO      Store integer
          CLC
          ADC  DATTYP          ; may become PCODE_STOC if a char
          JSR  GENADR
@@ -1343,7 +1343,7 @@ FOR5     JSR  GENNOP
          JSR  WRK_WRKD
          JSR  PULWRK
          JSR  WRK_OPND
-         LDA  #PCODE_JMP       ; JMP     	Jump unconditionally
+         LDA  #PCODE_JMP       ; JMP      Jump unconditionally
          JSR  GENRJMP
          JSR  WRKD_WRK
          JSR  FIXAD
@@ -1351,7 +1351,7 @@ FOR6     LDA  #$FF
          STA  OPND+1
          LDA  #$FD
          STA  OPND
-         LDA  #PCODE_INT       ;  INT     	Increment stack pointer
+         LDA  #PCODE_INT       ;  INT       Increment stack pointer
          JMP  GENJMP
 
 
@@ -1802,7 +1802,7 @@ BLKB2    LDA  FRAME
          STA  OPND
          LDA  FRAME+1
          STA  OPND+1
-         LDA  #PCODE_INT         ; INT     	Increment stack pointer
+         LDA  #PCODE_INT         ; INT      Increment stack pointer
          JSR  GENJMP
 BLKB5    JSR  STMNT
          LDA  token_type
@@ -1816,7 +1816,7 @@ BLKB4    LDA  #TOKEN_END       ; END
          LDA  #PCODE_RTN  ; OK - we are at the end of a block - this is a procedure/function return
          LDX  LEVEL       ; OR - if we are at level 0, then that is the end of the program
          BNE  BLKB6
-         LDA  #PCODE_FINISHD        ; Opcode: FINISHED 	Stop run (end program)
+         LDA  #PCODE_FINISHD        ; Opcode: FINISHED  Stop run (end program)
 TEST1    =  *
 BLKB6    JMP  GENNOP
 ;
