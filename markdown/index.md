@@ -1,4 +1,4 @@
-# G-Pascal for Ben Eater's 6502 board
+% G-Pascal for Ben Eater's 6502 board
 
 **Author**: Nick Gammon
 
@@ -115,7 +115,7 @@ Both the Pascal compiler and assembler are quite fast. Any program that will fit
 * There is no fee
 * You do not need to register
 * You do not need to provide any personal details such as email address
-* The software can be downloaded from GitHub
+* The software can be [downloaded from GitHub](https://github.com/nickgammon/G-Pascal)
 * The license (MIT License) is [here](doc/license.txt)
 
 ---
