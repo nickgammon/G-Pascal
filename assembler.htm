@@ -251,8 +251,8 @@ begin = *
       ldx #&gt;hello
       jsr print
       rts</code></pre>
-<p>Load and compile the above assembler code, which relocates itself to $5800 and with the symbol table moved to $5800 to avoid a clash with the symbols.</p>
-<p>You can test that on its own now by going to the main menu and selecting &lt;R&gt;un. The runtime system automatically starts running at the first <em>emitted</em> object code. In this case, that is the “jmp start” instruction.</p>
+<p>Load and assemble (LOAD then ASS) the above assembler code, which relocates itself to $5800 and with the symbol table moved to $5800 to avoid a clash with the symbols.</p>
+<p>You can test that on its own now by typing RUN. The runtime system automatically starts running at the first <em>emitted</em> object code. In this case, that is the “jmp start” instruction.</p>
 <pre class="pas"><code>  { Relocate symbol table and runtime stack: } {%s $5800}
   { Note: hello_world_relocated.asm should be loaded and compiled before running this }
 
@@ -370,7 +370,7 @@ write_loop:
 <p>Debugging assembler code can be a pain. Below are a few suggestions.</p>
 <h3 id="toggling-an-led">Toggling an LED</h3>
 <p>You can use a handful of instructions to toggle one of the VIA pins, like this:</p>
-<pre><code>VIA_PORTA   = $7FF1
+<pre><code>VIA_PORTA  = $7FF1
 DEBUG_MASK = %00010000
 
   pha
@@ -398,6 +398,7 @@ Stack: 8c 9b 42 9b 5f 97</code></pre>
 <p>Remember that the high-order byte is pushed first by the JSR so you have to read the bytes from right to left. Thus “5F 97” becomes $975F, and then adding one gives you $9760.</p>
 <p>From the above we conclude that, in this case, a JSR at $975D called something (you can find what by looking at your listing), and then a JSR at $9B40 called something, and finally a JSR at $9B8A called something. Then the BRK was reached.</p>
 <p>You could sprinkle multiple BRK instructions through your code to confirm or deny that certain parts of code are executed each with their own unique breakpoint “ID” so you can see which one was reached (without having to match the breakpoint address to the generated code address).</p>
+<p>If you do not put an “ID” byte after the BRK, then the code shown will simply be the opcode of the next instruction in the source.</p>
 <h3 id="debugging-prints">Debugging prints</h3>
 <p>Another technique is to put “debugging prints” inside your code. This could be used instead of inserting BRK instructions if you just want a breadcrumb trail of what is being executed and in what order. For example:</p>
 <pre><code>;
