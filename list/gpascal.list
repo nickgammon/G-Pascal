@@ -1233,7 +1233,7 @@ Source: "editor.inc"
                         	   153:   makeHandler "DELETE",  editor_delete
 00:8347 44454C455445    	     1M    asciiz   "DELETE"
 00:834D 00
-00:834E 6E8B            	     2M    word  editor_delete
+00:834E 678B            	     2M    word  editor_delete
                         	   154:   makeHandler "HELP",    editor_help
 00:8350 48454C50        	     1M    asciiz   "HELP"
 00:8354 00
@@ -2078,7 +2078,7 @@ Source: "editor.inc"
 00:891F A980            	   891:   lda #EFLAG_NO_LINE_NUMBERS
 00:8921 25BC            	   892:   and editor_flags
 00:8923 D003            	   893:   bne editor_list_no_line_number
-00:8925 201E8C          	   894:   jsr show_current_line_number
+00:8925 20178C          	   894:   jsr show_current_line_number
                         	   895: 
                         	   896: editor_list_no_line_number:
 00:8928 A000            	   897:   ldy  #0
@@ -2239,823 +2239,828 @@ Source: "editor.inc"
 00:89F8 85BC            	  1047:   sta editor_flags
                         	  1048: 
                         	  1049: editor_insert:
-00:89FA 64B0            	  1050:   stz insert_last_char
-00:89FC 207785          	  1051:   jsr editor_get_number
-00:89FF F015            	  1052:   beq editor_insert_at_start
-                        	  1053: 
-                        	  1054:   ;
-                        	  1055:   ; I really want to insert AFTER this line so I'll add 1 to whatever line number they gave
-                        	  1056:   ; To insert at the start use Insert without a line number
-                        	  1057:   ;
-00:8A01 18              	  1058:   clc
-00:8A02 A594            	  1059:   lda token_value
-00:8A04 6901            	  1060:   adc #1
-00:8A06 85AC            	  1061:   sta this_line
-00:8A08 A595            	  1062:   lda token_value+1
-00:8A0A 6900            	  1063:   adc #0
-00:8A0C 85AD            	  1064:   sta this_line+1
-                        	  1065: 
-00:8A0E 203886          	  1066:   jsr editor_check_no_more
-00:8A11 20558C          	  1067:   jsr find_line    ; find the "from" line address
-00:8A14 800E            	  1068:   bra editor_insert_common
-                        	  1069: 
-                        	  1070: editor_insert_at_start:
-00:8A16 A900            	  1071:   lda #<TEXT_START
-00:8A18 85AE            	  1072:   sta this_line_addr
-00:8A1A A903            	  1073:   lda #>TEXT_START
-00:8A1C 85AF            	  1074:   sta this_line_addr+1
-00:8A1E A901            	  1075:   lda #1
-00:8A20 85A2            	  1076:   sta current_line    ; current line number (1)
-00:8A22 64A3            	  1077:   stz current_line+1
-                        	  1078: 
-                        	  1079: editor_insert_common:
-00:8A24 20898C          	  1080:   jsr find_source_end
-                        	  1081: 
-                        	  1082: ;
-                        	  1083: ;  move existing source to end of RAM
-                        	  1084: ;
-00:8A27 38              	  1085:   sec
-00:8A28 A523            	  1086:   lda PCODE
-00:8A2A E5AE            	  1087:   sbc this_line_addr
-00:8A2C 85AA            	  1088:   sta mem_move_len
-00:8A2E A524            	  1089:   lda PCODE+1
-00:8A30 E5AF            	  1090:   sbc this_line_addr+1
-00:8A32 85AB            	  1091:   sta mem_move_len+1
-                        	  1092: 
-                        	  1093: ;
-                        	  1094: ;  find where to move to
-                        	  1095: ;
-00:8A34 38              	  1096:   sec
-00:8A35 A9FF            	  1097:   lda #<HIGHEST_RAM
-00:8A37 E5AA            	  1098:   sbc mem_move_len
-00:8A39 85A8            	  1099:   sta mem_move_dest
-00:8A3B 85A4            	  1100:   sta insert_limit
-00:8A3D A93F            	  1101:   lda #>HIGHEST_RAM
-00:8A3F E5AB            	  1102:   sbc mem_move_len+1
-00:8A41 85A9            	  1103:   sta mem_move_dest+1
-00:8A43 85A5            	  1104:   sta insert_limit+1
-                        	  1105: 
-                        	  1106: ;
-                        	  1107: ;  the source of the move
-                        	  1108: ;
-00:8A45 A5AE            	  1109:   lda this_line_addr
-00:8A47 85A6            	  1110:   sta mem_move_src
-00:8A49 A5AF            	  1111:   lda this_line_addr+1
-00:8A4B 85A7            	  1112:   sta mem_move_src+1
-                        	  1113: 
-00:8A4D 20A681          	  1114:   jsr moveup
-                        	  1115: 
-                        	  1116: ;
-                        	  1117: ;  put input at from_line_addr
-                        	  1118: ;
-                        	  1119: 
-00:8A50 A5AE            	  1120:   lda this_line_addr
-00:8A52 8523            	  1121:   sta PCODE
-00:8A54 A5AF            	  1122:   lda this_line_addr+1
-00:8A56 8524            	  1123:   sta PCODE+1
-                        	  1124: 
-00:8A58 A9D4            	  1125:   lda  #<load_message
-00:8A5A A289            	  1126:   ldx  #>load_message
-00:8A5C 202682          	  1127:   jsr  print
-                        	  1128: 
-                        	  1129: ;
-                        	  1130: ;  show the first line number
-                        	  1131: ;
-                        	  1132: 
-00:8A5F A901            	  1133:   lda #EFLAG_SHOW_LINE
-00:8A61 04BC            	  1134:   tsb editor_flags
-                        	  1135: 
-                        	  1136: editor_insert_loop:
-00:8A63 A904            	  1137:   lda #EFLAG_LOAD         ; no line numbers on load
-00:8A65 25BC            	  1138:   and editor_flags
-00:8A67 D00B            	  1139:   bne editor_insert_no_line_number
-                        	  1140: 
-00:8A69 A5BC            	  1141:   lda editor_flags
-00:8A6B 2901            	  1142:   and #EFLAG_SHOW_LINE
-00:8A6D F005            	  1143:   beq  editor_insert_no_line_number
-                        	  1144: ;
-                        	  1145: ;  display the line number
-                        	  1146: ;
-                        	  1147: 
-00:8A6F 64BC            	  1148:   stz editor_flags      ; cancel flag until next newline
-00:8A71 201E8C          	  1149:   jsr show_current_line_number
-                        	  1150: 
-                        	  1151: editor_insert_no_line_number:
-00:8A74 A000            	  1152:   ldy  #0
+00:89FA 207785          	  1050:   jsr editor_get_number
+00:89FD F015            	  1051:   beq editor_insert_at_start
+                        	  1052: 
+                        	  1053:   ;
+                        	  1054:   ; I really want to insert AFTER this line so I'll add 1 to whatever line number they gave
+                        	  1055:   ; To insert at the start use Insert without a line number
+                        	  1056:   ;
+00:89FF 18              	  1057:   clc
+00:8A00 A594            	  1058:   lda token_value
+00:8A02 6901            	  1059:   adc #1
+00:8A04 85AC            	  1060:   sta this_line
+00:8A06 A595            	  1061:   lda token_value+1
+00:8A08 6900            	  1062:   adc #0
+00:8A0A 85AD            	  1063:   sta this_line+1
+                        	  1064: 
+00:8A0C 203886          	  1065:   jsr editor_check_no_more
+00:8A0F 20558C          	  1066:   jsr find_line    ; find the "from" line address
+00:8A12 800E            	  1067:   bra editor_insert_common
+                        	  1068: 
+                        	  1069: editor_insert_at_start:
+00:8A14 A900            	  1070:   lda #<TEXT_START
+00:8A16 85AE            	  1071:   sta this_line_addr
+00:8A18 A903            	  1072:   lda #>TEXT_START
+00:8A1A 85AF            	  1073:   sta this_line_addr+1
+00:8A1C A901            	  1074:   lda #1
+00:8A1E 85A2            	  1075:   sta current_line    ; current line number (1)
+00:8A20 64A3            	  1076:   stz current_line+1
+                        	  1077: 
+                        	  1078: editor_insert_common:
+00:8A22 20898C          	  1079:   jsr find_source_end
+                        	  1080: 
+                        	  1081: ;
+                        	  1082: ;  move existing source to end of RAM
+                        	  1083: ;
+00:8A25 38              	  1084:   sec
+00:8A26 A523            	  1085:   lda PCODE
+00:8A28 E5AE            	  1086:   sbc this_line_addr
+00:8A2A 85AA            	  1087:   sta mem_move_len
+00:8A2C A524            	  1088:   lda PCODE+1
+00:8A2E E5AF            	  1089:   sbc this_line_addr+1
+00:8A30 85AB            	  1090:   sta mem_move_len+1
+                        	  1091: 
+                        	  1092: ;
+                        	  1093: ;  find where to move to
+                        	  1094: ;
+00:8A32 38              	  1095:   sec
+00:8A33 A9FF            	  1096:   lda #<HIGHEST_RAM
+00:8A35 E5AA            	  1097:   sbc mem_move_len
+00:8A37 85A8            	  1098:   sta mem_move_dest
+00:8A39 85A4            	  1099:   sta insert_limit
+00:8A3B A93F            	  1100:   lda #>HIGHEST_RAM
+00:8A3D E5AB            	  1101:   sbc mem_move_len+1
+00:8A3F 85A9            	  1102:   sta mem_move_dest+1
+00:8A41 85A5            	  1103:   sta insert_limit+1
+                        	  1104: 
+                        	  1105: ;
+                        	  1106: ;  the source of the move
+                        	  1107: ;
+00:8A43 A5AE            	  1108:   lda this_line_addr
+00:8A45 85A6            	  1109:   sta mem_move_src
+00:8A47 A5AF            	  1110:   lda this_line_addr+1
+00:8A49 85A7            	  1111:   sta mem_move_src+1
+                        	  1112: 
+00:8A4B 20A681          	  1113:   jsr moveup
+                        	  1114: 
+                        	  1115: ;
+                        	  1116: ;  put input at from_line_addr
+                        	  1117: ;
+                        	  1118: 
+00:8A4E A5AE            	  1119:   lda this_line_addr
+00:8A50 8523            	  1120:   sta PCODE
+00:8A52 A5AF            	  1121:   lda this_line_addr+1
+00:8A54 8524            	  1122:   sta PCODE+1
+                        	  1123: 
+00:8A56 A9D4            	  1124:   lda  #<load_message
+00:8A58 A289            	  1125:   ldx  #>load_message
+00:8A5A 202682          	  1126:   jsr  print
+                        	  1127: 
+                        	  1128: ;
+                        	  1129: ;  show the first line number
+                        	  1130: ;
+                        	  1131: 
+00:8A5D A901            	  1132:   lda #EFLAG_SHOW_LINE
+00:8A5F 04BC            	  1133:   tsb editor_flags
+00:8A61 A000            	  1134:   ldy #0    ; offset from PCODE for inserting (should always be zero)
+00:8A63 A200            	  1135:   ldx #0    ; last character we inserted
+                        	  1136: 
+                        	  1137: editor_insert_loop:
+00:8A65 A904            	  1138:   lda #EFLAG_LOAD         ; no line numbers on load
+00:8A67 25BC            	  1139:   and editor_flags
+00:8A69 D00B            	  1140:   bne editor_insert_no_line_number
+                        	  1141: 
+00:8A6B A5BC            	  1142:   lda editor_flags
+00:8A6D 2901            	  1143:   and #EFLAG_SHOW_LINE
+00:8A6F F005            	  1144:   beq  editor_insert_no_line_number
+                        	  1145: ;
+                        	  1146: ;  display the line number
+                        	  1147: ;
+                        	  1148: 
+00:8A71 64BC            	  1149:   stz editor_flags      ; cancel flag until next newline
+00:8A73 20178C          	  1150:   jsr show_current_line_number
+                        	  1151: 
+                        	  1152: editor_insert_no_line_number:
 00:8A76 2076C8          	  1153:   jsr  CHRIN
-00:8A79 C90D            	  1154:   cmp  #CR       ; carriage-return?
-00:8A7B F0F7            	  1155:   beq  editor_insert_no_line_number ; yes, ignore
-00:8A7D C91B            	  1156:   cmp  #END_EDITOR_INPUT  ; Esc?
-00:8A7F F051            	  1157:   beq  editor_insert_done
-00:8A81 C903            	  1158:   cmp  #KEY_ABORT         ; let them stop inputting with Ctrl+C
-00:8A83 F04D            	  1159:   beq  editor_insert_done
-00:8A85 C908            	  1160:   cmp  #BACKSPACE
-00:8A87 F02A            	  1161:   beq  editor_insert_backspace
-00:8A89 C90A            	  1162:   cmp  #NL
-00:8A8B D00C            	  1163:   bne  editor_insert_not_newline
-00:8A8D A901            	  1164:   lda  #EFLAG_SHOW_LINE
-00:8A8F 04BC            	  1165:   tsb  editor_flags
-00:8A91 A90A            	  1166:   lda  #NL            ; get the newline back
-00:8A93 E6A2            	  1167:   inc  current_line
-00:8A95 D002            	  1168:   bne  editor_insert_not_newline
-00:8A97 E6A3            	  1169:   inc  current_line+1
-                        	  1170: editor_insert_not_newline
-00:8A99 9123            	  1171:   sta  (PCODE),Y
-00:8A9B 85B0            	  1172:   sta  insert_last_char       ; for detecting final newline
-00:8A9D E623            	  1173:   inc  PCODE
-00:8A9F D002            	  1174:   bne  editor_insert_loop1
-00:8AA1 E624            	  1175:   inc  PCODE+1
-                        	  1176: 
-                        	  1177: editor_insert_loop1:
-00:8AA3 A5A5            	  1178:   lda  insert_limit+1
-00:8AA5 C524            	  1179:   cmp  PCODE+1
-00:8AA7 B0BA            	  1180:   bcs  editor_insert_loop   ; carry is SET if we didn't borrow
-00:8AA9 D054            	  1181:   bne  editor_too_full
-00:8AAB A5A4            	  1182:   lda  insert_limit
-00:8AAD C523            	  1183:   cmp  PCODE
-00:8AAF F04E            	  1184:   beq  editor_too_full
-00:8AB1 80B0            	  1185:   bra  editor_insert_loop
-                        	  1186: 
+00:8A79 C90D            	  1154:   cmp  #CR                          ; carriage-return?
+00:8A7B F0F9            	  1155:   beq  editor_insert_no_line_number ; yes, ignore
+00:8A7D C91B            	  1156:   cmp  #END_EDITOR_INPUT            ; Esc?
+00:8A7F F04B            	  1157:   beq  editor_insert_done
+00:8A81 C908            	  1158:   cmp  #BACKSPACE
+00:8A83 F029            	  1159:   beq  editor_insert_backspace
+00:8A85 C90A            	  1160:   cmp  #NL
+00:8A87 D00C            	  1161:   bne  editor_insert_not_newline
+00:8A89 A901            	  1162:   lda  #EFLAG_SHOW_LINE
+00:8A8B 04BC            	  1163:   tsb  editor_flags
+00:8A8D A90A            	  1164:   lda  #NL            ; get the newline back
+00:8A8F E6A2            	  1165:   inc  current_line
+00:8A91 D002            	  1166:   bne  editor_insert_not_newline
+00:8A93 E6A3            	  1167:   inc  current_line+1
+                        	  1168: editor_insert_not_newline
+00:8A95 9123            	  1169:   sta  (PCODE),y
+00:8A97 AA              	  1170:   tax                ; for detecting final newline
+00:8A98 E623            	  1171:   inc  PCODE
+00:8A9A D002            	  1172:   bne  editor_insert_loop1
+00:8A9C E624            	  1173:   inc  PCODE+1
+                        	  1174: 
+                        	  1175: editor_insert_loop1:
+00:8A9E A5A5            	  1176:   lda  insert_limit+1
+00:8AA0 C524            	  1177:   cmp  PCODE+1
+00:8AA2 B0C1            	  1178:   bcs  editor_insert_loop   ; carry is SET if we didn't borrow
+00:8AA4 D052            	  1179:   bne  editor_too_full
+00:8AA6 A5A4            	  1180:   lda  insert_limit
+00:8AA8 C523            	  1181:   cmp  PCODE
+00:8AAA F04C            	  1182:   beq  editor_too_full
+00:8AAC 80B7            	  1183:   bra  editor_insert_loop
+                        	  1184: 
+                        	  1185: ;
+                        	  1186: ;  backspace reduces our pointer by one, unless we are at the start
                         	  1187: ;
-                        	  1188: ;  backspace reduces our pointer by one, unless we are at the start
-                        	  1189: ;
-                        	  1190: editor_insert_backspace:
-00:8AB3 A523            	  1191:   lda PCODE
-00:8AB5 C5AE            	  1192:   cmp this_line_addr
-00:8AB7 D006            	  1193:   bne editor_insert_backspace_not_at_start
-00:8AB9 A524            	  1194:   lda PCODE+1
-00:8ABB C5AF            	  1195:   cmp this_line_addr+1
-00:8ABD F0A4            	  1196:   beq editor_insert_loop    ; at start, ignore backspace
-                        	  1197: 
-                        	  1198: editor_insert_backspace_not_at_start:
-00:8ABF 38              	  1199:   sec                       ; move source pointer back one
-00:8AC0 A523            	  1200:   lda PCODE
-00:8AC2 E901            	  1201:   sbc #1
-00:8AC4 8523            	  1202:   sta PCODE
-00:8AC6 A524            	  1203:   lda PCODE+1
-00:8AC8 E900            	  1204:   sbc #0
-00:8ACA 8524            	  1205:   sta PCODE+1
-00:8ACC B123            	  1206:   lda (PCODE),y
-00:8ACE 85B0            	  1207:   sta insert_last_char       ; this is now the last character we inserted
-00:8AD0 8091            	  1208:   bra editor_insert_loop
-                        	  1209: 
-                        	  1210: editor_insert_done:
-00:8AD2 A5B0            	  1211:   lda insert_last_char
-00:8AD4 F00E            	  1212:   beq editor_insert_done_with_newline   ; nothing got inserted at all
-00:8AD6 C90A            	  1213:   cmp #NL
-00:8AD8 F00A            	  1214:   beq editor_insert_done_with_newline  ; skip inserting a newline if we just got a newline
+                        	  1188: editor_insert_backspace:
+00:8AAE A523            	  1189:   lda PCODE
+00:8AB0 C5AE            	  1190:   cmp this_line_addr
+00:8AB2 D006            	  1191:   bne editor_insert_backspace_not_at_start
+00:8AB4 A524            	  1192:   lda PCODE+1
+00:8AB6 C5AF            	  1193:   cmp this_line_addr+1
+00:8AB8 F0AB            	  1194:   beq editor_insert_loop    ; at start, ignore backspace
+                        	  1195: 
+                        	  1196: editor_insert_backspace_not_at_start:
+00:8ABA 38              	  1197:   sec                       ; move source pointer back one
+00:8ABB A523            	  1198:   lda PCODE
+00:8ABD E901            	  1199:   sbc #1
+00:8ABF 8523            	  1200:   sta PCODE
+00:8AC1 A524            	  1201:   lda PCODE+1
+00:8AC3 E900            	  1202:   sbc #0
+00:8AC5 8524            	  1203:   sta PCODE+1
+00:8AC7 B123            	  1204:   lda (PCODE),y
+00:8AC9 AA              	  1205:   tax                      ; this is now the last character we inserted
+00:8ACA 8099            	  1206:   bra editor_insert_loop
+                        	  1207: 
+                        	  1208: editor_insert_done:
+00:8ACC 8A              	  1209:   txa
+00:8ACD F00E            	  1210:   beq editor_insert_done_with_newline   ; nothing got inserted at all
+00:8ACF C90A            	  1211:   cmp #NL
+00:8AD1 F00A            	  1212:   beq editor_insert_done_with_newline  ; skip inserting a newline if we just got a newline
+                        	  1213: ;
+                        	  1214: ;  They finished inserting, but without a newline ... add one
                         	  1215: ;
-                        	  1216: ;  They finished inserting, but without a newline ... add one
-                        	  1217: ;
-00:8ADA A90A            	  1218:   lda #NL
-00:8ADC 9123            	  1219:   sta (PCODE),Y
-00:8ADE E623            	  1220:   inc PCODE
-00:8AE0 D002            	  1221:   bne editor_insert_done_with_newline
-00:8AE2 E624            	  1222:   inc PCODE+1
-                        	  1223: 
+00:8AD3 A90A            	  1216:   lda #NL
+00:8AD5 9123            	  1217:   sta (PCODE),y
+00:8AD7 E623            	  1218:   inc PCODE
+00:8AD9 D002            	  1219:   bne editor_insert_done_with_newline
+00:8ADB E624            	  1220:   inc PCODE+1
+                        	  1221: 
+                        	  1222: ;
+                        	  1223: ;  they are done - copy the rest back to the end of where they just inserted
                         	  1224: ;
-                        	  1225: ;  they are done - copy the rest back to the end of where they just inserted
-                        	  1226: ;
-                        	  1227: editor_insert_done_with_newline:
+                        	  1225: editor_insert_done_with_newline:
+                        	  1226: 
+00:8ADD 64BE            	  1227:   stz system_flags     ; compile is not valid any more
                         	  1228: 
-00:8AE4 64BE            	  1229:   stz system_flags     ; compile is not valid any more
-                        	  1230: 
-00:8AE6 A523            	  1231:   lda PCODE
-00:8AE8 85A8            	  1232:   sta mem_move_dest
-00:8AEA A524            	  1233:   lda PCODE+1
-00:8AEC 85A9            	  1234:   sta mem_move_dest+1
-                        	  1235: 
-00:8AEE A5A4            	  1236:   lda insert_limit
-00:8AF0 85A6            	  1237:   sta mem_move_src
-00:8AF2 A5A5            	  1238:   lda insert_limit+1
-00:8AF4 85A7            	  1239:   sta mem_move_src+1
+00:8ADF A523            	  1229:   lda PCODE
+00:8AE1 85A8            	  1230:   sta mem_move_dest
+00:8AE3 A524            	  1231:   lda PCODE+1
+00:8AE5 85A9            	  1232:   sta mem_move_dest+1
+                        	  1233: 
+00:8AE7 A5A4            	  1234:   lda insert_limit
+00:8AE9 85A6            	  1235:   sta mem_move_src
+00:8AEB A5A5            	  1236:   lda insert_limit+1
+00:8AED 85A7            	  1237:   sta mem_move_src+1
+                        	  1238: 
+00:8AEF 207A81          	  1239:   jsr movedown
                         	  1240: 
-00:8AF6 207A81          	  1241:   jsr movedown
-                        	  1242: 
-00:8AF9 202892          	  1243:   jsr CROUT   ; put a newline after the ESC character
-00:8AFC 4CCC82          	  1244:   jmp main_prompt
-                        	  1245: 
-                        	  1246: editor_too_full:
-00:8AFF A92A            	  1247:   lda #<memory_full
-00:8B01 A28B            	  1248:   ldx #>memory_full
-00:8B03 202682          	  1249:   jsr print
+00:8AF2 202892          	  1241:   jsr CROUT   ; put a newline after the ESC character
+00:8AF5 4CCC82          	  1242:   jmp main_prompt
+                        	  1243: 
+                        	  1244: editor_too_full:
+00:8AF8 A923            	  1245:   lda #<memory_full
+00:8AFA A28B            	  1246:   ldx #>memory_full
+00:8AFC 202682          	  1247:   jsr print
+                        	  1248: ;
+                        	  1249: ;  consume input so it isn't mistaken for a command
                         	  1250: ;
-                        	  1251: ;  consume input so it isn't mistaken for a command
-                        	  1252: ;
-                        	  1253: editor_too_full_loop:
-00:8B06 2076C8          	  1254:   jsr CHRIN
-00:8B09 C91B            	  1255:   cmp #END_EDITOR_INPUT
-00:8B0B D0F9            	  1256:   bne editor_too_full_loop
+                        	  1251: editor_too_full_loop:
+00:8AFF 2076C8          	  1252:   jsr CHRIN
+00:8B02 C91B            	  1253:   cmp #END_EDITOR_INPUT
+00:8B04 D0F9            	  1254:   bne editor_too_full_loop
+                        	  1255: ;
+                        	  1256: ;  another message, they may miss the first one during a bulk load
                         	  1257: ;
-                        	  1258: ;  another message, they may miss the first one during a bulk load
-                        	  1259: ;
-00:8B0D A945            	  1260:   lda #<memory_filled_up
-00:8B0F A28B            	  1261:   ldx #>memory_filled_up
-00:8B11 202682          	  1262:   jsr print
-00:8B14 4CD28A          	  1263:   jmp editor_insert_done
-                        	  1264: 
-00:8B17 4E6F2072616E6765	  1265: editor_no_lines  asciiz "No range supplied\n"
-00:8B1F 20737570706C6965
-00:8B27 640A
-00:8B29 00
-00:8B2A 0A0A4D656D6F7279	  1266: memory_full      asciiz "\n\nMemory full - press Esc\n"
-00:8B32 2066756C6C202D20
-00:8B3A 7072657373204573
-00:8B42 630A
-00:8B44 00
-00:8B45 0A0A4E6F20726F6F	  1267: memory_filled_up asciiz "\n\nNo room for source during load/input\n\n"
-00:8B4D 6D20666F7220736F
-00:8B55 7572636520647572
-00:8B5D 696E67206C6F6164
-00:8B65 2F696E7075740A0A
-00:8B6D 00
-                        	  1268: 
+00:8B06 A93E            	  1258:   lda #<memory_filled_up
+00:8B08 A28B            	  1259:   ldx #>memory_filled_up
+00:8B0A 202682          	  1260:   jsr print
+00:8B0D 4CCC8A          	  1261:   jmp editor_insert_done
+                        	  1262: 
+00:8B10 4E6F2072616E6765	  1263: editor_no_lines  asciiz "No range supplied\n"
+00:8B18 20737570706C6965
+00:8B20 640A
+00:8B22 00
+00:8B23 0A0A4D656D6F7279	  1264: memory_full      asciiz "\n\nMemory full - press Esc\n"
+00:8B2B 2066756C6C202D20
+00:8B33 7072657373204573
+00:8B3B 630A
+00:8B3D 00
+00:8B3E 0A0A4E6F20726F6F	  1265: memory_filled_up asciiz "\n\nNo room for source during load/input\n\n"
+00:8B46 6D20666F7220736F
+00:8B4E 7572636520647572
+00:8B56 696E67206C6F6164
+00:8B5E 2F696E7075740A0A
+00:8B66 00
+                        	  1266: 
+                        	  1267: ;--------------------------------------------
+                        	  1268: ;  DELETE
                         	  1269: ;--------------------------------------------
-                        	  1270: ;  DELETE
-                        	  1271: ;--------------------------------------------
-                        	  1272: editor_delete:
+                        	  1270: editor_delete:
+                        	  1271: ;
+                        	  1272: ;  default to no lines
                         	  1273: ;
-                        	  1274: ;  default to no lines
-                        	  1275: ;
-00:8B6E 649E            	  1276:   stz from_line
-00:8B70 649F            	  1277:   stz from_line+1
-00:8B72 64A0            	  1278:   stz to_line
-00:8B74 64A1            	  1279:   stz to_line+1
-                        	  1280: 
-00:8B76 64B9            	  1281:   stz find_count      ; delete count in this case
-00:8B78 64BA            	  1282:   stz find_count+1
-                        	  1283: 
-00:8B7A 204886          	  1284:   jsr editor_get_range
-00:8B7D 203886          	  1285:   jsr editor_check_no_more
+00:8B67 649E            	  1274:   stz from_line
+00:8B69 649F            	  1275:   stz from_line+1
+00:8B6B 64A0            	  1276:   stz to_line
+00:8B6D 64A1            	  1277:   stz to_line+1
+                        	  1278: 
+00:8B6F 64B9            	  1279:   stz find_count      ; delete count in this case
+00:8B71 64BA            	  1280:   stz find_count+1
+                        	  1281: 
+00:8B73 204886          	  1282:   jsr editor_get_range
+00:8B76 203886          	  1283:   jsr editor_check_no_more
+                        	  1284: ;
+                        	  1285: ; if no lines given, give up
                         	  1286: ;
-                        	  1287: ; if no lines given, give up
-                        	  1288: ;
-00:8B80 A59E            	  1289:   lda from_line
-00:8B82 059F            	  1290:   ora from_line+1
-00:8B84 D00A            	  1291:   bne editor_delete_have_range
-00:8B86 A917            	  1292:   lda #<editor_no_lines
-00:8B88 A28B            	  1293:   ldx #>editor_no_lines
-00:8B8A 202682          	  1294:   jsr print
-00:8B8D 4CCC82          	  1295:   jmp  main_prompt
-                        	  1296: 
-                        	  1297: editor_delete_have_range:
-00:8B90 A59E            	  1298:   lda from_line
-00:8B92 85AC            	  1299:   sta this_line
-00:8B94 A59F            	  1300:   lda from_line+1
-00:8B96 85AD            	  1301:   sta this_line+1
-00:8B98 20558C          	  1302:   jsr find_line       ; find the "from" line address
-00:8B9B A5AE            	  1303:   lda this_line_addr  ; that becomes the destination of the move
-00:8B9D 85A8            	  1304:   sta mem_move_dest
-00:8B9F A5AF            	  1305:   lda this_line_addr+1
-00:8BA1 85A9            	  1306:   sta mem_move_dest+1
-00:8BA3 64AA            	  1307:   stz mem_move_len
-00:8BA5 64AB            	  1308:   stz mem_move_len+1
-                        	  1309: ;
-                        	  1310: ;  now we'll work our way up until we get to the to_line, however we'll
-                        	  1311: ;  add one because we want the final address to actually be the start of
-                        	  1312: ;  the NEXT line
-                        	  1313: ;
-00:8BA7 18              	  1314:   clc
-00:8BA8 A5A0            	  1315:   lda to_line
-00:8BAA 6901            	  1316:   adc #1
-00:8BAC 85AC            	  1317:   sta this_line
-00:8BAE A5A1            	  1318:   lda to_line+1
-00:8BB0 6900            	  1319:   adc #0
-00:8BB2 85AD            	  1320:   sta this_line+1
-00:8BB4 20638C          	  1321:   jsr find_line_loop    ; find the "to" line address
-00:8BB7 A5AE            	  1322:   lda this_line_addr  ; that becomes the destination of the move
-00:8BB9 85A6            	  1323:   sta mem_move_src
-00:8BBB A5AF            	  1324:   lda this_line_addr+1
-00:8BBD 85A7            	  1325:   sta mem_move_src+1
-                        	  1326: 
-                        	  1327: ;
-                        	  1328: ;  count how many lines we delete by counting newlines from
-                        	  1329: ;   mem_move_dest to mem_move_src
-                        	  1330: ;
-                        	  1331: 
-00:8BBF A5A8            	  1332:   lda mem_move_dest
-00:8BC1 8523            	  1333:   sta PCODE
-00:8BC3 A5A9            	  1334:   lda mem_move_dest+1
-00:8BC5 8524            	  1335:   sta PCODE+1
-00:8BC7 A000            	  1336:   ldy #0
-                        	  1337: 
-                        	  1338: editor_delete_line_count_loop:
-00:8BC9 A523            	  1339:   lda PCODE
-00:8BCB C5A6            	  1340:   cmp mem_move_src
-00:8BCD D006            	  1341:   bne editor_delete_line_count_not_done
-00:8BCF A524            	  1342:   lda PCODE+1
-00:8BD1 C5A7            	  1343:   cmp mem_move_src+1
-00:8BD3 F014            	  1344:   beq editor_delete_line_count_done
-                        	  1345: 
-                        	  1346: editor_delete_line_count_not_done:
-00:8BD5 B123            	  1347:   lda (PCODE),y
-00:8BD7 C90A            	  1348:   cmp #NL
-00:8BD9 D006            	  1349:   bne editor_delete_line_count_not_newline
-00:8BDB E6B9            	  1350:   inc find_count
-00:8BDD D002            	  1351:   bne editor_delete_line_count_not_newline
-00:8BDF E6BA            	  1352:   inc find_count+1
-                        	  1353: editor_delete_line_count_not_newline:
-00:8BE1 E623            	  1354:   inc PCODE
-00:8BE3 D0E4            	  1355:   bne editor_delete_line_count_loop
-00:8BE5 E624            	  1356:   inc PCODE+1
-00:8BE7 80E0            	  1357:   bra editor_delete_line_count_loop
-                        	  1358: 
-                        	  1359: ;
-                        	  1360: ;  now find where the source ends
-                        	  1361: ;  PCODE will now be at the first line to not be deleted
-                        	  1362: ;
-                        	  1363: editor_delete_line_count_done:
-                        	  1364: 
-00:8BE9 20918C          	  1365:   jsr find_source_end_loop
-00:8BEC 38              	  1366:   sec
-00:8BED A523            	  1367:   lda PCODE
-00:8BEF E5AE            	  1368:   sbc this_line_addr
-00:8BF1 85AA            	  1369:   sta mem_move_len
-00:8BF3 A524            	  1370:   lda PCODE+1
-00:8BF5 E5AF            	  1371:   sbc this_line_addr+1
-00:8BF7 85AB            	  1372:   sta mem_move_len+1
-00:8BF9 207A81          	  1373:   jsr movedown  ; that should do it
-                        	  1374: 
-00:8BFC A5B9            	  1375:   lda find_count
-00:8BFE 8500            	  1376:   sta REG
-00:8C00 A5BA            	  1377:   lda find_count+1
-00:8C02 8501            	  1378:   sta REG+1
-00:8C04 6402            	  1379:   stz REGB
-00:8C06 205291          	  1380:   jsr display_in_decimal
-00:8C09 A913            	  1381:   lda #<lines_deleted_message
-00:8C0B A28C            	  1382:   ldx #>lines_deleted_message
-00:8C0D 202682          	  1383:   jsr print
-00:8C10 4CCC82          	  1384:   jmp main_prompt
+00:8B79 A59E            	  1287:   lda from_line
+00:8B7B 059F            	  1288:   ora from_line+1
+00:8B7D D00A            	  1289:   bne editor_delete_have_range
+00:8B7F A910            	  1290:   lda #<editor_no_lines
+00:8B81 A28B            	  1291:   ldx #>editor_no_lines
+00:8B83 202682          	  1292:   jsr print
+00:8B86 4CCC82          	  1293:   jmp  main_prompt
+                        	  1294: 
+                        	  1295: editor_delete_have_range:
+00:8B89 A59E            	  1296:   lda from_line
+00:8B8B 85AC            	  1297:   sta this_line
+00:8B8D A59F            	  1298:   lda from_line+1
+00:8B8F 85AD            	  1299:   sta this_line+1
+00:8B91 20558C          	  1300:   jsr find_line       ; find the "from" line address
+00:8B94 A5AE            	  1301:   lda this_line_addr  ; that becomes the destination of the move
+00:8B96 85A8            	  1302:   sta mem_move_dest
+00:8B98 A5AF            	  1303:   lda this_line_addr+1
+00:8B9A 85A9            	  1304:   sta mem_move_dest+1
+00:8B9C 64AA            	  1305:   stz mem_move_len
+00:8B9E 64AB            	  1306:   stz mem_move_len+1
+                        	  1307: ;
+                        	  1308: ;  now we'll work our way up until we get to the to_line, however we'll
+                        	  1309: ;  add one because we want the final address to actually be the start of
+                        	  1310: ;  the NEXT line
+                        	  1311: ;
+00:8BA0 18              	  1312:   clc
+00:8BA1 A5A0            	  1313:   lda to_line
+00:8BA3 6901            	  1314:   adc #1
+00:8BA5 85AC            	  1315:   sta this_line
+00:8BA7 A5A1            	  1316:   lda to_line+1
+00:8BA9 6900            	  1317:   adc #0
+00:8BAB 85AD            	  1318:   sta this_line+1
+00:8BAD 20638C          	  1319:   jsr find_line_loop    ; find the "to" line address
+00:8BB0 A5AE            	  1320:   lda this_line_addr  ; that becomes the destination of the move
+00:8BB2 85A6            	  1321:   sta mem_move_src
+00:8BB4 A5AF            	  1322:   lda this_line_addr+1
+00:8BB6 85A7            	  1323:   sta mem_move_src+1
+                        	  1324: 
+                        	  1325: ;
+                        	  1326: ;  count how many lines we delete by counting newlines from
+                        	  1327: ;   mem_move_dest to mem_move_src
+                        	  1328: ;
+                        	  1329: 
+00:8BB8 A5A8            	  1330:   lda mem_move_dest
+00:8BBA 8523            	  1331:   sta PCODE
+00:8BBC A5A9            	  1332:   lda mem_move_dest+1
+00:8BBE 8524            	  1333:   sta PCODE+1
+00:8BC0 A000            	  1334:   ldy #0
+                        	  1335: 
+                        	  1336: editor_delete_line_count_loop:
+00:8BC2 A523            	  1337:   lda PCODE
+00:8BC4 C5A6            	  1338:   cmp mem_move_src
+00:8BC6 D006            	  1339:   bne editor_delete_line_count_not_done
+00:8BC8 A524            	  1340:   lda PCODE+1
+00:8BCA C5A7            	  1341:   cmp mem_move_src+1
+00:8BCC F014            	  1342:   beq editor_delete_line_count_done
+                        	  1343: 
+                        	  1344: editor_delete_line_count_not_done:
+00:8BCE B123            	  1345:   lda (PCODE),y
+00:8BD0 C90A            	  1346:   cmp #NL
+00:8BD2 D006            	  1347:   bne editor_delete_line_count_not_newline
+00:8BD4 E6B9            	  1348:   inc find_count
+00:8BD6 D002            	  1349:   bne editor_delete_line_count_not_newline
+00:8BD8 E6BA            	  1350:   inc find_count+1
+                        	  1351: editor_delete_line_count_not_newline:
+00:8BDA E623            	  1352:   inc PCODE
+00:8BDC D0E4            	  1353:   bne editor_delete_line_count_loop
+00:8BDE E624            	  1354:   inc PCODE+1
+00:8BE0 80E0            	  1355:   bra editor_delete_line_count_loop
+                        	  1356: 
+                        	  1357: ;
+                        	  1358: ;  now find where the source ends
+                        	  1359: ;  PCODE will now be at the first line to not be deleted
+                        	  1360: ;
+                        	  1361: editor_delete_line_count_done:
+                        	  1362: 
+00:8BE2 20918C          	  1363:   jsr find_source_end_loop
+00:8BE5 38              	  1364:   sec
+00:8BE6 A523            	  1365:   lda PCODE
+00:8BE8 E5AE            	  1366:   sbc this_line_addr
+00:8BEA 85AA            	  1367:   sta mem_move_len
+00:8BEC A524            	  1368:   lda PCODE+1
+00:8BEE E5AF            	  1369:   sbc this_line_addr+1
+00:8BF0 85AB            	  1370:   sta mem_move_len+1
+00:8BF2 207A81          	  1371:   jsr movedown  ; that should do it
+                        	  1372: 
+00:8BF5 A5B9            	  1373:   lda find_count
+00:8BF7 8500            	  1374:   sta REG
+00:8BF9 A5BA            	  1375:   lda find_count+1
+00:8BFB 8501            	  1376:   sta REG+1
+00:8BFD 6402            	  1377:   stz REGB
+00:8BFF 205291          	  1378:   jsr display_in_decimal
+00:8C02 A90C            	  1379:   lda #<lines_deleted_message
+00:8C04 A28C            	  1380:   ldx #>lines_deleted_message
+00:8C06 202682          	  1381:   jsr print
+00:8C09 4CCC82          	  1382:   jmp main_prompt
+                        	  1383: 
+00:8C0C 2064656C65746564	  1384: lines_deleted_message asciiz " deleted.\n"
+00:8C14 2E0A
+00:8C16 00
                         	  1385: 
-00:8C13 2064656C65746564	  1386: lines_deleted_message asciiz " deleted.\n"
-00:8C1B 2E0A
-00:8C1D 00
-                        	  1387: 
+                        	  1386: ;--------------------------------------------
+                        	  1387: ;  show current line number with leading spaces
                         	  1388: ;--------------------------------------------
-                        	  1389: ;  show current line number with leading spaces
-                        	  1390: ;--------------------------------------------
-                        	  1391: show_current_line_number:
-                        	  1392: ;
-                        	  1393: ;  get the line number into REG ready for printing
-                        	  1394: ;
-00:8C1E A5A2            	  1395:   lda current_line
-00:8C20 8500            	  1396:   sta REG
-00:8C22 A6A3            	  1397:   ldx current_line+1
-00:8C24 8601            	  1398:   stx REG+1
-00:8C26 A000            	  1399:   ldy #0        ; count of leading spaces
-00:8C28 8402            	  1400:   sty REGB
-00:8C2A E003            	  1401:   cpx #>1000    ; if the number is >= 1000 don't print any spaces
-00:8C2C 9006            	  1402:   bcc line_number_lt_1000
-00:8C2E D013            	  1403:   bne line_number_output_spaces
-00:8C30 C9E8            	  1404:   cmp #<1000
-00:8C32 B00F            	  1405:   bcs line_number_output_spaces
-                        	  1406: line_number_lt_1000:
-00:8C34 C8              	  1407:   iny           ; output one space
-00:8C35 E000            	  1408:   cpx  #0       ; if line number > 255 then one space is all we need
-00:8C37 D00A            	  1409:   bne  line_number_output_spaces
-00:8C39 C964            	  1410:   cmp  #100     ; if line number >= 100 then one space is all we need
-00:8C3B B006            	  1411:   bcs  line_number_output_spaces
-00:8C3D C8              	  1412:   iny           ; output two spaces
-00:8C3E C90A            	  1413:   cmp  #10      ; if line number >= 10 then two spaces are all we need
-00:8C40 B001            	  1414:   bcs  line_number_output_spaces
-00:8C42 C8              	  1415:   iny           ; output three spaces
-                        	  1416: line_number_output_spaces:
-00:8C43 C000            	  1417:   cpy #0            ; leading spaces in front of line number
-00:8C45 F008            	  1418:   beq  show_current_line_number_done
-00:8C47 5A              	  1419:   phy
-00:8C48 20B392          	  1420:   jsr  PUTSP      ; output the space
-00:8C4B 7A              	  1421:   ply
-00:8C4C 88              	  1422:   dey             ; count them
-00:8C4D D0F4            	  1423:   bne  line_number_output_spaces  ; more spaces to go
-                        	  1424: show_current_line_number_done:
-00:8C4F 205291          	  1425:   jsr  display_in_decimal    ; now the actual number
-00:8C52 4CB392          	  1426:   jmp  PUTSP      ; and a space after it
-                        	  1427: 
-                        	  1428: ;--------------------------------------------
-                        	  1429: ;  find_line
-                        	  1430: ;
-                        	  1431: ;  finds address of this_line in memory - returns in this_line_addr
-                        	  1432: ;--------------------------------------------
-                        	  1433: find_line:
-00:8C55 A901            	  1434:   lda #1
-00:8C57 85A2            	  1435:   sta current_line    ; current line number (1)
-00:8C59 64A3            	  1436:   stz current_line+1
-00:8C5B A900            	  1437:   lda #<TEXT_START   ; start at start of source
-00:8C5D 85AE            	  1438:   sta this_line_addr
-00:8C5F A903            	  1439:   lda #>TEXT_START
-00:8C61 85AF            	  1440:   sta this_line_addr+1
-                        	  1441: find_line_loop:
-00:8C63 A000            	  1442:   ldy #0
-00:8C65 A5A2            	  1443:   lda current_line
-00:8C67 C5AC            	  1444:   cmp this_line
-00:8C69 D007            	  1445:   bne find_line_next
-00:8C6B A5A3            	  1446:   lda current_line+1
-00:8C6D C5AD            	  1447:   cmp this_line+1
-00:8C6F D001            	  1448:   bne find_line_next
-00:8C71 60              	  1449:   rts
-                        	  1450: find_line_next:
-00:8C72 B1AE            	  1451:   lda (this_line_addr),Y
-00:8C74 F012            	  1452:   beq find_line_eof
-00:8C76 C90A            	  1453:   cmp #NL
-00:8C78 D006            	  1454:   bne find_line_same_line
-00:8C7A E6A2            	  1455:   inc current_line       ; add 1 to our line number counter
-00:8C7C D002            	  1456:   bne find_line_same_line
-00:8C7E E6A3            	  1457:   inc current_line+1
-                        	  1458: find_line_same_line:
-00:8C80 E6AE            	  1459:   inc this_line_addr     ; onto next address - which means that a newline
-00:8C82 D0DF            	  1460:   bne find_line_loop     ; will actually end up being the start of the new
-00:8C84 E6AF            	  1461:   inc this_line_addr+1   ; line, which is what we want
-00:8C86 80DB            	  1462:   bra find_line_loop
-                        	  1463: find_line_eof:           ; we are pointing to 0x00 - make that the address
-00:8C88 60              	  1464:   rts
-                        	  1465: 
-                        	  1466: 
-                        	  1467: 
-                        	  1468: ;***********************************************
-                        	  1469: ; Find text end
-                        	  1470: ;***********************************************
-                        	  1471: find_source_end:
-00:8C89 A900            	  1472:   lda  #<TEXT_START        ; start at start of source
-00:8C8B 8523            	  1473:   sta  PCODE
-00:8C8D A903            	  1474:   lda  #>TEXT_START
-00:8C8F 8524            	  1475:   sta  PCODE+1
-                        	  1476: find_source_end_loop =  *
-00:8C91 A000            	  1477:   ldy  #0
-00:8C93 B123            	  1478:   lda  (PCODE),Y             ; keep going until 0x00 indicates end of source
-00:8C95 F008            	  1479:   beq  find_source_end_wrap
-00:8C97 E623            	  1480:   inc  PCODE
-00:8C99 D0F6            	  1481:   bne  find_source_end_loop
-00:8C9B E624            	  1482:   inc  PCODE+1
-00:8C9D 80F2            	  1483:   bra  find_source_end_loop
-                        	  1484: ;
-                        	  1485: ;  include final 0x00
-                        	  1486: ;
-                        	  1487: find_source_end_wrap =  *
-00:8C9F E623            	  1488:   inc  PCODE
-00:8CA1 D002            	  1489:   bne  find_source_end_done
-00:8CA3 E624            	  1490:   inc  PCODE+1
-                        	  1491: find_source_end_done =  *
-00:8CA5 60              	  1492:   rts
-                        	  1493: 
-                        	  1494: ;
-                        	  1495: ;  testing BRK handling
-                        	  1496: ;
-00:8CA6 0A526573756D6564	  1497: brk_resumed asciiz "\nResumed after BRK\n"
+                        	  1389: show_current_line_number:
+00:8C17 48              	  1390:   pha
+00:8C18 DA              	  1391:   phx
+00:8C19 5A              	  1392:   phy
+                        	  1393: ;
+                        	  1394: ;  get the line number into REG ready for printing
+                        	  1395: ;
+00:8C1A A5A2            	  1396:   lda current_line
+00:8C1C 8500            	  1397:   sta REG
+00:8C1E A6A3            	  1398:   ldx current_line+1
+00:8C20 8601            	  1399:   stx REG+1
+00:8C22 A000            	  1400:   ldy #0        ; count of leading spaces
+00:8C24 8402            	  1401:   sty REGB
+00:8C26 E003            	  1402:   cpx #>1000    ; if the number is >= 1000 don't print any spaces
+00:8C28 9006            	  1403:   bcc line_number_lt_1000
+00:8C2A D013            	  1404:   bne line_number_output_spaces
+00:8C2C C9E8            	  1405:   cmp #<1000
+00:8C2E B00F            	  1406:   bcs line_number_output_spaces
+                        	  1407: line_number_lt_1000:
+00:8C30 C8              	  1408:   iny           ; output one space
+00:8C31 E000            	  1409:   cpx  #0       ; if line number > 255 then one space is all we need
+00:8C33 D00A            	  1410:   bne  line_number_output_spaces
+00:8C35 C964            	  1411:   cmp  #100     ; if line number >= 100 then one space is all we need
+00:8C37 B006            	  1412:   bcs  line_number_output_spaces
+00:8C39 C8              	  1413:   iny           ; output two spaces
+00:8C3A C90A            	  1414:   cmp  #10      ; if line number >= 10 then two spaces are all we need
+00:8C3C B001            	  1415:   bcs  line_number_output_spaces
+00:8C3E C8              	  1416:   iny           ; output three spaces
+                        	  1417: line_number_output_spaces:
+00:8C3F C000            	  1418:   cpy #0            ; leading spaces in front of line number
+00:8C41 F008            	  1419:   beq  show_current_line_number_done
+00:8C43 5A              	  1420:   phy
+00:8C44 20B392          	  1421:   jsr  PUTSP      ; output the space
+00:8C47 7A              	  1422:   ply
+00:8C48 88              	  1423:   dey             ; count them
+00:8C49 D0F4            	  1424:   bne  line_number_output_spaces  ; more spaces to go
+                        	  1425: show_current_line_number_done:
+00:8C4B 205291          	  1426:   jsr  display_in_decimal    ; now the actual number
+00:8C4E 20B392          	  1427:   jsr  PUTSP      ; and a space after it
+00:8C51 7A              	  1428:   ply
+00:8C52 FA              	  1429:   plx
+00:8C53 68              	  1430:   pla
+00:8C54 60              	  1431:   rts
+                        	  1432: 
+                        	  1433: ;--------------------------------------------
+                        	  1434: ;  find_line
+                        	  1435: ;
+                        	  1436: ;  finds address of this_line in memory - returns in this_line_addr
+                        	  1437: ;--------------------------------------------
+                        	  1438: find_line:
+00:8C55 A901            	  1439:   lda #1
+00:8C57 85A2            	  1440:   sta current_line    ; current line number (1)
+00:8C59 64A3            	  1441:   stz current_line+1
+00:8C5B A900            	  1442:   lda #<TEXT_START   ; start at start of source
+00:8C5D 85AE            	  1443:   sta this_line_addr
+00:8C5F A903            	  1444:   lda #>TEXT_START
+00:8C61 85AF            	  1445:   sta this_line_addr+1
+                        	  1446: find_line_loop:
+00:8C63 A000            	  1447:   ldy #0
+00:8C65 A5A2            	  1448:   lda current_line
+00:8C67 C5AC            	  1449:   cmp this_line
+00:8C69 D007            	  1450:   bne find_line_next
+00:8C6B A5A3            	  1451:   lda current_line+1
+00:8C6D C5AD            	  1452:   cmp this_line+1
+00:8C6F D001            	  1453:   bne find_line_next
+00:8C71 60              	  1454:   rts
+                        	  1455: find_line_next:
+00:8C72 B1AE            	  1456:   lda (this_line_addr),Y
+00:8C74 F012            	  1457:   beq find_line_eof
+00:8C76 C90A            	  1458:   cmp #NL
+00:8C78 D006            	  1459:   bne find_line_same_line
+00:8C7A E6A2            	  1460:   inc current_line       ; add 1 to our line number counter
+00:8C7C D002            	  1461:   bne find_line_same_line
+00:8C7E E6A3            	  1462:   inc current_line+1
+                        	  1463: find_line_same_line:
+00:8C80 E6AE            	  1464:   inc this_line_addr     ; onto next address - which means that a newline
+00:8C82 D0DF            	  1465:   bne find_line_loop     ; will actually end up being the start of the new
+00:8C84 E6AF            	  1466:   inc this_line_addr+1   ; line, which is what we want
+00:8C86 80DB            	  1467:   bra find_line_loop
+                        	  1468: find_line_eof:           ; we are pointing to 0x00 - make that the address
+00:8C88 60              	  1469:   rts
+                        	  1470: 
+                        	  1471: 
+                        	  1472: 
+                        	  1473: ;***********************************************
+                        	  1474: ; Find text end
+                        	  1475: ;***********************************************
+                        	  1476: find_source_end:
+00:8C89 A900            	  1477:   lda  #<TEXT_START        ; start at start of source
+00:8C8B 8523            	  1478:   sta  PCODE
+00:8C8D A903            	  1479:   lda  #>TEXT_START
+00:8C8F 8524            	  1480:   sta  PCODE+1
+                        	  1481: find_source_end_loop =  *
+00:8C91 A000            	  1482:   ldy  #0
+00:8C93 B123            	  1483:   lda  (PCODE),Y             ; keep going until 0x00 indicates end of source
+00:8C95 F008            	  1484:   beq  find_source_end_wrap
+00:8C97 E623            	  1485:   inc  PCODE
+00:8C99 D0F6            	  1486:   bne  find_source_end_loop
+00:8C9B E624            	  1487:   inc  PCODE+1
+00:8C9D 80F2            	  1488:   bra  find_source_end_loop
+                        	  1489: ;
+                        	  1490: ;  include final 0x00
+                        	  1491: ;
+                        	  1492: find_source_end_wrap =  *
+00:8C9F E623            	  1493:   inc  PCODE
+00:8CA1 D002            	  1494:   bne  find_source_end_done
+00:8CA3 E624            	  1495:   inc  PCODE+1
+                        	  1496: find_source_end_done =  *
+00:8CA5 60              	  1497:   rts
+                        	  1498: 
+                        	  1499: ;
+                        	  1500: ;  testing BRK handling
+                        	  1501: ;
+00:8CA6 0A526573756D6564	  1502: brk_resumed asciiz "\nResumed after BRK\n"
 00:8CAE 2061667465722042
 00:8CB6 524B0A
 00:8CB9 00
-                        	  1498: 
-                        	  1499: editor_test:
-00:8CBA A912            	  1500:   lda #$12
-00:8CBC A223            	  1501:   ldx #$23
-00:8CBE A042            	  1502:   ldy #$42
-00:8CC0 C912            	  1503:   cmp #$12
-00:8CC2 00              	  1504:   brk
-00:8CC3 99              	  1505:   dfb $99   ; break number
-00:8CC4 A9A6            	  1506:   lda #<brk_resumed
-00:8CC6 A28C            	  1507:   ldx #>brk_resumed
-00:8CC8 202682          	  1508:   jsr print
-00:8CCB 60              	  1509:   rts
-                        	  1510: 
-                        	  1511: ;
-                        	  1512: ;  memory dump
-                        	  1513: ;
-                        	  1514: editor_memory:
-00:8CCC 204F85          	  1515:   jsr editor_default_range
-00:8CCF A902            	  1516:   lda #EFLAG_ALLOW_ZERO_FROM
-00:8CD1 85BC            	  1517:   sta editor_flags
-00:8CD3 204886          	  1518:   jsr editor_get_range
-00:8CD6 203886          	  1519:   jsr editor_check_no_more
-00:8CD9 64A2            	  1520:   stz current_line      ; count of bytes shown
-00:8CDB A59E            	  1521:   lda from_line
-00:8CDD 85AE            	  1522:   sta this_line_addr
-00:8CDF A59F            	  1523:   lda from_line+1
-00:8CE1 85AF            	  1524:   sta this_line_addr+1
-                        	  1525: 
-                        	  1526: editor_memory_loop:
-00:8CE3 A58B            	  1527:   lda serial_in_byte_received
-00:8CE5 C903            	  1528:   cmp  #KEY_ABORT
-00:8CE7 F050            	  1529:   beq  editor_memory_aborted
+                        	  1503: 
+                        	  1504: editor_test:
+00:8CBA A912            	  1505:   lda #$12
+00:8CBC A223            	  1506:   ldx #$23
+00:8CBE A042            	  1507:   ldy #$42
+00:8CC0 C912            	  1508:   cmp #$12
+00:8CC2 00              	  1509:   brk
+00:8CC3 99              	  1510:   dfb $99   ; break number
+00:8CC4 A9A6            	  1511:   lda #<brk_resumed
+00:8CC6 A28C            	  1512:   ldx #>brk_resumed
+00:8CC8 202682          	  1513:   jsr print
+00:8CCB 60              	  1514:   rts
+                        	  1515: 
+                        	  1516: ;
+                        	  1517: ;  memory dump
+                        	  1518: ;
+                        	  1519: editor_memory:
+00:8CCC 204F85          	  1520:   jsr editor_default_range
+00:8CCF A902            	  1521:   lda #EFLAG_ALLOW_ZERO_FROM
+00:8CD1 85BC            	  1522:   sta editor_flags
+00:8CD3 204886          	  1523:   jsr editor_get_range
+00:8CD6 203886          	  1524:   jsr editor_check_no_more
+00:8CD9 64A2            	  1525:   stz current_line      ; count of bytes shown
+00:8CDB A59E            	  1526:   lda from_line
+00:8CDD 85AE            	  1527:   sta this_line_addr
+00:8CDF A59F            	  1528:   lda from_line+1
+00:8CE1 85AF            	  1529:   sta this_line_addr+1
                         	  1530: 
-00:8CE9 A5A2            	  1531:   lda current_line
-00:8CEB D017            	  1532:   bne editor_memory_loop1
-                        	  1533: ;
-                        	  1534: ;  show address
-                        	  1535: ;
-00:8CED A924            	  1536:   lda #'$'
-00:8CEF 20AF93          	  1537:   jsr COUT
-00:8CF2 A59F            	  1538:   lda from_line+1
-00:8CF4 209D92          	  1539:   jsr PRBYTE
-00:8CF7 A59E            	  1540:   lda from_line
-00:8CF9 209D92          	  1541:   jsr PRBYTE
-00:8CFC A93A            	  1542:   lda #':'
-00:8CFE 20AF93          	  1543:   jsr COUT
-00:8D01 20B392          	  1544:   jsr PUTSP
-                        	  1545: editor_memory_loop1:
-00:8D04 A000            	  1546:   ldy #0
-00:8D06 B19E            	  1547:   lda (from_line),Y
-00:8D08 209D92          	  1548:   jsr PRBYTE
-00:8D0B 20B392          	  1549:   jsr PUTSP
-00:8D0E E6A2            	  1550:   inc current_line
-00:8D10 E69E            	  1551:   inc from_line
-00:8D12 D002            	  1552:   bne editor_memory_loop2
-00:8D14 E69F            	  1553:   inc from_line+1
-                        	  1554: editor_memory_loop2:
-00:8D16 A59F            	  1555:   lda from_line+1
-00:8D18 C5A1            	  1556:   cmp to_line+1
-00:8D1A 900A            	  1557:   bcc editor_memory_loop3   ; less than
-00:8D1C D018            	  1558:   bne editor_memory_done    ; greater than
-00:8D1E A59E            	  1559:   lda from_line             ; equal, so try low-order byte
-00:8D20 C5A0            	  1560:   cmp to_line
-00:8D22 9002            	  1561:   bcc editor_memory_loop3   ; less than
-00:8D24 D010            	  1562:   bne editor_memory_done    ; greater than
-                        	  1563: editor_memory_loop3:
-00:8D26 A5A2            	  1564:   lda current_line
-00:8D28 C910            	  1565:   cmp #16
-00:8D2A 90B7            	  1566:   bcc editor_memory_loop
-00:8D2C 20B392          	  1567:   jsr PUTSP
-00:8D2F 203F8D          	  1568:   jsr editor_memory_show_ascii
-00:8D32 64A2            	  1569:   stz current_line      ; count of bytes shown
-00:8D34 80AD            	  1570:   bra editor_memory_loop
-                        	  1571: 
-                        	  1572: editor_memory_done:
-00:8D36 203F8D          	  1573:   jsr editor_memory_show_ascii
-                        	  1574: editor_memory_aborted:
-00:8D39 202892          	  1575:   jsr CROUT
-00:8D3C 4CCC82          	  1576:   jmp  main_prompt
-                        	  1577: 
-                        	  1578: editor_memory_show_ascii:
-                        	  1579: ;
-                        	  1580: ;  now the ASCII equivalents
-                        	  1581: ;
-00:8D3F A000            	  1582:   ldy #0
-                        	  1583: editor_memory_ascii:
-00:8D41 B1AE            	  1584:   lda (this_line_addr),Y
-00:8D43 C920            	  1585:   cmp #$20
-00:8D45 B002            	  1586:   bcs editor_memory_not_control
-00:8D47 8004            	  1587:   bra editor_memory_show_dot
-                        	  1588: editor_memory_not_control:
-00:8D49 C97F            	  1589:   cmp #$7F
-00:8D4B 9002            	  1590:   bcc editor_memory_not_high
-                        	  1591: editor_memory_show_dot
-00:8D4D A92E            	  1592:   lda #'.'
-                        	  1593: editor_memory_not_high:
-00:8D4F 20AF93          	  1594:   jsr COUT
-00:8D52 20B392          	  1595:   jsr PUTSP
-00:8D55 C8              	  1596:   iny
-00:8D56 C6A2            	  1597:   dec current_line
-00:8D58 D0E7            	  1598:   bne editor_memory_ascii
-                        	  1599: ;
-                        	  1600: ;  adjust the ASCII printing address
-                        	  1601: ;
-00:8D5A A59E            	  1602:   lda from_line
-00:8D5C 85AE            	  1603:   sta this_line_addr
-00:8D5E A59F            	  1604:   lda from_line+1
-00:8D60 85AF            	  1605:   sta this_line_addr+1
-                        	  1606: 
-00:8D62 202892          	  1607:   jsr CROUT
-00:8D65 60              	  1608:   rts
-                        	  1609: 
-                        	  1610: 
+                        	  1531: editor_memory_loop:
+00:8CE3 A58B            	  1532:   lda serial_in_byte_received
+00:8CE5 C903            	  1533:   cmp  #KEY_ABORT
+00:8CE7 F050            	  1534:   beq  editor_memory_aborted
+                        	  1535: 
+00:8CE9 A5A2            	  1536:   lda current_line
+00:8CEB D017            	  1537:   bne editor_memory_loop1
+                        	  1538: ;
+                        	  1539: ;  show address
+                        	  1540: ;
+00:8CED A924            	  1541:   lda #'$'
+00:8CEF 20AF93          	  1542:   jsr COUT
+00:8CF2 A59F            	  1543:   lda from_line+1
+00:8CF4 209D92          	  1544:   jsr PRBYTE
+00:8CF7 A59E            	  1545:   lda from_line
+00:8CF9 209D92          	  1546:   jsr PRBYTE
+00:8CFC A93A            	  1547:   lda #':'
+00:8CFE 20AF93          	  1548:   jsr COUT
+00:8D01 20B392          	  1549:   jsr PUTSP
+                        	  1550: editor_memory_loop1:
+00:8D04 A000            	  1551:   ldy #0
+00:8D06 B19E            	  1552:   lda (from_line),Y
+00:8D08 209D92          	  1553:   jsr PRBYTE
+00:8D0B 20B392          	  1554:   jsr PUTSP
+00:8D0E E6A2            	  1555:   inc current_line
+00:8D10 E69E            	  1556:   inc from_line
+00:8D12 D002            	  1557:   bne editor_memory_loop2
+00:8D14 E69F            	  1558:   inc from_line+1
+                        	  1559: editor_memory_loop2:
+00:8D16 A59F            	  1560:   lda from_line+1
+00:8D18 C5A1            	  1561:   cmp to_line+1
+00:8D1A 900A            	  1562:   bcc editor_memory_loop3   ; less than
+00:8D1C D018            	  1563:   bne editor_memory_done    ; greater than
+00:8D1E A59E            	  1564:   lda from_line             ; equal, so try low-order byte
+00:8D20 C5A0            	  1565:   cmp to_line
+00:8D22 9002            	  1566:   bcc editor_memory_loop3   ; less than
+00:8D24 D010            	  1567:   bne editor_memory_done    ; greater than
+                        	  1568: editor_memory_loop3:
+00:8D26 A5A2            	  1569:   lda current_line
+00:8D28 C910            	  1570:   cmp #16
+00:8D2A 90B7            	  1571:   bcc editor_memory_loop
+00:8D2C 20B392          	  1572:   jsr PUTSP
+00:8D2F 203F8D          	  1573:   jsr editor_memory_show_ascii
+00:8D32 64A2            	  1574:   stz current_line      ; count of bytes shown
+00:8D34 80AD            	  1575:   bra editor_memory_loop
+                        	  1576: 
+                        	  1577: editor_memory_done:
+00:8D36 203F8D          	  1578:   jsr editor_memory_show_ascii
+                        	  1579: editor_memory_aborted:
+00:8D39 202892          	  1580:   jsr CROUT
+00:8D3C 4CCC82          	  1581:   jmp  main_prompt
+                        	  1582: 
+                        	  1583: editor_memory_show_ascii:
+                        	  1584: ;
+                        	  1585: ;  now the ASCII equivalents
+                        	  1586: ;
+00:8D3F A000            	  1587:   ldy #0
+                        	  1588: editor_memory_ascii:
+00:8D41 B1AE            	  1589:   lda (this_line_addr),Y
+00:8D43 C920            	  1590:   cmp #$20
+00:8D45 B002            	  1591:   bcs editor_memory_not_control
+00:8D47 8004            	  1592:   bra editor_memory_show_dot
+                        	  1593: editor_memory_not_control:
+00:8D49 C97F            	  1594:   cmp #$7F
+00:8D4B 9002            	  1595:   bcc editor_memory_not_high
+                        	  1596: editor_memory_show_dot
+00:8D4D A92E            	  1597:   lda #'.'
+                        	  1598: editor_memory_not_high:
+00:8D4F 20AF93          	  1599:   jsr COUT
+00:8D52 20B392          	  1600:   jsr PUTSP
+00:8D55 C8              	  1601:   iny
+00:8D56 C6A2            	  1602:   dec current_line
+00:8D58 D0E7            	  1603:   bne editor_memory_ascii
+                        	  1604: ;
+                        	  1605: ;  adjust the ASCII printing address
+                        	  1606: ;
+00:8D5A A59E            	  1607:   lda from_line
+00:8D5C 85AE            	  1608:   sta this_line_addr
+00:8D5E A59F            	  1609:   lda from_line+1
+00:8D60 85AF            	  1610:   sta this_line_addr+1
                         	  1611: 
-                        	  1612: 
-00:8D66 4164647220507265	  1613: symbol_table_message asciiz "Addr Prev L  T Dsp  Ar Da Ln Name\n"
+00:8D62 202892          	  1612:   jsr CROUT
+00:8D65 60              	  1613:   rts
+                        	  1614: 
+                        	  1615: 
+                        	  1616: 
+                        	  1617: 
+00:8D66 4164647220507265	  1618: symbol_table_message asciiz "Addr Prev L  T Dsp  Ar Da Ln Name\n"
 00:8D6E 76204C2020542044
 00:8D76 7370202041722044
 00:8D7E 61204C6E204E616D
 00:8D86 650A
 00:8D88 00
-                        	  1614: 
-                        	  1615: editor_symbol_table_list  = *
-00:8D89 A966            	  1616:   lda #<symbol_table_message
-00:8D8B A28D            	  1617:   ldx #>symbol_table_message
-00:8D8D 202682          	  1618:   jsr print
                         	  1619: 
-00:8D90 A532            	  1620:   lda  ENDSYM+1    ; get the end of the symbol table
-00:8D92 8541            	  1621:   sta  SYMITM+1    ; make it the current symbol
-00:8D94 A531            	  1622:   lda  ENDSYM
-00:8D96 800B            	  1623:   bra  ST_SYMTBL_LIST_CHECK
+                        	  1620: editor_symbol_table_list  = *
+00:8D89 A966            	  1621:   lda #<symbol_table_message
+00:8D8B A28D            	  1622:   ldx #>symbol_table_message
+00:8D8D 202682          	  1623:   jsr print
                         	  1624: 
-                        	  1625: ST_SYMTBL_LIST_NEXT =  *
-00:8D98 A000            	  1626:   ldy  #SYMPRV
-00:8D9A B140            	  1627:   lda  (SYMITM),Y
-00:8D9C AA              	  1628:   tax
-00:8D9D C8              	  1629:   iny
-00:8D9E B140            	  1630:   lda  (SYMITM),Y
-00:8DA0 8541            	  1631:   sta  SYMITM+1   ; previous link
-00:8DA2 8A              	  1632:   txa
-                        	  1633: ;
-                        	  1634: ;  go to the previous symbol table item
-                        	  1635: ;
-                        	  1636: ST_SYMTBL_LIST_CHECK     =  *
-00:8DA3 8540            	  1637:   sta  SYMITM
-00:8DA5 C9FF            	  1638:   cmp  #<SYMBOL_TABLE_START
-00:8DA7 D009            	  1639:   bne  ST_SYMTBL_LIST_LINE
-00:8DA9 A541            	  1640:   lda  SYMITM+1
-00:8DAB C93F            	  1641:   cmp  #>SYMBOL_TABLE_START
-00:8DAD D003            	  1642:   bne  ST_SYMTBL_LIST_LINE       ; more to go
-00:8DAF 4C388E          	  1643:   jmp  ST_SYMTBL_LIST_DONE       ; finished if symitm and symitm+1 are both zero
-                        	  1644: 
-                        	  1645: ST_SYMTBL_LIST_LINE = *
-00:8DB2 A541            	  1646:   lda  SYMITM+1
-00:8DB4 209D92          	  1647:   jsr  PRBYTE
-00:8DB7 A540            	  1648:   lda  SYMITM
-00:8DB9 209D92          	  1649:   jsr  PRBYTE
-00:8DBC A920            	  1650:   lda  #' '
-00:8DBE 208592          	  1651:   jsr  PRCHAR
-00:8DC1 A001            	  1652:   ldy  #SYMPRV+1
-00:8DC3 B140            	  1653:   lda  (SYMITM),Y
-00:8DC5 209D92          	  1654:   jsr  PRBYTE
-00:8DC8 88              	  1655:   dey
-00:8DC9 B140            	  1656:   lda  (SYMITM),Y
-00:8DCB 209D92          	  1657:   jsr  PRBYTE
-00:8DCE A920            	  1658:   lda  #' '
-00:8DD0 208592          	  1659:   jsr  PRCHAR
-00:8DD3 A002            	  1660:   ldy  #SYMLVL
-00:8DD5 B140            	  1661:   lda  (SYMITM),Y  ; level
-00:8DD7 209D92          	  1662:   jsr  PRBYTE
-00:8DDA A920            	  1663:   lda  #' '
-00:8DDC 208592          	  1664:   jsr  PRCHAR
-00:8DDF A003            	  1665:   ldy  #SYMTYP
-00:8DE1 B140            	  1666:   lda  (SYMITM),Y  ; type
-00:8DE3 208592          	  1667:   jsr  PRCHAR
-00:8DE6 A920            	  1668:   lda  #' '
-00:8DE8 208592          	  1669:   jsr  PRCHAR
-00:8DEB A004            	  1670:   ldy  #SYMDSP
-00:8DED C8              	  1671:   iny
-00:8DEE B140            	  1672:   lda  (SYMITM),Y  ; displacement
-00:8DF0 209D92          	  1673:   jsr  PRBYTE
-00:8DF3 88              	  1674:   dey
-00:8DF4 B140            	  1675:   lda  (SYMITM),Y  ; displacement
-00:8DF6 209D92          	  1676:   jsr  PRBYTE
-00:8DF9 A920            	  1677:   lda  #' '
-00:8DFB 208592          	  1678:   jsr  PRCHAR
-00:8DFE A006            	  1679:   ldy  #SYMARG
-00:8E00 B140            	  1680:   lda  (SYMITM),Y  ; argument count
-00:8E02 209D92          	  1681:   jsr  PRBYTE
-00:8E05 A920            	  1682:   lda  #' '
-00:8E07 208592          	  1683:   jsr  PRCHAR
-00:8E0A A008            	  1684:   ldy  #SYMDAT
-00:8E0C B140            	  1685:   lda  (SYMITM),Y  ; data type
-00:8E0E 209D92          	  1686:   jsr  PRBYTE
-00:8E11 A920            	  1687:   lda  #' '
-00:8E13 208592          	  1688:   jsr  PRCHAR
-00:8E16 A009            	  1689:   ldy  #SYMLEN
-00:8E18 B140            	  1690:   lda  (SYMITM),Y  ; length
-00:8E1A 48              	  1691:   pha
-00:8E1B 209D92          	  1692:   jsr  PRBYTE
-00:8E1E A920            	  1693:   lda  #' '
-00:8E20 208592          	  1694:   jsr  PRCHAR
-00:8E23 A00A            	  1695:   ldy  #SYMNAM
-00:8E25 68              	  1696:   pla
-00:8E26 AA              	  1697:   tax
-                        	  1698: ST_SYMTBL_LIST_NAME = *
-00:8E27 B140            	  1699:   lda  (SYMITM),Y  ; name
-00:8E29 5A              	  1700:   phy
-00:8E2A 208592          	  1701:   jsr  PRCHAR
-00:8E2D 7A              	  1702:   ply
-00:8E2E C8              	  1703:   iny
-00:8E2F CA              	  1704:   dex
-00:8E30 D0F5            	  1705:   bne ST_SYMTBL_LIST_NAME
-00:8E32 202892          	  1706:   jsr CROUT
-00:8E35 4C988D          	  1707:   jmp ST_SYMTBL_LIST_NEXT
-                        	  1708: 
-                        	  1709: ST_SYMTBL_LIST_DONE = *
-                        	  1710: 
-00:8E38 4CCC82          	  1711:   jmp main_prompt
-                        	  1712: 
+00:8D90 A532            	  1625:   lda  ENDSYM+1    ; get the end of the symbol table
+00:8D92 8541            	  1626:   sta  SYMITM+1    ; make it the current symbol
+00:8D94 A531            	  1627:   lda  ENDSYM
+00:8D96 800B            	  1628:   bra  ST_SYMTBL_LIST_CHECK
+                        	  1629: 
+                        	  1630: ST_SYMTBL_LIST_NEXT =  *
+00:8D98 A000            	  1631:   ldy  #SYMPRV
+00:8D9A B140            	  1632:   lda  (SYMITM),Y
+00:8D9C AA              	  1633:   tax
+00:8D9D C8              	  1634:   iny
+00:8D9E B140            	  1635:   lda  (SYMITM),Y
+00:8DA0 8541            	  1636:   sta  SYMITM+1   ; previous link
+00:8DA2 8A              	  1637:   txa
+                        	  1638: ;
+                        	  1639: ;  go to the previous symbol table item
+                        	  1640: ;
+                        	  1641: ST_SYMTBL_LIST_CHECK     =  *
+00:8DA3 8540            	  1642:   sta  SYMITM
+00:8DA5 C9FF            	  1643:   cmp  #<SYMBOL_TABLE_START
+00:8DA7 D009            	  1644:   bne  ST_SYMTBL_LIST_LINE
+00:8DA9 A541            	  1645:   lda  SYMITM+1
+00:8DAB C93F            	  1646:   cmp  #>SYMBOL_TABLE_START
+00:8DAD D003            	  1647:   bne  ST_SYMTBL_LIST_LINE       ; more to go
+00:8DAF 4C388E          	  1648:   jmp  ST_SYMTBL_LIST_DONE       ; finished if symitm and symitm+1 are both zero
+                        	  1649: 
+                        	  1650: ST_SYMTBL_LIST_LINE = *
+00:8DB2 A541            	  1651:   lda  SYMITM+1
+00:8DB4 209D92          	  1652:   jsr  PRBYTE
+00:8DB7 A540            	  1653:   lda  SYMITM
+00:8DB9 209D92          	  1654:   jsr  PRBYTE
+00:8DBC A920            	  1655:   lda  #' '
+00:8DBE 208592          	  1656:   jsr  PRCHAR
+00:8DC1 A001            	  1657:   ldy  #SYMPRV+1
+00:8DC3 B140            	  1658:   lda  (SYMITM),Y
+00:8DC5 209D92          	  1659:   jsr  PRBYTE
+00:8DC8 88              	  1660:   dey
+00:8DC9 B140            	  1661:   lda  (SYMITM),Y
+00:8DCB 209D92          	  1662:   jsr  PRBYTE
+00:8DCE A920            	  1663:   lda  #' '
+00:8DD0 208592          	  1664:   jsr  PRCHAR
+00:8DD3 A002            	  1665:   ldy  #SYMLVL
+00:8DD5 B140            	  1666:   lda  (SYMITM),Y  ; level
+00:8DD7 209D92          	  1667:   jsr  PRBYTE
+00:8DDA A920            	  1668:   lda  #' '
+00:8DDC 208592          	  1669:   jsr  PRCHAR
+00:8DDF A003            	  1670:   ldy  #SYMTYP
+00:8DE1 B140            	  1671:   lda  (SYMITM),Y  ; type
+00:8DE3 208592          	  1672:   jsr  PRCHAR
+00:8DE6 A920            	  1673:   lda  #' '
+00:8DE8 208592          	  1674:   jsr  PRCHAR
+00:8DEB A004            	  1675:   ldy  #SYMDSP
+00:8DED C8              	  1676:   iny
+00:8DEE B140            	  1677:   lda  (SYMITM),Y  ; displacement
+00:8DF0 209D92          	  1678:   jsr  PRBYTE
+00:8DF3 88              	  1679:   dey
+00:8DF4 B140            	  1680:   lda  (SYMITM),Y  ; displacement
+00:8DF6 209D92          	  1681:   jsr  PRBYTE
+00:8DF9 A920            	  1682:   lda  #' '
+00:8DFB 208592          	  1683:   jsr  PRCHAR
+00:8DFE A006            	  1684:   ldy  #SYMARG
+00:8E00 B140            	  1685:   lda  (SYMITM),Y  ; argument count
+00:8E02 209D92          	  1686:   jsr  PRBYTE
+00:8E05 A920            	  1687:   lda  #' '
+00:8E07 208592          	  1688:   jsr  PRCHAR
+00:8E0A A008            	  1689:   ldy  #SYMDAT
+00:8E0C B140            	  1690:   lda  (SYMITM),Y  ; data type
+00:8E0E 209D92          	  1691:   jsr  PRBYTE
+00:8E11 A920            	  1692:   lda  #' '
+00:8E13 208592          	  1693:   jsr  PRCHAR
+00:8E16 A009            	  1694:   ldy  #SYMLEN
+00:8E18 B140            	  1695:   lda  (SYMITM),Y  ; length
+00:8E1A 48              	  1696:   pha
+00:8E1B 209D92          	  1697:   jsr  PRBYTE
+00:8E1E A920            	  1698:   lda  #' '
+00:8E20 208592          	  1699:   jsr  PRCHAR
+00:8E23 A00A            	  1700:   ldy  #SYMNAM
+00:8E25 68              	  1701:   pla
+00:8E26 AA              	  1702:   tax
+                        	  1703: ST_SYMTBL_LIST_NAME = *
+00:8E27 B140            	  1704:   lda  (SYMITM),Y  ; name
+00:8E29 5A              	  1705:   phy
+00:8E2A 208592          	  1706:   jsr  PRCHAR
+00:8E2D 7A              	  1707:   ply
+00:8E2E C8              	  1708:   iny
+00:8E2F CA              	  1709:   dex
+00:8E30 D0F5            	  1710:   bne ST_SYMTBL_LIST_NAME
+00:8E32 202892          	  1711:   jsr CROUT
+00:8E35 4C988D          	  1712:   jmp ST_SYMTBL_LIST_NEXT
                         	  1713: 
-00:8E3B 446F6E650A      	  1714: recover_done asciiz "Done\n"
+                        	  1714: ST_SYMTBL_LIST_DONE = *
+                        	  1715: 
+00:8E38 4CCC82          	  1716:   jmp main_prompt
+                        	  1717: 
+                        	  1718: 
+00:8E3B 446F6E650A      	  1719: recover_done asciiz "Done\n"
 00:8E40 00
-00:8E41 4E6F74206E656564	  1715: recover_not_needed asciiz "Not needed\n"
+00:8E41 4E6F74206E656564	  1720: recover_not_needed asciiz "Not needed\n"
 00:8E49 65640A
 00:8E4C 00
-                        	  1716: 
-                        	  1717: ;
-                        	  1718: ; Recover: if the first byte of the source is 0x00, change it to a space
-                        	  1719: ;
-                        	  1720: editor_recover:
-00:8E4D A900            	  1721:   lda  #<TEXT_START
-00:8E4F 8540            	  1722:   sta  FROM
-00:8E51 A903            	  1723:   lda  #>TEXT_START
-00:8E53 8541            	  1724:   sta  FROM+1
-00:8E55 A000            	  1725:   ldy  #0
-00:8E57 B140            	  1726:   lda  (FROM),Y
-00:8E59 D00E            	  1727:   bne  editor_recover_not_needed
-00:8E5B A920            	  1728:   lda  #' '
-00:8E5D 9140            	  1729:   sta  (FROM),Y
-00:8E5F A93B            	  1730:   lda #<recover_done
-00:8E61 A28E            	  1731:   ldx #>recover_done
-00:8E63 202682          	  1732:   jsr print
-00:8E66 4CCC82          	  1733:   jmp main_prompt
-                        	  1734: 
-                        	  1735: editor_recover_not_needed:
-00:8E69 A941            	  1736:   lda #<recover_not_needed
-00:8E6B A28E            	  1737:   ldx #>recover_not_needed
-00:8E6D 202682          	  1738:   jsr print
-00:8E70 4CCC82          	  1739:   jmp main_prompt
-                        	  1740: 
-                        	  1741: 
-                        	  1742: editor_debug:
-00:8E73 A901            	  1743:   lda #1
-00:8E75 8549            	  1744:   sta  DBGFLG
-00:8E77 852E            	  1745:   sta  DCODE
-00:8E79 4C6B93          	  1746:   jmp  CHK_RUN
-                        	  1747: 
-                        	  1748: editor_trace:
-00:8E7C A980            	  1749:   lda  #$80
-00:8E7E 8549            	  1750:   sta  DBGFLG
-00:8E80 852E            	  1751:   sta  DCODE
-00:8E82 4C6B93          	  1752:   jmp  CHK_RUN
-                        	  1753: 
-                        	  1754: 
-                        	  1755: editor_info  = *
-00:8E85 20F58E          	  1756:   jsr show_source_start
-00:8E88 20CD8E          	  1757:   jsr show_source_end
-00:8E8B 208390          	  1758:   jsr crc_source
-00:8E8E 4CCC82          	  1759:   jmp main_prompt
-                        	  1760: 
-                        	  1761: editor_compile:
-00:8E91 A900            	  1762:   lda  #0
-00:8E93 8542            	  1763:   sta  SYNTAX
-00:8E95 4CADB9          	  1764:   jmp  COMPIL
+                        	  1721: 
+                        	  1722: ;
+                        	  1723: ; Recover: if the first byte of the source is 0x00, change it to a space
+                        	  1724: ;
+                        	  1725: editor_recover:
+00:8E4D A900            	  1726:   lda  #<TEXT_START
+00:8E4F 8540            	  1727:   sta  FROM
+00:8E51 A903            	  1728:   lda  #>TEXT_START
+00:8E53 8541            	  1729:   sta  FROM+1
+00:8E55 A000            	  1730:   ldy  #0
+00:8E57 B140            	  1731:   lda  (FROM),Y
+00:8E59 D00E            	  1732:   bne  editor_recover_not_needed
+00:8E5B A920            	  1733:   lda  #' '
+00:8E5D 9140            	  1734:   sta  (FROM),Y
+00:8E5F A93B            	  1735:   lda #<recover_done
+00:8E61 A28E            	  1736:   ldx #>recover_done
+00:8E63 202682          	  1737:   jsr print
+00:8E66 4CCC82          	  1738:   jmp main_prompt
+                        	  1739: 
+                        	  1740: editor_recover_not_needed:
+00:8E69 A941            	  1741:   lda #<recover_not_needed
+00:8E6B A28E            	  1742:   ldx #>recover_not_needed
+00:8E6D 202682          	  1743:   jsr print
+00:8E70 4CCC82          	  1744:   jmp main_prompt
+                        	  1745: 
+                        	  1746: 
+                        	  1747: editor_debug:
+00:8E73 A901            	  1748:   lda #1
+00:8E75 8549            	  1749:   sta  DBGFLG
+00:8E77 852E            	  1750:   sta  DCODE
+00:8E79 4C6B93          	  1751:   jmp  CHK_RUN
+                        	  1752: 
+                        	  1753: editor_trace:
+00:8E7C A980            	  1754:   lda  #$80
+00:8E7E 8549            	  1755:   sta  DBGFLG
+00:8E80 852E            	  1756:   sta  DCODE
+00:8E82 4C6B93          	  1757:   jmp  CHK_RUN
+                        	  1758: 
+                        	  1759: 
+                        	  1760: editor_info  = *
+00:8E85 20F58E          	  1761:   jsr show_source_start
+00:8E88 20CD8E          	  1762:   jsr show_source_end
+00:8E8B 208390          	  1763:   jsr crc_source
+00:8E8E 4CCC82          	  1764:   jmp main_prompt
                         	  1765: 
-                        	  1766: editor_syntax:
-00:8E98 A901            	  1767:   lda #1
-00:8E9A 8542            	  1768:   sta  SYNTAX
-00:8E9C 4CADB9          	  1769:   jmp  COMPIL
+                        	  1766: editor_compile:
+00:8E91 A900            	  1767:   lda  #0
+00:8E93 8542            	  1768:   sta  SYNTAX
+00:8E95 4CADB9          	  1769:   jmp  COMPIL
                         	  1770: 
-                        	  1771: editor_run:
-00:8E9F A900            	  1772:   lda  #0
-00:8EA1 8549            	  1773:   sta  DBGFLG
-00:8EA3 852E            	  1774:   sta  DCODE
-00:8EA5 4C6B93          	  1775:   jmp  CHK_RUN
-                        	  1776: 
-                        	  1777:   ;
-                        	  1778: show_symbol_table_end:
-00:8EA8 A910            	  1779:   lda  #<symbol_table_ended_message    ; Symbol table ended at
-00:8EAA A293            	  1780:   ldx  #>symbol_table_ended_message
-00:8EAC 202682          	  1781:   jsr  print
-00:8EAF A532            	  1782:   lda  ENDSYM+1
-00:8EB1 209D92          	  1783:   jsr  PRBYTE
-00:8EB4 A531            	  1784:   lda  ENDSYM
-00:8EB6 205293          	  1785:   jsr  PRBYTECR
-00:8EB9 60              	  1786:   rts
-                        	  1787: 
-                        	  1788: 
-00:8EBA 536F757263652065	  1789: source_ended_message asciiz "Source ends   at $"
+                        	  1771: editor_syntax:
+00:8E98 A901            	  1772:   lda #1
+00:8E9A 8542            	  1773:   sta  SYNTAX
+00:8E9C 4CADB9          	  1774:   jmp  COMPIL
+                        	  1775: 
+                        	  1776: editor_run:
+00:8E9F A900            	  1777:   lda  #0
+00:8EA1 8549            	  1778:   sta  DBGFLG
+00:8EA3 852E            	  1779:   sta  DCODE
+00:8EA5 4C6B93          	  1780:   jmp  CHK_RUN
+                        	  1781: 
+                        	  1782:   ;
+                        	  1783: show_symbol_table_end:
+00:8EA8 A910            	  1784:   lda  #<symbol_table_ended_message    ; Symbol table ended at
+00:8EAA A293            	  1785:   ldx  #>symbol_table_ended_message
+00:8EAC 202682          	  1786:   jsr  print
+00:8EAF A532            	  1787:   lda  ENDSYM+1
+00:8EB1 209D92          	  1788:   jsr  PRBYTE
+00:8EB4 A531            	  1789:   lda  ENDSYM
+00:8EB6 205293          	  1790:   jsr  PRBYTECR
+00:8EB9 60              	  1791:   rts
+                        	  1792: 
+                        	  1793: 
+00:8EBA 536F757263652065	  1794: source_ended_message asciiz "Source ends   at $"
 00:8EC2 6E64732020206174
 00:8ECA 2024
 00:8ECC 00
-                        	  1790: show_source_end:
-00:8ECD A9BA            	  1791:   lda #<source_ended_message
-00:8ECF A28E            	  1792:   ldx #>source_ended_message
-00:8ED1 202682          	  1793:   jsr print
-00:8ED4 20898C          	  1794:   jsr find_source_end
-00:8ED7 A524            	  1795:   lda PCODE+1
-00:8ED9 209D92          	  1796:   jsr PRBYTE
-00:8EDC A523            	  1797:   lda PCODE
-00:8EDE 205293          	  1798:   jsr PRBYTECR
-00:8EE1 60              	  1799:   rts
-                        	  1800: 
-00:8EE2 536F757263652073	  1801: source_starts_message asciiz "Source starts at $"    ; source starts at
+                        	  1795: show_source_end:
+00:8ECD A9BA            	  1796:   lda #<source_ended_message
+00:8ECF A28E            	  1797:   ldx #>source_ended_message
+00:8ED1 202682          	  1798:   jsr print
+00:8ED4 20898C          	  1799:   jsr find_source_end
+00:8ED7 A524            	  1800:   lda PCODE+1
+00:8ED9 209D92          	  1801:   jsr PRBYTE
+00:8EDC A523            	  1802:   lda PCODE
+00:8EDE 205293          	  1803:   jsr PRBYTECR
+00:8EE1 60              	  1804:   rts
+                        	  1805: 
+00:8EE2 536F757263652073	  1806: source_starts_message asciiz "Source starts at $"    ; source starts at
 00:8EEA 7461727473206174
 00:8EF2 2024
 00:8EF4 00
-                        	  1802: show_source_start:
-00:8EF5 A9E2            	  1803:   lda #<source_starts_message
-00:8EF7 A28E            	  1804:   ldx #>source_starts_message
-00:8EF9 202682          	  1805:   jsr print
-00:8EFC A903            	  1806:   lda #>TEXT_START
-00:8EFE 209D92          	  1807:   jsr PRBYTE
-00:8F01 A900            	  1808:   lda #<TEXT_START
-00:8F03 205293          	  1809:   jsr PRBYTECR
-00:8F06 60              	  1810:   rts
-                        	  1811: 
-                        	  1812: editor_assemble:
-00:8F07 4C4298          	  1813:   jmp ASSEMBLE
-                        	  1814: 
-                        	  1815: 
+                        	  1807: show_source_start:
+00:8EF5 A9E2            	  1808:   lda #<source_starts_message
+00:8EF7 A28E            	  1809:   ldx #>source_starts_message
+00:8EF9 202682          	  1810:   jsr print
+00:8EFC A903            	  1811:   lda #>TEXT_START
+00:8EFE 209D92          	  1812:   jsr PRBYTE
+00:8F01 A900            	  1813:   lda #<TEXT_START
+00:8F03 205293          	  1814:   jsr PRBYTECR
+00:8F06 60              	  1815:   rts
                         	  1816: 
-                        	  1817: 
-                        	  1818: ;16-bit number comparison...
-                        	  1819: ;
-                        	  1820: ;         lda #>x               ; MSB of 1st number
-                        	  1821: ;         cmp #>y               ; MSB of 2nd number
-                        	  1822: ;         bcc islower           ; X < Y
-                        	  1823: ;
-                        	  1824: ;         bne ishigher          ; X > Y
-                        	  1825: ;
-                        	  1826: ;         lda #<x               ; LSB of 1st number
-                        	  1827: ;         cmp #<y               ; LSB of 2nd number
-                        	  1828: ;         bcc islower           ; X < Y
-                        	  1829: ;
-                        	  1830: ;         beq issame            ; X = Y
-                        	  1831: ;
-                        	  1832: ;         bne ishigher          ; X > Y
-                        	  1833: ;
+                        	  1817: editor_assemble:
+00:8F07 4C4298          	  1818:   jmp ASSEMBLE
+                        	  1819: 
+                        	  1820: 
+                        	  1821: 
+                        	  1822: 
+                        	  1823: ;16-bit number comparison...
+                        	  1824: ;
+                        	  1825: ;         lda #>x               ; MSB of 1st number
+                        	  1826: ;         cmp #>y               ; MSB of 2nd number
+                        	  1827: ;         bcc islower           ; X < Y
+                        	  1828: ;
+                        	  1829: ;         bne ishigher          ; X > Y
+                        	  1830: ;
+                        	  1831: ;         lda #<x               ; LSB of 1st number
+                        	  1832: ;         cmp #<y               ; LSB of 2nd number
+                        	  1833: ;         bcc islower           ; X < Y
                         	  1834: ;
-                        	  1835: 
+                        	  1835: ;         beq issame            ; X = Y
+                        	  1836: ;
+                        	  1837: ;         bne ishigher          ; X > Y
+                        	  1838: ;
+                        	  1839: ;
+                        	  1840: 
 
 Source: "gpascal.asm"
                         	   175:   .include "utilities.inc"
@@ -4463,7 +4468,7 @@ Source: "errors.inc"
 00:9808 A929            	   153:   lda #')'
 00:980A 20AF93          	   154:   jsr COUT
 00:980D 20B392          	   155:   jsr PUTSP
-00:9810 201E8C          	   156:   jsr show_current_line_number
+00:9810 20178C          	   156:   jsr show_current_line_number
 00:9813 A59C            	   157:   lda token_line_start
 00:9815 85A6            	   158:   sta mem_move_src
 00:9817 A59D            	   159:   lda token_line_start+1
@@ -8226,62 +8231,62 @@ Source: "interpreter.inc"
                         	    18: 
                         	    19: ;                 Code            Description                         Arguments
                         	    20: ;                 ----            -----------------------------       -----------------------
-                        	    21: PCODE_LIT     = 	$00 ; Dec:  0 - Load constant                     - 3-byte literal (number)
+                        	    21: PCODE_LIT     =   $00 ; Dec:  0 - Load constant                     - 3-byte literal (number)
                         	    22: PCODE_STACK   =   $01 ; Dec:  1 - Alter runtime stack to address    - 2-byte stack address
-                        	    23: PCODE_NEG     = 	$02 ; Dec:  2 - Unary minus 0 - (sp)              - none
+                        	    23: PCODE_NEG     =   $02 ; Dec:  2 - Unary minus 0 - (sp)              - none
                         	    24: PCODE_LIB_CALL =  $03 ; Dec:  3 - Call library function/procedure   - absolute address
-                        	    25: PCODE_ADD     = 	$04 ; Dec:  4 - Add (sp) to (sp - 1)              - none
-                        	    26: PCODE_SUB     = 	$06 ; Dec:  6 - Subtract (sp) from (sp - 1)       - none
-                        	    27: PCODE_MUL     = 	$08 ; Dec:  8 - Multiply (sp) * (sp - 1)          - none
-                        	    28: PCODE_DIV     = 	$0A ; Dec: 10 - Divide (sp - 1) / (sp)            - none
-                        	    29: PCODE_MOD     = 	$0B ; Dec: 11 - Modulus (sp - 1) MOD (sp)         - none
-                        	    30: PCODE_ADRNN   = 	$0C ; Dec: 12 - Address of integer                - level, displ
-                        	    31: PCODE_ADRNC   = 	$0D ; Dec: 13 - Address of character              - level, displ
-                        	    32: PCODE_ADRAN   = 	$0E ; Dec: 14 - Address of integer array          - level, displ
-                        	    33: PCODE_ADRAC   = 	$0F ; Dec: 15 - Address of character array        - level, displ
-                        	    34: PCODE_EQL     = 	$10 ; Dec: 16 - Test (sp - 1) == (sp)             - none
-                        	    35: PCODE_FINISHD = 	$11 ; Dec: 17 - Stop run (end program)            - none
-                        	    36: PCODE_NEQ     = 	$12 ; Dec: 18 - Test (sp - 1) != (sp)             - none
-                        	    37: PCODE_LSS     = 	$14 ; Dec: 20 - Test (sp - 1) < (sp)              - none
-                        	    38: PCODE_GEQ     = 	$16 ; Dec: 22 - Test (sp - 1) >= (sp)             - none
-                        	    39: PCODE_GTR     = 	$18 ; Dec: 24 - Test (sp - 1) > (sp)              - none
-                        	    40: PCODE_LEQ     = 	$19 ; Dec: 25 - Test (sp - 1) <= (sp)             - none
-                        	    41: PCODE_ORR     = 	$1A ; Dec: 26 - OR  (sp - 1) | (sp)               - none
-                        	    42: PCODE_AND     = 	$1B ; Dec: 27 - AND (sp - 1) & (sp)               - none
-                        	    43: PCODE_INP     = 	$1C ; Dec: 28 - Input number                      - none
-                        	    44: PCODE_INPC    = 	$1D ; Dec: 29 - Input character                   - none
-                        	    45: PCODE_OUT     = 	$1E ; Dec: 30 - Output number                     - none
-                        	    46: PCODE_OUTC    = 	$1F ; Dec: 31 - Output character                  - none
-                        	    47: PCODE_EOR     = 	$20 ; Dec: 32 - Not (sp) (logical negate)         - none
-                        	    48: PCODE_OUH     = 	$21 ; Dec: 33 - Output hex number                 - none
-                        	    49: PCODE_SHL     = 	$22 ; Dec: 34 - Shift left (sp) bits              - none
-                        	    50: PCODE_OUS     = 	$23 ; Dec: 35 - Output string                     - length, string
-                        	    51: PCODE_SHR     = 	$24 ; Dec: 36 - Shift right (sp) bits             - none
-                        	    52: PCODE_INS     = 	$25 ; Dec: 37 - Input string into array           - max, level, displ
-                        	    53: PCODE_INC     = 	$26 ; Dec: 38 - Increment (sp) by 1               - none
-                        	    54: PCODE_CLL     = 	$27 ; Dec: 39 - Relative procedure/function call  - level, relative address
-                        	    55: PCODE_DEC     = 	$28 ; Dec: 40 - Decrement (sp) by 1               - none
-                        	    56: PCODE_RTN     = 	$29 ; Dec: 41 - Procedure/function return         - none
-                        	    57: PCODE_MOV     = 	$2A ; Dec: 42 - Copy (sp) to (sp + 1)             - none
-                        	    58: PCODE_CLA     = 	$2B ; Dec: 43 - Call absolute address             - none
-                        	    59: PCODE_LOD     = 	$2C ; Dec: 44 - Load integer onto stack           - level, displ
-                        	    60: PCODE_LODC    = 	$2D ; Dec: 45 - Load character onto stack         - level, displ
-                        	    61: PCODE_LDA     = 	$2E ; Dec: 46 - Load absolute address integer     - none
-                        	    62: PCODE_LDAC    = 	$2F ; Dec: 47 - Load absolute address character   - none
-                        	    63: PCODE_LDI     = 	$30 ; Dec: 48 - Load integer indexed              - level, displ
-                        	    64: PCODE_LDIC    = 	$31 ; Dec: 49 - Load character indexed            - level, displ
-                        	    65: PCODE_STO     = 	$32 ; Dec: 50 - Store integer                     - level, displ
-                        	    66: PCODE_STOC    = 	$33 ; Dec: 51 - Store character                   - level, displ
-                        	    67: PCODE_STA     = 	$34 ; Dec: 52 - Store integer absolute address    - none
-                        	    68: PCODE_STAC    = 	$35 ; Dec: 53 - Store character absolute address  - none
-                        	    69: PCODE_STI     = 	$36 ; Dec: 54 - Store integer indexed             - level, displ
-                        	    70: PCODE_STIC    = 	$37 ; Dec: 55 - Store character indexed           - level, displ
-                        	    71: PCODE_ABSCLL  = 	$38 ; Dec: 56 - Absolute procedure/function call  - level, absolute address
-                        	    72: PCODE_XOR     = 	$3A ; Dec: 58 - XOR (sp - 1) ^ (sp)               - none
-                        	    73: PCODE_INT     = 	$3B ; Dec: 59 - Increment stack pointer           - increment
-                        	    74: PCODE_JMP     = 	$3C ; Dec: 60 - Jump unconditionally              - relative address
-                        	    75: PCODE_JMZ     = 	$3D ; Dec: 61 - Jump if (sp) zero                 - relative address
-                        	    76: PCODE_JM1     = 	$3E ; Dec: 62 - Jump if (sp) not zero             - relative address
+                        	    25: PCODE_ADD     =   $04 ; Dec:  4 - Add (sp) to (sp - 1)              - none
+                        	    26: PCODE_SUB     =   $06 ; Dec:  6 - Subtract (sp) from (sp - 1)       - none
+                        	    27: PCODE_MUL     =   $08 ; Dec:  8 - Multiply (sp) * (sp - 1)          - none
+                        	    28: PCODE_DIV     =   $0A ; Dec: 10 - Divide (sp - 1) / (sp)            - none
+                        	    29: PCODE_MOD     =   $0B ; Dec: 11 - Modulus (sp - 1) MOD (sp)         - none
+                        	    30: PCODE_ADRNN   =   $0C ; Dec: 12 - Address of integer                - level, displ
+                        	    31: PCODE_ADRNC   =   $0D ; Dec: 13 - Address of character              - level, displ
+                        	    32: PCODE_ADRAN   =   $0E ; Dec: 14 - Address of integer array          - level, displ
+                        	    33: PCODE_ADRAC   =   $0F ; Dec: 15 - Address of character array        - level, displ
+                        	    34: PCODE_EQL     =   $10 ; Dec: 16 - Test (sp - 1) == (sp)             - none
+                        	    35: PCODE_FINISHD =   $11 ; Dec: 17 - Stop run (end program)            - none
+                        	    36: PCODE_NEQ     =   $12 ; Dec: 18 - Test (sp - 1) != (sp)             - none
+                        	    37: PCODE_LSS     =   $14 ; Dec: 20 - Test (sp - 1) < (sp)              - none
+                        	    38: PCODE_GEQ     =   $16 ; Dec: 22 - Test (sp - 1) >= (sp)             - none
+                        	    39: PCODE_GTR     =   $18 ; Dec: 24 - Test (sp - 1) > (sp)              - none
+                        	    40: PCODE_LEQ     =   $19 ; Dec: 25 - Test (sp - 1) <= (sp)             - none
+                        	    41: PCODE_ORR     =   $1A ; Dec: 26 - OR  (sp - 1) | (sp)               - none
+                        	    42: PCODE_AND     =   $1B ; Dec: 27 - AND (sp - 1) & (sp)               - none
+                        	    43: PCODE_INP     =   $1C ; Dec: 28 - Input number                      - none
+                        	    44: PCODE_INPC    =   $1D ; Dec: 29 - Input character                   - none
+                        	    45: PCODE_OUT     =   $1E ; Dec: 30 - Output number                     - none
+                        	    46: PCODE_OUTC    =   $1F ; Dec: 31 - Output character                  - none
+                        	    47: PCODE_EOR     =   $20 ; Dec: 32 - Not (sp) (logical negate)         - none
+                        	    48: PCODE_OUH     =   $21 ; Dec: 33 - Output hex number                 - none
+                        	    49: PCODE_SHL     =   $22 ; Dec: 34 - Shift left (sp) bits              - none
+                        	    50: PCODE_OUS     =   $23 ; Dec: 35 - Output string                     - length, string
+                        	    51: PCODE_SHR     =   $24 ; Dec: 36 - Shift right (sp) bits             - none
+                        	    52: PCODE_INS     =   $25 ; Dec: 37 - Input string into array           - max, level, displ
+                        	    53: PCODE_INC     =   $26 ; Dec: 38 - Increment (sp) by 1               - none
+                        	    54: PCODE_CLL     =   $27 ; Dec: 39 - Relative procedure/function call  - level, relative address
+                        	    55: PCODE_DEC     =   $28 ; Dec: 40 - Decrement (sp) by 1               - none
+                        	    56: PCODE_RTN     =   $29 ; Dec: 41 - Procedure/function return         - none
+                        	    57: PCODE_MOV     =   $2A ; Dec: 42 - Copy (sp) to (sp + 1)             - none
+                        	    58: PCODE_CLA     =   $2B ; Dec: 43 - Call absolute address             - none
+                        	    59: PCODE_LOD     =   $2C ; Dec: 44 - Load integer onto stack           - level, displ
+                        	    60: PCODE_LODC    =   $2D ; Dec: 45 - Load character onto stack         - level, displ
+                        	    61: PCODE_LDA     =   $2E ; Dec: 46 - Load absolute address integer     - none
+                        	    62: PCODE_LDAC    =   $2F ; Dec: 47 - Load absolute address character   - none
+                        	    63: PCODE_LDI     =   $30 ; Dec: 48 - Load integer indexed              - level, displ
+                        	    64: PCODE_LDIC    =   $31 ; Dec: 49 - Load character indexed            - level, displ
+                        	    65: PCODE_STO     =   $32 ; Dec: 50 - Store integer                     - level, displ
+                        	    66: PCODE_STOC    =   $33 ; Dec: 51 - Store character                   - level, displ
+                        	    67: PCODE_STA     =   $34 ; Dec: 52 - Store integer absolute address    - none
+                        	    68: PCODE_STAC    =   $35 ; Dec: 53 - Store character absolute address  - none
+                        	    69: PCODE_STI     =   $36 ; Dec: 54 - Store integer indexed             - level, displ
+                        	    70: PCODE_STIC    =   $37 ; Dec: 55 - Store character indexed           - level, displ
+                        	    71: PCODE_ABSCLL  =   $38 ; Dec: 56 - Absolute procedure/function call  - level, absolute address
+                        	    72: PCODE_XOR     =   $3A ; Dec: 58 - XOR (sp - 1) ^ (sp)               - none
+                        	    73: PCODE_INT     =   $3B ; Dec: 59 - Increment stack pointer           - increment
+                        	    74: PCODE_JMP     =   $3C ; Dec: 60 - Jump unconditionally              - relative address
+                        	    75: PCODE_JMZ     =   $3D ; Dec: 61 - Jump if (sp) zero                 - relative address
+                        	    76: PCODE_JM1     =   $3E ; Dec: 62 - Jump if (sp) not zero             - relative address
                         	    77: PCODE_OUTCR   =   $40 ; Dec: 64 - Output a carriage-return          - none
                         	    78: PCODE_LCD_WRITE_NUM = $42 ; Dec: 66 - Write number to LCD           - none
                         	    79: PCODE_LCD_WRITE_STR = $43 ; Dec: 67 - Write string to LCD           - none
@@ -8300,71 +8305,71 @@ Source: "interpreter.inc"
                         	    92: ;  Y is zero when starting to execute these routines
                         	    93: ;
                         	    94: execution_address_table  =  *
-00:ACBA EBAF            	    95:   word  EX_LIT             ; $00 = LIT     	Load constant
+00:ACBA EBAF            	    95:   word  EX_LIT             ; $00 = LIT      Load constant
 00:ACBC DFB3            	    96:   word  EX_NEW_STACK       ; $01 =          Change stack to addr
-00:ACBE FDAF            	    97:   word  EX_NEG             ; $02 = NEG     	Unary minus: 0 - (sp)
+00:ACBE FDAF            	    97:   word  EX_NEG             ; $02 = NEG      Unary minus: 0 - (sp)
 00:ACC0 6BB5            	    98:   word  EX_LIB_CALL        ; $03 = LIB_CALL Library function call
-00:ACC2 06B0            	    99:   word  EX_ADD             ; $04 = ADD     	Add (sp) to (sp - 1)
+00:ACC2 06B0            	    99:   word  EX_ADD             ; $04 = ADD      Add (sp) to (sp - 1)
 00:ACC4 19AF            	   100:   word  EX_INVINS          ; $05 =          NOT IMPLEMENTED
-00:ACC6 0FB0            	   101:   word  EX_SUB             ; $06 = SUB     	Subtract (sp) from (sp - 1)
+00:ACC6 0FB0            	   101:   word  EX_SUB             ; $06 = SUB      Subtract (sp) from (sp - 1)
 00:ACC8 19AF            	   102:   word  EX_INVINS          ; $07 =          NOT IMPLEMENTED
-00:ACCA 1BB0            	   103:   word  EX_MUL             ; $08 = MUL     	Multiply (sp) * (sp - 1)
+00:ACCA 1BB0            	   103:   word  EX_MUL             ; $08 = MUL      Multiply (sp) * (sp - 1)
 00:ACCC 19AF            	   104:   word  EX_INVINS          ; $09 =          NOT IMPLEMENTED
-00:ACCE 56B0            	   105:   word  EX_DIV             ; $0A = DIV     	Divide (sp - 1) / (sp)
-00:ACD0 2BB0            	   106:   word  EX_MOD             ; $0B = MOD     	Modulus (sp - 1) MOD (sp)
-00:ACD2 CAB4            	   107:   word  EX_ADRNN           ; $0C = ADRNN   	Address of integer
-00:ACD4 BAB4            	   108:   word  EX_ADRNC           ; $0D = ADRNC   	Address of character
-00:ACD6 D8B4            	   109:   word  EX_ADRAN           ; $0E = ADRAN   	Address of integer array
-00:ACD8 DEB4            	   110:   word  EX_ADRAC           ; $0F = ADRAC   	Address of character array
-00:ACDA 73B0            	   111:   word  EX_EQL             ; $10 = EQL     	Test (sp - 1) == (sp)
-00:ACDC 66AE            	   112:   word  EX_FINISHD         ; $11 = FINISHD 	Stop run (end program)
-00:ACDE 8DB0            	   113:   word  EX_NEQ             ; $12 = NEQ     	Test (sp - 1) != (sp)
+00:ACCE 56B0            	   105:   word  EX_DIV             ; $0A = DIV      Divide (sp - 1) / (sp)
+00:ACD0 2BB0            	   106:   word  EX_MOD             ; $0B = MOD      Modulus (sp - 1) MOD (sp)
+00:ACD2 CAB4            	   107:   word  EX_ADRNN           ; $0C = ADRNN    Address of integer
+00:ACD4 BAB4            	   108:   word  EX_ADRNC           ; $0D = ADRNC    Address of character
+00:ACD6 D8B4            	   109:   word  EX_ADRAN           ; $0E = ADRAN    Address of integer array
+00:ACD8 DEB4            	   110:   word  EX_ADRAC           ; $0F = ADRAC    Address of character array
+00:ACDA 73B0            	   111:   word  EX_EQL             ; $10 = EQL      Test (sp - 1) == (sp)
+00:ACDC 66AE            	   112:   word  EX_FINISHD         ; $11 = FINISHD  Stop run (end program)
+00:ACDE 8DB0            	   113:   word  EX_NEQ             ; $12 = NEQ      Test (sp - 1) != (sp)
 00:ACE0 19AF            	   114:   word  EX_INVINS          ; $13 =          NOT IMPLEMENTED
-00:ACE2 96B0            	   115:   word  EX_LSS             ; $14 = LSS     	Test (sp - 1) < (sp)
+00:ACE2 96B0            	   115:   word  EX_LSS             ; $14 = LSS      Test (sp - 1) < (sp)
 00:ACE4 19AF            	   116:   word  EX_INVINS          ; $15 =          NOT IMPLEMENTED
-00:ACE6 AEB0            	   117:   word  EX_GEQ             ; $16 = GEQ     	Test (sp - 1) >= (sp)
+00:ACE6 AEB0            	   117:   word  EX_GEQ             ; $16 = GEQ      Test (sp - 1) >= (sp)
 00:ACE8 19AF            	   118:   word  EX_INVINS          ; $17 =          NOT IMPLEMENTED
-00:ACEA A2B0            	   119:   word  EX_GTR             ; $18 = GTR     	Test (sp - 1) > (sp)
-00:ACEC BAB0            	   120:   word  EX_LEQ             ; $19 = LEQ     	Test (sp - 1) <= (sp)
-00:ACEE CFB0            	   121:   word  EX_ORR             ; $1A = ORR     	OR  (sp - 1) | (sp)
-00:ACF0 D8B0            	   122:   word  EX_AND             ; $1B = AND     	AND (sp - 1) & (sp)
-00:ACF2 58B2            	   123:   word  EX_INP             ; $1C = INP     	Input number
-00:ACF4 20B4            	   124:   word  EX_INPC            ; $1D = INPC    	Input character
-00:ACF6 98B2            	   125:   word  EX_OUT             ; $1E = OUT     	Output number
-00:ACF8 3AB4            	   126:   word  EX_OUTC            ; $1F = OUTC    	Output character
-00:ACFA E1B0            	   127:   word  EX_EOR             ; $20 = EOR     	Not (sp) (logical negate)
-00:ACFC ACB2            	   128:   word  EX_OUH             ; $21 = OUH     	Output hex number
-00:ACFE EAB0            	   129:   word  EX_SHL             ; $22 = SHL     	Shift left (sp) bits
-00:AD00 CCB2            	   130:   word  EX_OUS             ; $23 = OUS     	Output string
-00:AD02 F6B0            	   131:   word  EX_SHR             ; $24 = SHR     	Shift right (sp) bits
-00:AD04 5CB4            	   132:   word  EX_INS             ; $25 = INS     	Input string into array
-00:AD06 02B1            	   133:   word  EX_INC             ; $26 = INC     	Increment (sp) by 1
-00:AD08 06B3            	   134:   word  EX_CLL             ; $27 = CLL     	Relative procedure/function call
-00:AD0A 1AB1            	   135:   word  EX_DEC             ; $28 = DEC     	Decrement (sp) by 1
-00:AD0C 1FB2            	   136:   word  EX_RTN             ; $29 = RTN     	Procedure/function return
-00:AD0E 32B1            	   137:   word  EX_MOV             ; $2A = MOV     	Copy (sp) to (sp + 1)
-00:AD10 95B3            	   138:   word  EX_CLA             ; $2B = CLA     	Call absolute address
-00:AD12 55B1            	   139:   word  EX_LOD             ; $2C = LOD     	Load integer onto stack
-00:AD14 43B1            	   140:   word  EX_LODC            ; $2D = LODC    	Load character onto stack
-00:AD16 76B1            	   141:   word  EX_LDA             ; $2E = LDA     	Load absolute address integer
-00:AD18 6BB1            	   142:   word  EX_LDAC            ; $2F = LDAC    	Load absolute address character
-00:AD1A B1B1            	   143:   word  EX_LDI             ; $30 = LDI     	Load integer indexed
-00:AD1C ABB1            	   144:   word  EX_LDIC            ; $31 = LDIC    	Load character indexed
-00:AD1E C4B1            	   145:   word  EX_STO             ; $32 = STO     	Store integer
-00:AD20 B7B1            	   146:   word  EX_STOC            ; $33 = STOC    	Store character
-00:AD22 D7B1            	   147:   word  EX_STA             ; $34 = STA     	Store integer absolute address
-00:AD24 EDB1            	   148:   word  EX_STAC            ; $35 = STAC    	Store character absolute address
-00:AD26 04B2            	   149:   word  EX_STI             ; $36 = STI     	Store integer indexed
-00:AD28 F6B1            	   150:   word  EX_STIC            ; $37 = STIC    	Store character indexed
-00:AD2A FFB2            	   151:   word  EX_ABSCLL          ; $38 = ABSCLL  	Absolute procedure/function call
+00:ACEA A2B0            	   119:   word  EX_GTR             ; $18 = GTR      Test (sp - 1) > (sp)
+00:ACEC BAB0            	   120:   word  EX_LEQ             ; $19 = LEQ      Test (sp - 1) <= (sp)
+00:ACEE CFB0            	   121:   word  EX_ORR             ; $1A = ORR      OR  (sp - 1) | (sp)
+00:ACF0 D8B0            	   122:   word  EX_AND             ; $1B = AND      AND (sp - 1) & (sp)
+00:ACF2 58B2            	   123:   word  EX_INP             ; $1C = INP      Input number
+00:ACF4 20B4            	   124:   word  EX_INPC            ; $1D = INPC     Input character
+00:ACF6 98B2            	   125:   word  EX_OUT             ; $1E = OUT      Output number
+00:ACF8 3AB4            	   126:   word  EX_OUTC            ; $1F = OUTC     Output character
+00:ACFA E1B0            	   127:   word  EX_EOR             ; $20 = EOR      Not (sp) (logical negate)
+00:ACFC ACB2            	   128:   word  EX_OUH             ; $21 = OUH      Output hex number
+00:ACFE EAB0            	   129:   word  EX_SHL             ; $22 = SHL      Shift left (sp) bits
+00:AD00 CCB2            	   130:   word  EX_OUS             ; $23 = OUS      Output string
+00:AD02 F6B0            	   131:   word  EX_SHR             ; $24 = SHR      Shift right (sp) bits
+00:AD04 5CB4            	   132:   word  EX_INS             ; $25 = INS      Input string into array
+00:AD06 02B1            	   133:   word  EX_INC             ; $26 = INC      Increment (sp) by 1
+00:AD08 06B3            	   134:   word  EX_CLL             ; $27 = CLL      Relative procedure/function call
+00:AD0A 1AB1            	   135:   word  EX_DEC             ; $28 = DEC      Decrement (sp) by 1
+00:AD0C 1FB2            	   136:   word  EX_RTN             ; $29 = RTN      Procedure/function return
+00:AD0E 32B1            	   137:   word  EX_MOV             ; $2A = MOV      Copy (sp) to (sp + 1)
+00:AD10 95B3            	   138:   word  EX_CLA             ; $2B = CLA      Call absolute address
+00:AD12 55B1            	   139:   word  EX_LOD             ; $2C = LOD      Load integer onto stack
+00:AD14 43B1            	   140:   word  EX_LODC            ; $2D = LODC     Load character onto stack
+00:AD16 76B1            	   141:   word  EX_LDA             ; $2E = LDA      Load absolute address integer
+00:AD18 6BB1            	   142:   word  EX_LDAC            ; $2F = LDAC     Load absolute address character
+00:AD1A B1B1            	   143:   word  EX_LDI             ; $30 = LDI      Load integer indexed
+00:AD1C ABB1            	   144:   word  EX_LDIC            ; $31 = LDIC     Load character indexed
+00:AD1E C4B1            	   145:   word  EX_STO             ; $32 = STO      Store integer
+00:AD20 B7B1            	   146:   word  EX_STOC            ; $33 = STOC     Store character
+00:AD22 D7B1            	   147:   word  EX_STA             ; $34 = STA      Store integer absolute address
+00:AD24 EDB1            	   148:   word  EX_STAC            ; $35 = STAC     Store character absolute address
+00:AD26 04B2            	   149:   word  EX_STI             ; $36 = STI      Store integer indexed
+00:AD28 F6B1            	   150:   word  EX_STIC            ; $37 = STIC     Store character indexed
+00:AD2A FFB2            	   151:   word  EX_ABSCLL          ; $38 = ABSCLL   Absolute procedure/function call
 00:AD2C 19AF            	   152:   word  EX_INVINS          ; $39 =          NOT IMPLEMENTED
-00:AD2E C6B0            	   153:   word  EX_XOR             ; $3A = XOR     	XOR (sp - 1) ^ (sp)
-00:AD30 B5B3            	   154:   word  EX_INT             ; $3B = INT     	Increment stack pointer
-00:AD32 F1B3            	   155:   word  EX_JMP             ; $3C = JMP     	Jump unconditionally
-00:AD34 04B4            	   156:   word  EX_JMZ             ; $3D = JMZ     	Jump if (sp) zero
-00:AD36 15B4            	   157:   word  EX_JM1             ; $3E = JM1     	Jump if (sp) not zero
+00:AD2E C6B0            	   153:   word  EX_XOR             ; $3A = XOR      XOR (sp - 1) ^ (sp)
+00:AD30 B5B3            	   154:   word  EX_INT             ; $3B = INT      Increment stack pointer
+00:AD32 F1B3            	   155:   word  EX_JMP             ; $3C = JMP      Jump unconditionally
+00:AD34 04B4            	   156:   word  EX_JMZ             ; $3D = JMZ      Jump if (sp) zero
+00:AD36 15B4            	   157:   word  EX_JM1             ; $3E = JM1      Jump if (sp) not zero
 00:AD38 19AF            	   158:   word  EX_INVINS          ; $3F =          NOT IMPLEMENTED
-00:AD3A C6AE            	   159:   word  EX_OUTCR           ; $40 = OUTCR   	Output a carriage-return
+00:AD3A C6AE            	   159:   word  EX_OUTCR           ; $40 = OUTCR    Output a carriage-return
 00:AD3C 19AF            	   160:   word  EX_INVINS          ; $41 =          NOT IMPLEMENTED
 00:AD3E 9DB2            	   161:   word  EX_LCD_WRITE_NUM   ; $42 = LCD_WRITE_NUM  Write number to LCD
 00:AD40 D1B2            	   162:   word  EX_LCD_WRITE_STR   ; $43 = LCD_WRITE_STR  Write string to LCD
@@ -9286,7 +9291,7 @@ Source: "interpreter.inc"
 00:B1F2 A000            	  1060:   ldy  #0
 00:B1F4 F0F2            	  1061:   beq  EX_STA5
                         	  1062: ;
-                        	  1063: ;   	Store character indexed
+                        	  1063: ;     Store character indexed
                         	  1064: ;
                         	  1065: EX_STIC:
 00:B1F6 2071AF          	  1066:   jsr  PULTOP
@@ -9296,7 +9301,7 @@ Source: "interpreter.inc"
 00:B200 A002            	  1070:   ldy  #2
 00:B202 D0BB            	  1071:   bne  EX_STO5
                         	  1072: ;
-                        	  1073: ;   	Store integer indexed
+                        	  1073: ;     Store integer indexed
                         	  1074: ;
                         	  1075: EX_STI :
 00:B204 2071AF          	  1076:   jsr  PULTOP
@@ -11215,7 +11220,7 @@ Source: "compiler.inc"
 00:BB79 68              	   393:          PLA
 00:BB7A C92D            	   394:          CMP  #'-'
 00:BB7C D005            	   395:          BNE  SIM3
-00:BB7E A902            	   396:          LDA  #PCODE_NEG      ; NEG     	Negate (sp)
+00:BB7E A902            	   396:          LDA  #PCODE_NEG      ; NEG       Negate (sp)
 00:BB80 20C8C6          	   397:          JSR  GENNOP     ; NEGATE
 00:BB83 A593            	   398: SIM3     LDA  token_type
 00:BB85 C92B            	   399:          CMP  #'+'
@@ -11237,7 +11242,7 @@ Source: "compiler.inc"
 00:BBA4 F010            	   415:          BEQ  SIM6
 00:BBA6 C9A4            	   416:          CMP  #TOKEN_XOR          ; XOR
 00:BBA8 F016            	   417:          BEQ  SIM8
-00:BBAA A91A            	   418:          LDA  #PCODE_ORR          ; ORR     	OR  (sp - 1) | (sp)
+00:BBAA A91A            	   418:          LDA  #PCODE_ORR          ; ORR       OR  (sp - 1) | (sp)
 00:BBAC 20C8C6          	   419: SIM7     JSR  GENNOP
 00:BBAF 4C83BB          	   420:          JMP  SIM3
 00:BBB2 A906            	   421: SIM5     LDA  #PCODE_SUB          ; MINUS
@@ -11510,18 +11515,18 @@ Source: "compiler.inc"
 00:BD6B 84BD            	   688:          word   EXPR7
 00:BD6D 00              	   689:          DFB  0
                         	   690: ;
-00:BD6E A910            	   691: EXPR2    LDA  #PCODE_EQL       ; EQL     	Test (sp - 1) == (sp)
+00:BD6E A910            	   691: EXPR2    LDA  #PCODE_EQL       ; EQL      Test (sp - 1) == (sp)
 00:BD70 20C8C6          	   692: EXPR8    JSR  GENNOP
 00:BD73 60              	   693:          RTS
-00:BD74 A912            	   694: EXPR3    LDA  #PCODE_NEQ       ; NEQ     	Test (sp - 1) != (sp)
+00:BD74 A912            	   694: EXPR3    LDA  #PCODE_NEQ       ; NEQ      Test (sp - 1) != (sp)
 00:BD76 D0F8            	   695:          BNE  EXPR8
-00:BD78 A914            	   696: EXPR4    LDA  #PCODE_LSS       ; LSS     	Test (sp - 1) < (sp)
+00:BD78 A914            	   696: EXPR4    LDA  #PCODE_LSS       ; LSS      Test (sp - 1) < (sp)
 00:BD7A D0F4            	   697:          BNE  EXPR8
-00:BD7C A916            	   698: EXPR5    LDA  #PCODE_GEQ       ; GEQ     	Test (sp - 1) >= (sp)
+00:BD7C A916            	   698: EXPR5    LDA  #PCODE_GEQ       ; GEQ      Test (sp - 1) >= (sp)
 00:BD7E D0F0            	   699:          BNE  EXPR8
-00:BD80 A918            	   700: EXPR6    LDA  #PCODE_GTR       ; GTR     	Test (sp - 1) > (sp)
+00:BD80 A918            	   700: EXPR6    LDA  #PCODE_GTR       ; GTR      Test (sp - 1) > (sp)
 00:BD82 D0EC            	   701:          BNE  EXPR8
-00:BD84 A919            	   702: EXPR7    LDA  #PCODE_LEQ       ; LEQ     	Test (sp - 1) <= (sp)
+00:BD84 A919            	   702: EXPR7    LDA  #PCODE_LEQ       ; LEQ      Test (sp - 1) <= (sp)
 00:BD86 D0E8            	   703:          BNE  EXPR8
                         	   704: ;
                         	   705: ; STATEMENT
@@ -11665,7 +11670,7 @@ Source: "compiler.inc"
 00:BE66 C9AC            	   843:          CMP  #TOKEN_HEX       ; HEX?
 00:BE68 F019            	   844:          BEQ  W_HEX      ; yes
 00:BE6A 2029BD          	   845:          JSR  EXPRES     ; just ordinary number - get it
-00:BE6D A91E            	   846:          LDA  #PCODE_OUT        ; OUT     	Output number
+00:BE6D A91E            	   846:          LDA  #PCODE_OUT        ; OUT       Output number
 00:BE6F 20C8C6          	   847:          JSR  GENNOP
 00:BE72 A593            	   848: WRIT5    LDA  token_type
 00:BE74 C92C            	   849:          CMP  #','
@@ -11675,7 +11680,7 @@ Source: "compiler.inc"
                         	   853: ; here for write (chr(x))
                         	   854: ;
                         	   855: W_CHR    =  *
-00:BE7B A91F            	   856:          LDA  #PCODE_OUTC   ; OUTC    	Output character
+00:BE7B A91F            	   856:          LDA  #PCODE_OUTC   ; OUTC      Output character
                         	   857: W_CHR1   =  *
 00:BE7D 2077BF          	   858:          JSR  WAIT_1     ; process expression in parentheses
 00:BE80 4C72BE          	   859:          JMP  WRIT5      ; back for next item
@@ -11683,7 +11688,7 @@ Source: "compiler.inc"
                         	   861: ; here for write (hex(x))
                         	   862: ;
                         	   863: W_HEX    =  *
-00:BE83 A921            	   864:          LDA  #PCODE_OUH        ; OUH     	Output hex number
+00:BE83 A921            	   864:          LDA  #PCODE_OUH        ; OUH       Output hex number
 00:BE85 D0F6            	   865:          BNE  W_CHR1
                         	   866: 
                         	   867: ;
@@ -11718,7 +11723,7 @@ Source: "compiler.inc"
 00:BEB7 C9AC            	   896:          CMP  #TOKEN_HEX      ; HEX?
 00:BEB9 F019            	   897:          BEQ  WRITE_LDC_HEX   ; yes
 00:BEBB 2029BD          	   898:          JSR  EXPRES          ; just ordinary number - get it
-00:BEBE A942            	   899:          LDA  #PCODE_LCD_WRITE_NUM        ; OUT     	Output number
+00:BEBE A942            	   899:          LDA  #PCODE_LCD_WRITE_NUM        ; OUT       Output number
 00:BEC0 20C8C6          	   900:          JSR  GENNOP
 00:BEC3 A593            	   901: WRITE_LCD5    LDA  token_type
 00:BEC5 C92C            	   902:          CMP  #','
@@ -11728,7 +11733,7 @@ Source: "compiler.inc"
                         	   906: ; here for lcdwrite (chr(x))
                         	   907: ;
                         	   908: WRITE_LDC_CHR    =  *
-00:BECC A945            	   909:          LDA  #PCODE_LCD_WRITE_CHR   ; OUTC    	Output character
+00:BECC A945            	   909:          LDA  #PCODE_LCD_WRITE_CHR   ; OUTC     Output character
                         	   910: WRITE_LDC_CHR1   =  *
 00:BECE 2077BF          	   911:          JSR  WAIT_1          ; process expression in parentheses
 00:BED1 4CC3BE          	   912:          JMP  WRITE_LCD5      ; back for next item
@@ -11736,7 +11741,7 @@ Source: "compiler.inc"
                         	   914: ; here for lcdwrite (hex(x))
                         	   915: ;
                         	   916: WRITE_LDC_HEX    =  *
-00:BED4 A944            	   917:          LDA  #PCODE_LCD_WRITE_HEX        ; OUH     	Output hex number
+00:BED4 A944            	   917:          LDA  #PCODE_LCD_WRITE_HEX        ; OUH       Output hex number
 00:BED6 D0F6            	   918:          BNE  WRITE_LDC_CHR1
                         	   919: 
                         	   920: ;
@@ -11934,7 +11939,7 @@ Source: "compiler.inc"
 00:C037 2004CF          	  1112:          JSR  CHKTKN
 00:C03A 20A0CE          	  1113:          JSR  pas_get_token
 00:C03D 207EBA          	  1114:          JSR  PSHPCODE
-00:C040 A93D            	  1115:          LDA  #PCODE_JMZ     ; JMZ     	Jump if (sp) zero
+00:C040 A93D            	  1115:          LDA  #PCODE_JMZ     ; JMZ      Jump if (sp) zero
 00:C042 204BC7          	  1116:          JSR  GENNJM
 00:C045 2088BD          	  1117:          JSR  STMNT
 00:C048 A593            	  1118:          LDA  token_type
@@ -11979,7 +11984,7 @@ Source: "compiler.inc"
 00:C09C 20BCBA          	  1157:          JSR  GETEXPR
 00:C09F 207292          	  1158:          JSR  PULWRK
 00:C0A2 20CDBA          	  1159:          JSR  WRK_OPND
-00:C0A5 A93D            	  1160:          LDA  #PCODE_JMZ         ; JMZ     	Jump if (sp) zero
+00:C0A5 A93D            	  1160:          LDA  #PCODE_JMZ         ; JMZ      Jump if (sp) zero
 00:C0A7 4C37C7          	  1161:          JMP  GENRJMP
                         	  1162: ;
                         	  1163: ; WHILE
@@ -11987,7 +11992,7 @@ Source: "compiler.inc"
 00:C0AA 207EBA          	  1165: WHILE    JSR  PSHPCODE
 00:C0AD 20BCBA          	  1166:          JSR  GETEXPR
 00:C0B0 207EBA          	  1167:          JSR  PSHPCODE
-00:C0B3 A93D            	  1168:          LDA  #PCODE_JMZ       ; JMZ     	Jump if (sp) zero
+00:C0B3 A93D            	  1168:          LDA  #PCODE_JMZ       ; JMZ      Jump if (sp) zero
 00:C0B5 204BC7          	  1169:          JSR  GENNJM
 00:C0B8 A997            	  1170:          LDA  #TOKEN_DO
 00:C0BA A212            	  1171:          LDX  #18             ; ERROR: DO expected
@@ -11998,7 +12003,7 @@ Source: "compiler.inc"
 00:C0C8 20E3BA          	  1176:          JSR  WRK_WRKD
 00:C0CB 207292          	  1177:          JSR  PULWRK
 00:C0CE 20CDBA          	  1178:          JSR  WRK_OPND
-00:C0D1 A93C            	  1179:          LDA  #PCODE_JMP     ; JMP     	Jump unconditionally
+00:C0D1 A93C            	  1179:          LDA  #PCODE_JMP     ; JMP      Jump unconditionally
 00:C0D3 2037C7          	  1180:          JSR  GENRJMP
 00:C0D6 20D8BA          	  1181:          JSR  WRKD_WRK
 00:C0D9 4C7FC7          	  1182:          JMP  FIXAD
@@ -12014,10 +12019,10 @@ Source: "compiler.inc"
 00:C0EA A900            	  1192: CASE7    LDA  #0
 00:C0EC 854C            	  1193:          STA  COUNT2
                         	  1194: CASE2    =  *
-00:C0EE A92A            	  1195:          LDA  #PCODE_MOV  ; make copy of selector:  MOV     	Copy (sp) to (sp + 1)
+00:C0EE A92A            	  1195:          LDA  #PCODE_MOV  ; make copy of selector:  MOV       Copy (sp) to (sp + 1)
 00:C0F0 20C8C6          	  1196:          JSR  GENNOP
 00:C0F3 20BCBA          	  1197:          JSR  GETEXPR    ; next expression to compare
-00:C0F6 A910            	  1198:          LDA  #PCODE_EQL       ;  EQL     	Test (sp - 1) == (sp)
+00:C0F6 A910            	  1198:          LDA  #PCODE_EQL       ;  EQL       Test (sp - 1) == (sp)
 00:C0F8 20C8C6          	  1199:          JSR  GENNOP
 00:C0FB A593            	  1200:          LDA  token_type
 00:C0FD C93A            	  1201:          CMP  #':'
@@ -12026,12 +12031,12 @@ Source: "compiler.inc"
 00:C103 A205            	  1204:          LDX  #5      ; ERROR: , or : expected
 00:C105 2004CF          	  1205:          JSR  CHKTKN
 00:C108 207EBA          	  1206:          JSR  PSHPCODE
-00:C10B A93E            	  1207:          LDA  #PCODE_JM1     ; JM1     	Jump if (sp) not zero
+00:C10B A93E            	  1207:          LDA  #PCODE_JM1     ; JM1      Jump if (sp) not zero
 00:C10D 204BC7          	  1208:          JSR  GENNJM
 00:C110 E64C            	  1209:          INC  COUNT2
 00:C112 4CEEC0          	  1210:          JMP  CASE2
 00:C115 20C2BA          	  1211: CASE1    JSR  PCD_WRKD
-00:C118 A93D            	  1212:          LDA  #PCODE_JMZ     ; JMZ     	Jump if (sp) zero
+00:C118 A93D            	  1212:          LDA  #PCODE_JMZ     ; JMZ      Jump if (sp) zero
 00:C11A 204BC7          	  1213:          JSR  GENNJM
 00:C11D A54C            	  1214:          LDA  COUNT2
 00:C11F F00A            	  1215:          BEQ  CASE3
@@ -12116,7 +12121,7 @@ Source: "compiler.inc"
 00:C1D6 68              	  1294:          PLA
 00:C1D7 854B            	  1295:          STA  COUNT1
 00:C1D9 207EBA          	  1296:          JSR  PSHPCODE
-00:C1DC A92A            	  1297:          LDA  #PCODE_MOV     ; MOV     	Copy (sp) to (sp + 1)
+00:C1DC A92A            	  1297:          LDA  #PCODE_MOV     ; MOV      Copy (sp) to (sp + 1)
 00:C1DE 20C8C6          	  1298:          JSR  GENNOP
 00:C1E1 202CBA          	  1299:          JSR  GET_LEV
 00:C1E4 2091BA          	  1300:          JSR  GET_OFF
@@ -12124,13 +12129,13 @@ Source: "compiler.inc"
 00:C1EA 18              	  1302:          CLC
 00:C1EB 692C            	  1303:          ADC  #PCODE_LOD  ; Load integer onto stack or PCODE_LODC if a char
 00:C1ED 20E1C6          	  1304:          JSR  GENADR
-00:C1F0 A916            	  1305:          LDA  #PCODE_GEQ        ; UP (GEQ): GEQ     	Test (sp - 1) >= (sp)
+00:C1F0 A916            	  1305:          LDA  #PCODE_GEQ        ; UP (GEQ): GEQ       Test (sp - 1) >= (sp)
 00:C1F2 A64B            	  1306:          LDX  COUNT1
 00:C1F4 F002            	  1307:          BEQ  FOR4
-00:C1F6 A919            	  1308:          LDA  #PCODE_LEQ        ; DOWN (LEQ): LEQ     	Test (sp - 1) <= (sp)
+00:C1F6 A919            	  1308:          LDA  #PCODE_LEQ        ; DOWN (LEQ): LEQ       Test (sp - 1) <= (sp)
 00:C1F8 20C8C6          	  1309: FOR4     JSR  GENNOP
 00:C1FB 207EBA          	  1310:          JSR  PSHPCODE
-00:C1FE A93D            	  1311:          LDA  #PCODE_JMZ       ;  JMZ     	Jump if (sp) zero
+00:C1FE A93D            	  1311:          LDA  #PCODE_JMZ       ;  JMZ       Jump if (sp) zero
 00:C200 204BC7          	  1312:          JSR  GENNJM
 00:C203 A54B            	  1313:          LDA  COUNT1
 00:C205 48              	  1314:          PHA
@@ -12148,16 +12153,16 @@ Source: "compiler.inc"
 00:C225 2091BA          	  1326:          JSR  GET_OFF
 00:C228 A54A            	  1327:          LDA  DATTYP
 00:C22A 18              	  1328:          CLC
-00:C22B 692C            	  1329:          ADC  #PCODE_LOD       ; LOD     	Load integer onto stack
+00:C22B 692C            	  1329:          ADC  #PCODE_LOD       ; LOD      Load integer onto stack
 00:C22D 20E1C6          	  1330:          JSR  GENADR
 00:C230 68              	  1331:          PLA
 00:C231 854B            	  1332:          STA  COUNT1
-00:C233 A926            	  1333:          LDA  #PCODE_INC     ; INC     	Increment (sp) by 1
+00:C233 A926            	  1333:          LDA  #PCODE_INC     ; INC      Increment (sp) by 1
 00:C235 A64B            	  1334:          LDX  COUNT1
 00:C237 F002            	  1335:          BEQ  FOR5
-00:C239 A928            	  1336:          LDA  #PCODE_DEC        ; DEC     	Decrement (sp) by 1
+00:C239 A928            	  1336:          LDA  #PCODE_DEC        ; DEC       Decrement (sp) by 1
 00:C23B 20C8C6          	  1337: FOR5     JSR  GENNOP
-00:C23E A932            	  1338:          LDA  #PCODE_STO       ; STO     	Store integer
+00:C23E A932            	  1338:          LDA  #PCODE_STO       ; STO      Store integer
 00:C240 18              	  1339:          CLC
 00:C241 654A            	  1340:          ADC  DATTYP          ; may become PCODE_STOC if a char
 00:C243 20E1C6          	  1341:          JSR  GENADR
@@ -12165,7 +12170,7 @@ Source: "compiler.inc"
 00:C249 20E3BA          	  1343:          JSR  WRK_WRKD
 00:C24C 207292          	  1344:          JSR  PULWRK
 00:C24F 20CDBA          	  1345:          JSR  WRK_OPND
-00:C252 A93C            	  1346:          LDA  #PCODE_JMP       ; JMP     	Jump unconditionally
+00:C252 A93C            	  1346:          LDA  #PCODE_JMP       ; JMP      Jump unconditionally
 00:C254 2037C7          	  1347:          JSR  GENRJMP
 00:C257 20D8BA          	  1348:          JSR  WRKD_WRK
 00:C25A 207FC7          	  1349:          JSR  FIXAD
@@ -12173,7 +12178,7 @@ Source: "compiler.inc"
 00:C25F 852C            	  1351:          STA  OPND+1
 00:C261 A9FD            	  1352:          LDA  #$FD
 00:C263 852B            	  1353:          STA  OPND
-00:C265 A93B            	  1354:          LDA  #PCODE_INT       ;  INT     	Increment stack pointer
+00:C265 A93B            	  1354:          LDA  #PCODE_INT       ;  INT       Increment stack pointer
 00:C267 4C51C7          	  1355:          JMP  GENJMP
                         	  1356: 
                         	  1357: 
@@ -12624,7 +12629,7 @@ Source: "compiler.inc"
 00:C552 852B            	  1802:          STA  OPND
 00:C554 A521            	  1803:          LDA  FRAME+1
 00:C556 852C            	  1804:          STA  OPND+1
-00:C558 A93B            	  1805:          LDA  #PCODE_INT         ; INT     	Increment stack pointer
+00:C558 A93B            	  1805:          LDA  #PCODE_INT         ; INT      Increment stack pointer
 00:C55A 2051C7          	  1806:          JSR  GENJMP
 00:C55D 2088BD          	  1807: BLKB5    JSR  STMNT
 00:C560 A593            	  1808:          LDA  token_type
@@ -12638,7 +12643,7 @@ Source: "compiler.inc"
 00:C573 A929            	  1816:          LDA  #PCODE_RTN  ; OK - we are at the end of a block - this is a procedure/function return
 00:C575 A622            	  1817:          LDX  LEVEL       ; OR - if we are at level 0, then that is the end of the program
 00:C577 D002            	  1818:          BNE  BLKB6
-00:C579 A911            	  1819:          LDA  #PCODE_FINISHD        ; Opcode: FINISHED 	Stop run (end program)
+00:C579 A911            	  1819:          LDA  #PCODE_FINISHD        ; Opcode: FINISHED  Stop run (end program)
                         	  1820: TEST1    =  *
 00:C57B 4CC8C6          	  1821: BLKB6    JMP  GENNOP
                         	  1822: ;
@@ -13695,7 +13700,7 @@ Source: "gtoken.inc"
 00:C9BA 204392          	   251:   jsr DISPAD
 00:C9BD 68              	   252:   pla
 00:C9BE 852E            	   253:   sta DCODE
-00:C9C0 201E8C          	   254:   jsr show_current_line_number
+00:C9C0 20178C          	   254:   jsr show_current_line_number
                         	   255: 
 00:C9C3 A59C            	   256:   lda token_line_start
 00:C9C5 8598            	   257:   sta token_work
@@ -15949,12 +15954,12 @@ editor_check_no_more_ok          A:8647
 editor_compile                   A:8E91
 editor_debug                     A:8E73
 editor_default_range             A:854F
-editor_delete                    A:8B6E
-editor_delete_have_range         A:8B90
-editor_delete_line_count_done    A:8BE9
-editor_delete_line_count_loop    A:8BC9
-editor_delete_line_count_not_do  A:8BD5
-editor_delete_line_count_not_ne  A:8BE1
+editor_delete                    A:8B67
+editor_delete_have_range         A:8B89
+editor_delete_line_count_done    A:8BE2
+editor_delete_line_count_loop    A:8BC2
+editor_delete_line_count_not_do  A:8BCE
+editor_delete_line_count_not_ne  A:8BDA
 editor_do_replace                A:8986
 editor_do_replace_copy_done      A:89CB
 editor_do_replace_smaller        A:89C8
@@ -15999,16 +16004,16 @@ editor_help_info                 A:83BE
 editor_help_loop                 A:853B
 editor_info                      E:8E85
 editor_insert                    A:89FA
-editor_insert_at_start           A:8A16
-editor_insert_backspace          A:8AB3
-editor_insert_backspace_not_at_  A:8ABF
-editor_insert_common             A:8A24
-editor_insert_done               A:8AD2
-editor_insert_done_with_newline  A:8AE4
-editor_insert_loop               A:8A63
-editor_insert_loop1              A:8AA3
-editor_insert_no_line_number     A:8A74
-editor_insert_not_newline        A:8A99
+editor_insert_at_start           A:8A14
+editor_insert_backspace          A:8AAE
+editor_insert_backspace_not_at_  A:8ABA
+editor_insert_common             A:8A22
+editor_insert_done               A:8ACC
+editor_insert_done_with_newline  A:8ADD
+editor_insert_loop               A:8A65
+editor_insert_loop1              A:8A9E
+editor_insert_no_line_number     A:8A76
+editor_insert_not_newline        A:8A95
 editor_line_number_too_big       A:85FB
 editor_list                      A:8747
 editor_list_aborted              A:887E
@@ -16049,7 +16054,7 @@ editor_no_closing_delimiter      A:8712
 editor_no_closing_delimiterJ     A:8781
 editor_no_closing_delimiter_mes  A:86FC
 editor_no_find_string            A:872D
-editor_no_lines                  A:8B17
+editor_no_lines                  A:8B10
 editor_recover                   A:8E4D
 editor_recover_not_needed        A:8E69
 editor_replace                   A:8733
@@ -16058,8 +16063,8 @@ editor_run                       A:8E9F
 editor_save                      A:8741
 editor_syntax                    A:8E98
 editor_test                      A:8CBA
-editor_too_full                  A:8AFF
-editor_too_full_loop             A:8B06
+editor_too_full                  A:8AF8
+editor_too_full_loop             A:8AFF
 editor_trace                     A:8E7C
 error1                           A:97BB
 error_find_next                  A:97B2
@@ -16270,7 +16275,6 @@ hardware_init                    A:C88D
 hardware_work                    S:008C
 id_equals_message                A:B5CC
 info_message                     A:A564
-insert_last_char                 E:00B0
 insert_limit                     S:00A4
 introduction                     A:8255
 irq                              A:B68C
@@ -16318,9 +16322,9 @@ library_function_call_1          A:C6B4
 library_function_call_2          A:C685
 library_function_call_3          A:C6AF
 library_function_call_5          A:C6B7
-line_number_lt_1000              A:8C34
-line_number_output_spaces        A:8C43
-lines_deleted_message            A:8C13
+line_number_lt_1000              A:8C30
+line_number_output_spaces        A:8C3F
+lines_deleted_message            A:8C0C
 list_symbols                     E:A56F
 list_symbols_check               E:A589
 list_symbols_done                E:A5C3
@@ -16344,8 +16348,8 @@ maths_work                       S:008D
 mem_move_dest                    S:00A8
 mem_move_len                     S:00AA
 mem_move_src                     S:00A6
-memory_filled_up                 A:8B45
-memory_full                      A:8B2A
+memory_filled_up                 A:8B3E
+memory_full                      A:8B23
 movedown                         A:817A
 movedown1                        A:819D
 movedown2                        A:8190
@@ -16425,8 +16429,8 @@ show_current_line                A:97F9
 show_current_line_done           A:983E
 show_current_line_loop           A:981B
 show_current_line_loop_print_on  A:9833
-show_current_line_number         A:8C1E
-show_current_line_number_done    A:8C4F
+show_current_line_number         A:8C17
+show_current_line_number_done    A:8C4B
 show_source_end                  A:8ECD
 show_source_start                A:8EF5
 show_symbol_table_end            A:8EA8
@@ -16777,7 +16781,6 @@ Symbols by value:
 00AC this_line
 00AE this_line_addr
 00B0 find_from
-00B0 insert_last_char
 00B1 find_to
 00B2 find_pos
 00B3 find_len
@@ -16945,32 +16948,32 @@ Symbols by value:
 89D4 load_message
 89F6 editor_load
 89FA editor_insert
-8A16 editor_insert_at_start
-8A24 editor_insert_common
-8A63 editor_insert_loop
-8A74 editor_insert_no_line_number
-8A99 editor_insert_not_newline
-8AA3 editor_insert_loop1
-8AB3 editor_insert_backspace
-8ABF editor_insert_backspace_not_at_start
-8AD2 editor_insert_done
-8AE4 editor_insert_done_with_newline
-8AFF editor_too_full
-8B06 editor_too_full_loop
-8B17 editor_no_lines
-8B2A memory_full
-8B45 memory_filled_up
-8B6E editor_delete
-8B90 editor_delete_have_range
-8BC9 editor_delete_line_count_loop
-8BD5 editor_delete_line_count_not_done
-8BE1 editor_delete_line_count_not_newline
-8BE9 editor_delete_line_count_done
-8C13 lines_deleted_message
-8C1E show_current_line_number
-8C34 line_number_lt_1000
-8C43 line_number_output_spaces
-8C4F show_current_line_number_done
+8A14 editor_insert_at_start
+8A22 editor_insert_common
+8A65 editor_insert_loop
+8A76 editor_insert_no_line_number
+8A95 editor_insert_not_newline
+8A9E editor_insert_loop1
+8AAE editor_insert_backspace
+8ABA editor_insert_backspace_not_at_start
+8ACC editor_insert_done
+8ADD editor_insert_done_with_newline
+8AF8 editor_too_full
+8AFF editor_too_full_loop
+8B10 editor_no_lines
+8B23 memory_full
+8B3E memory_filled_up
+8B67 editor_delete
+8B89 editor_delete_have_range
+8BC2 editor_delete_line_count_loop
+8BCE editor_delete_line_count_not_done
+8BDA editor_delete_line_count_not_newline
+8BE2 editor_delete_line_count_done
+8C0C lines_deleted_message
+8C17 show_current_line_number
+8C30 line_number_lt_1000
+8C3F line_number_output_spaces
+8C4B show_current_line_number_done
 8C55 find_line
 8C63 find_line_loop
 8C72 find_line_next

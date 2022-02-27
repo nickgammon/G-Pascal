@@ -1047,7 +1047,6 @@ editor_load:
   sta editor_flags
 
 editor_insert:
-  stz insert_last_char
   jsr editor_get_number
   beq editor_insert_at_start
 
@@ -1132,6 +1131,8 @@ editor_insert_common:
 
   lda #EFLAG_SHOW_LINE
   tsb editor_flags
+  ldy #0    ; offset from PCODE for inserting (should always be zero)
+  ldx #0    ; last character we inserted
 
 editor_insert_loop:
   lda #EFLAG_LOAD         ; no line numbers on load
@@ -1149,13 +1150,10 @@ editor_insert_loop:
   jsr show_current_line_number
 
 editor_insert_no_line_number:
-  ldy  #0
   jsr  CHRIN
-  cmp  #CR       ; carriage-return?
+  cmp  #CR                          ; carriage-return?
   beq  editor_insert_no_line_number ; yes, ignore
-  cmp  #END_EDITOR_INPUT  ; Esc?
-  beq  editor_insert_done
-  cmp  #KEY_ABORT         ; let them stop inputting with Ctrl+C
+  cmp  #END_EDITOR_INPUT            ; Esc?
   beq  editor_insert_done
   cmp  #BACKSPACE
   beq  editor_insert_backspace
@@ -1168,8 +1166,8 @@ editor_insert_no_line_number:
   bne  editor_insert_not_newline
   inc  current_line+1
 editor_insert_not_newline
-  sta  (PCODE),Y
-  sta  insert_last_char       ; for detecting final newline
+  sta  (PCODE),y
+  tax                ; for detecting final newline
   inc  PCODE
   bne  editor_insert_loop1
   inc  PCODE+1
@@ -1204,11 +1202,11 @@ editor_insert_backspace_not_at_start:
   sbc #0
   sta PCODE+1
   lda (PCODE),y
-  sta insert_last_char       ; this is now the last character we inserted
+  tax                      ; this is now the last character we inserted
   bra editor_insert_loop
 
 editor_insert_done:
-  lda insert_last_char
+  txa
   beq editor_insert_done_with_newline   ; nothing got inserted at all
   cmp #NL
   beq editor_insert_done_with_newline  ; skip inserting a newline if we just got a newline
@@ -1216,7 +1214,7 @@ editor_insert_done:
 ;  They finished inserting, but without a newline ... add one
 ;
   lda #NL
-  sta (PCODE),Y
+  sta (PCODE),y
   inc PCODE
   bne editor_insert_done_with_newline
   inc PCODE+1
@@ -1389,6 +1387,9 @@ lines_deleted_message asciiz " deleted.\n"
 ;  show current line number with leading spaces
 ;--------------------------------------------
 show_current_line_number:
+  pha
+  phx
+  phy
 ;
 ;  get the line number into REG ready for printing
 ;
@@ -1423,7 +1424,11 @@ line_number_output_spaces:
   bne  line_number_output_spaces  ; more spaces to go
 show_current_line_number_done:
   jsr  display_in_decimal    ; now the actual number
-  jmp  PUTSP      ; and a space after it
+  jsr  PUTSP      ; and a space after it
+  ply
+  plx
+  pla
+  rts
 
 ;--------------------------------------------
 ;  find_line
