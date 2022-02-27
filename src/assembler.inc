@@ -319,8 +319,6 @@ ass_operand:
   beq ass_identifier_operand
   cmp #TOKEN_STRING
   beq ass_string
-  cmp #'*'
-  beq ass_asterisk
 ;
 ;  here for some kind of numeric address
 ;
@@ -332,21 +330,6 @@ ass_operand:
 ass_string:
   lda #ASS_OPERAND_STRING
   sta ASS_OPERAND
-  jsr opcode_lookup
-  jsr get_token  ; NOW get the next token
-  jmp ass_finish_line
-
-;
-;  an asterisk as the operand evaluates to the current P-code address
-;
-ass_asterisk:
-  lda #ASS_OPERAND_ABSOLUTE
-  sta ASS_OPERAND
-  lda PCODE
-  sta ASS_VALUE
-  lda PCODE+1
-  sta ASS_VALUE+1
-  stz ASS_VALUE+2
   jsr opcode_lookup
   jsr get_token  ; NOW get the next token
   jmp ass_finish_line
@@ -1140,9 +1123,26 @@ ass_not_unary_minus:
   bra ass_expression_cannot_be_unary
 ass_not_unary_less_than:
   cmp #'>'
-  bne ass_expression_cannot_be_unary
+  bne ass_not_unary_greater_than
   lda #TOKEN_HIGH_BYTE
   sta token_type
+  bra ass_not_unary_greater_than
+ass_not_unary_greater_than:
+  cmp #'*'
+  bne ass_expression_cannot_be_unary
+;
+;  A '*' where a unary expression is allowed will be the current emit address (eg. foo = *)
+;
+  lda PCODE
+  sta token_value
+  lda PCODE+1
+  sta token_value+1
+  stz token_value+2
+  stz exp_unary_ok          ; don't have unary operators after numbers
+  lda #TOKEN_NUMBER
+  sta token_type            ; make get_token think a sign as a token on its own
+  bra ass_expression_found_value
+
 ass_expression_cannot_be_unary:
   pha
   lda #1
