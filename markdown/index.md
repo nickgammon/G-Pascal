@@ -13,7 +13,7 @@
 <div class='quick_link'> [Adventure game](adventure.htm) </div>
 <div class='quick_link'> [More electronics](https://gammon.com.au/electronics) </div>
 
-## On-board assembler, tiny Pascal, and text editor for Ben Eater's board
+## On-board assembler, tiny Pascal, and text editor for [Ben Eater's board](https://eater.net/6502)
 
 ### Includes:
 
@@ -201,6 +201,8 @@ You may need to modify the way the code interfaces with the hardware, depending 
 * [File menu](file_menu.htm)
 * [How to install](installation.htm)
 * [History of G-Pascal](history.htm) and the assembler
+* [Ben Eater's 6502 board](https://eater.net/6502)
+* [Ben Eater's first 6502 board tutorial on YouTube](https://www.youtube.com/watch?v=LnzuMJLZRdU)
 
 ---
 

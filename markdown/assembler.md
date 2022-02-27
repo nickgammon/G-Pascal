@@ -120,11 +120,12 @@ A test file is [here](examples/asm/assembler_opcode_test.asm) which assembles ev
 
 Operands are separated from the opcode by one or more spaces.
 
-* The operand "*" must appear on its own, and evaluates to the current output code address, eg.
+* The operand "*" evaluates to the current output code address, eg.
 
 
     ```asm
-    foo = *  ; foo is assigned to the current address
+    foo =   *       ; foo is assigned to the current address
+        bra *+4   ; branch to 4 bytes ahead of this instruction
     ```
 
 * In the case of opcodes which may or may not use the A register as an operand, the "A" must be explicitly provided, eg.

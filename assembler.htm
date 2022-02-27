@@ -111,8 +111,9 @@ begin = *
 <h2 id="operand">Operand</h2>
 <p>Operands are separated from the opcode by one or more spaces.</p>
 <ul>
-<li><p>The operand "*" must appear on its own, and evaluates to the current output code address, eg.</p>
-<pre class="asm"><code>foo = *  ; foo is assigned to the current address</code></pre></li>
+<li><p>The operand "*" evaluates to the current output code address, eg.</p>
+<pre class="asm"><code>foo =   *       ; foo is assigned to the current address
+    bra *+4   ; branch to 4 bytes ahead of this instruction</code></pre></li>
 <li><p>In the case of opcodes which may or may not use the A register as an operand, the “A” must be explicitly provided, eg.</p>
 <pre class="asm"><code>  LSR A</code></pre></li>
 <li><p>String operands only apply to the ASC, ASCII, ASCIIZ and STRING directives. In those cases a quoted string of any length (up to 255 characters) may be the operand. In a similar way to the Pascal compiler, strings may start with either single of double quotes, and contain the other type of quote inside. Alternatively you may double the starting quote to include it in the string. eg. ‘Nick’‘s cat’. In other places strings of one to three characters long may be used, and will be treated as numbers. Eg.</p>
