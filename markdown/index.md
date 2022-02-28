@@ -15,6 +15,8 @@
 
 ## On-board assembler, tiny Pascal, and text editor for [Ben Eater's board](https://eater.net/6502)
 
+Demonstration video [here on Vimeo](https://vimeo.com/682663375).
+
 ### Includes:
 
 * A **6502 assembler** which lets you try out your assembler programming without having to keep removing the EEPROM chip and programming it externally. The assembler supports:
