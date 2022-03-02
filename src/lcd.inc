@@ -107,10 +107,18 @@ lcd_read_instruction_nibble:
 ; wait until LCD is not busy
 ;
 lcd_wait:
+  phx
   phy
   pha
   jsr lcd_prepare_to_read_register
+  ldx #0
 lcdbusy:
+;
+;  timeout after 256 iterations of this loop so we don't hang
+;  if there is no LCD or it doesn't respond
+;
+  dex
+  beq lcd_wait_timeout:
   jsr lcd_read_instruction_nibble
   and #$80        ; get busy flag
   tay             ; save busy status
@@ -120,8 +128,10 @@ lcdbusy:
 ;
 ;  here when not busy any more
 ;
+lcd_wait_timeout:
   pla
   ply
+  plx
   rts
 
 ;
