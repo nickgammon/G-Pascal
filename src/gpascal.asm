@@ -77,7 +77,7 @@ BIT_INTERVAL = CLOCK_RATE / BAUD_RATE ; time between bits in µs
 ;    and checking the debugging pulses compared to the middle of the bit times
 ;    with an oscilloscope or logic analyser
 ;
-SERIAL_DELAY1 = 32    ; initial delay (count) - lower because of the initial overhead
+SERIAL_DELAY1 = 48    ; initial delay (count) - higher because it is 1.5 bit times
 SERIAL_DELAY2 = 35    ; subsequent delays between bits (count)
 
 SYMBOL_TABLE_START = HIGHEST_RAM  ; symbol table pointer (ENDSYM) is decremented before being used
