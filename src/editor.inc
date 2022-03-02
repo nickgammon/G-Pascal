@@ -191,6 +191,7 @@ editor_help_info:
 ;  HELP
 ;--------------------------------------------
 editor_help:
+  jsr editor_check_no_more
   lda #<editor_help_info
   sta REG
   lda #>editor_help_info
@@ -238,12 +239,14 @@ editor_bad_number:
 ;  no number. Raises an error otherwise
 ;
 editor_get_number:
-  jsr get_token
+  jsr pas_get_token   ; use this to find END as a token
   beq editor_get_number_none ; no token? return with carry set
   cmp #NL
   beq editor_get_number_none ; newline counts as no token
   cmp #TOKEN_NUMBER
   beq editor_get_number_ok
+  cmp #TOKEN_END
+  beq editor_get_number_end
   cmp #TOKEN_IDENTIFIER
   bne editor_get_number_not_identifier
   lda token_length
@@ -265,6 +268,7 @@ editor_get_number:
   cmp #'L'
   bne editor_bad_number
   jsr editor_default_range
+  jsr editor_check_no_more ; can't have ALL - something
   bra editor_get_number_none
 ;
 ;  find / replace can go straight to the delimiter
@@ -302,6 +306,18 @@ editor_get_number_none:
   clc
   rts
 
+;
+;  the word "END" will count as the highest possible line number
+;
+editor_get_number_end:
+  lda #$FF
+  sta token_value
+  sta token_value+1
+  stz token_value+2
+  jsr editor_check_no_more ; can't have END - something
+  sec
+  rts
+
 number_too_large_message:
   asciiz "Number too large or too small\n"
 
@@ -321,7 +337,7 @@ editor_bad_range:
   jmp main_prompt
 
 too_much_on_line:
-  asciiz "Unexpected input on line\n"
+  asciiz "Unexpected trailing input on line\n"
 
 editor_check_no_more:
   jsr get_token
@@ -407,11 +423,12 @@ editor_get_range_number:
   sbc from_line
   lda to_line+1
   sbc from_line+1
-  bcc editor_bad_range    ; <sigh> because of the way SBC works
+  bcc editor_bad_rangeJ    ; <sigh> because of the way SBC works
 
 editor_get_range_done:
   rts
 
+editor_bad_rangeJ jmp editor_bad_range
 
 ;
 
@@ -1009,7 +1026,7 @@ editor_do_replace:
 ;
 ;  the length to move will be (the end of the source) - (the start of the move)
 ;
-  clc
+  sec
   lda PCODE
   sbc mem_move_src
   sta mem_move_len
@@ -1048,7 +1065,7 @@ editor_load:
 
 editor_insert:
   jsr editor_get_number
-  beq editor_insert_at_start
+  bcc editor_insert_at_start
 
   ;
   ; I really want to insert AFTER this line so I'll add 1 to whatever line number they gave
@@ -1270,6 +1287,37 @@ editor_no_lines  asciiz "No range supplied\n"
 memory_full      asciiz "\n\nMemory full - press Esc\n"
 memory_filled_up asciiz "\n\nNo room for source during load/input\n\n"
 
+;
+;  subroutine to check we got a range for certain actions
+;
+editor_argument_check:
+  ldy #0
+;
+;  skip spaces to make sure we got a range
+;
+editor_argument_check_loop:
+  lda (token_start),y
+  beq editor_argument_check_failed
+  cmp #NL
+  beq editor_argument_check_failed
+  jsr isspace
+  bcc editor_argument_check_got_argument
+  iny
+  bne editor_argument_check_loop
+
+;
+;  only found spaces, not good enough
+;
+editor_argument_check_failed:
+  lda #<editor_no_lines
+  ldx #>editor_no_lines
+  jsr print
+  jmp  main_prompt
+
+editor_argument_check_got_argument:
+  rts
+
+
 ;--------------------------------------------
 ;  DELETE
 ;--------------------------------------------
@@ -1284,21 +1332,11 @@ editor_delete:
 
   stz find_count      ; delete count in this case
   stz find_count+1
+  jsr editor_argument_check ; cannot get away with no arguments
 
   jsr editor_get_range
   jsr editor_check_no_more
-;
-; if no lines given, give up
-;
-  lda from_line
-  ora from_line+1
-  bne editor_delete_have_range
-  lda #<editor_no_lines
-  ldx #>editor_no_lines
-  jsr print
-  jmp  main_prompt
 
-editor_delete_have_range:
   lda from_line
   sta this_line
   lda from_line+1
@@ -1523,6 +1561,7 @@ editor_test:
 ;  memory dump
 ;
 editor_memory:
+  jsr editor_argument_check  ; check they supplied some sort of range
   jsr editor_default_range
   lda #EFLAG_ALLOW_ZERO_FROM
   sta editor_flags
@@ -1563,6 +1602,12 @@ editor_memory_loop1:
   bne editor_memory_loop2
   inc from_line+1
 editor_memory_loop2:
+;
+;  if we wrap around back to zero, stop
+;
+  lda from_line
+  ora from_line+1
+  beq editor_memory_done
   lda from_line+1
   cmp to_line+1
   bcc editor_memory_loop3   ; less than
@@ -1729,6 +1774,7 @@ recover_not_needed asciiz "Not needed\n"
 ; Recover: if the first byte of the source is 0x00, change it to a space
 ;
 editor_recover:
+  jsr editor_check_no_more
   lda  #<TEXT_START
   sta  FROM
   lda  #>TEXT_START
@@ -1751,12 +1797,14 @@ editor_recover_not_needed:
 
 
 editor_debug:
+  jsr editor_check_no_more
   lda #1
   sta  DBGFLG
   sta  DCODE
   jmp  CHK_RUN
 
 editor_trace:
+  jsr editor_check_no_more
   lda  #$80
   sta  DBGFLG
   sta  DCODE
@@ -1764,22 +1812,26 @@ editor_trace:
 
 
 editor_info  = *
+  jsr editor_check_no_more
   jsr show_source_start
   jsr show_source_end
   jsr crc_source
   jmp main_prompt
 
 editor_compile:
+  jsr editor_check_no_more
   lda  #0
   sta  SYNTAX
   jmp  COMPIL
 
 editor_syntax:
+  jsr editor_check_no_more
   lda #1
   sta  SYNTAX
   jmp  COMPIL
 
 editor_run:
+  jsr editor_check_no_more
   lda  #0
   sta  DBGFLG
   sta  DCODE
@@ -1821,6 +1873,7 @@ show_source_start:
   rts
 
 editor_assemble:
+  jsr editor_check_no_more
   jmp ASSEMBLE
 
 
