@@ -195,12 +195,11 @@ LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.0"
 START    =  *
   cld             ; cancel decimal mode
   sei             ; no interrupts yet
-  ldx  #NEW_STK
-  txs             ; set up stack pointer
-  stx random      ; initialise random numbers
-  stx random+1
-  stx random+2
-  stx random+3
+  lda #$FF
+  sta random      ; initialise random numbers
+  sta random+1
+  sta random+2
+  sta random+3
 ;
 ;  Put 0x00 at start of source
 ;
@@ -213,8 +212,8 @@ START    =  *
   sta  (REG),Y     ; null edit file
   sty  system_flags
   tax
-  cli             ; allow interrupts after a reset
-  jmp  REST1
+;
+;  now do rest of initialization
 ;
 RESTART  =  *
   ldx  #NEW_STK
