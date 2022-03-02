@@ -116,9 +116,6 @@ ass_line1:
   cmp #'='               ; = directive is OK
   beq ass_identifier
 
-  cmp #';'
-  beq ass_finish_line
-
   cmp #NL
   beq ass_line
 
@@ -205,10 +202,9 @@ ass_added_symbol:
   jsr get_token  ; skip the colon
 ass_not_colon:
   cmp #NL     ; newline means this is just a label line
-  beq ass_finish_lineJ2
-  cmp #';'    ; ditto for comment
   bne ass_not_colon2
-ass_finish_lineJ2  jmp ass_finish_line
+  jmp ass_finish_line
+
 ass_not_colon2:
   cmp #TOKEN_IDENTIFIER  ; should be an opcode now
   beq ass_opcode
@@ -294,15 +290,12 @@ ass_opcode2:
 ;
 
   jsr get_token
-  cmp #';'          ; hit a comment?
-  beq ass_no_operand
   cmp #NL           ; or end of line?
   bne ass_operand
 
 ;
-;  here when the opcode is followed by (spaces), a comment or a newline
+;  here when the opcode is followed by (spaces) or a newline
 ;
-ass_no_operand:
   lda #ASS_OPERAND_IMPLIED
   sta ASS_OPERAND
   jsr opcode_lookup
@@ -730,8 +723,6 @@ ass_done_message asciiz "Assemble finished: No errors\n"
 
 ass_check_no_more_tokens:
   lda token_type
-  cmp #';'          ; hit a comment?
-  beq ass_check_no_more_tokens_ok
   cmp #NL           ; or end of line?
   beq ass_check_no_more_tokens_ok
   ldx #19    ; ERROR: incorrect symbol
