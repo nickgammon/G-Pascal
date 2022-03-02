@@ -52,8 +52,8 @@
 ;  CONDITIONAL COMPILES
 ;
 EMULATOR = 0          ; for testing on a PC running an emulator
-LCD_SUPPORT = 1       ; 1 = support LCD, 0 = not. Unset if you have removed the LCD.
-SERIAL_DEBUGGING = 0  ; if set, toggle VIA PA2 when reading a bit, and PA3 when writing a bit
+LCD_SUPPORT = 0       ; 1 = support LCD, 0 = not. Unset if you have removed the LCD.
+SERIAL_DEBUGGING = 1  ; if set, toggle VIA PA2 when reading a bit, and PA3 when writing a bit
 
 ;
 ;  CONFIGURATION
@@ -201,7 +201,6 @@ START    =  *
   stx random+1
   stx random+2
   stx random+3
-  jsr hardware_init
 ;
 ;  Put 0x00 at start of source
 ;
@@ -222,6 +221,8 @@ RESTART  =  *
   txs             ; reset stack
   cli             ; allow interrupts after a NMI
   cld             ; cancel decimal mode
+  jsr hardware_init
+
 ;
 REST1    =  *
   .if LCD_SUPPORT

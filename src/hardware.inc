@@ -301,8 +301,7 @@ STOP_TRACE rts
 
 hardware_init:
 
-  lda VIA_PORTA
-  ora #SERIAL_OUT_MASK  ; set 1 bit (idle serial comms)
+  lda #SERIAL_OUT_MASK  ; set 1 bit (idle serial comms), and others to zero
   sta VIA_PORTA
 
   ; set output enable bits
