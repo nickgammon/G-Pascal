@@ -52,7 +52,7 @@
 ;  CONDITIONAL COMPILES
 ;
 EMULATOR = 0          ; for testing on a PC running an emulator
-LCD_SUPPORT = 0       ; 1 = support LCD, 0 = not. Unset if you have removed the LCD.
+LCD_SUPPORT = 1       ; 1 = support LCD, 0 = not. Unset if you have removed the LCD.
 SERIAL_DEBUGGING = 1  ; if set, toggle VIA PA2 when reading a bit, and PA3 when writing a bit
 
 ;
