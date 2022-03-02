@@ -146,12 +146,24 @@ irq1:
 ;  here for a hardware IRQ
 ;
   lda VIA_IFR
+  and #VIA_FLAG_CB2        ; CB2 active edge
+  bne cb2_interrupt
+
+  lda VIA_IFR
   and #VIA_FLAG_TIMER1     ; Time out of T1
   bne timer1_interrupt
 
-  lda VIA_IFR
-  and #VIA_FLAG_CB2        ; CB2 active edge
-  bne cb2_interrupt
+
+;
+;  we shouldn't get here, and if we do we will probably just loop servicing the interrupt
+;
+  .if SERIAL_DEBUGGING
+
+    lda #SERIAL_SPARE2_MASK
+    tsb VIA_PORTA
+    trb VIA_PORTA
+
+  .endif  ; SERIAL_DEBUGGING
 
   jmp irq_done
 
