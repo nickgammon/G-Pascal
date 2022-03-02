@@ -118,7 +118,7 @@ lcdbusy:
 ;  if there is no LCD or it doesn't respond
 ;
   dex
-  beq lcd_wait_timeout:
+  beq lcd_wait_timeout
   jsr lcd_read_instruction_nibble
   and #$80        ; get busy flag
   tay             ; save busy status
