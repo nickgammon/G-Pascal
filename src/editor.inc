@@ -339,9 +339,22 @@ editor_bad_range:
 too_much_on_line:
   asciiz "Unexpected trailing input on line\n"
 
+;
+;  check that all is left on the line is spaces
+;
 editor_check_no_more:
-  jsr get_token
-  beq editor_check_no_more_ok
+  ldy #0
+editor_check_no_more_loop:
+  lda (token_start),y
+  beq editor_check_no_more_ok   ; end of file
+  cmp #NL
+  beq editor_check_no_more_ok   ; newline is OK
+  jsr isspace
+  bcc editor_check_no_more_failed ; not spaces is bad
+  iny
+  bne editor_check_no_more_loop   ; skip spaces
+
+editor_check_no_more_failed:
   lda #<too_much_on_line
   ldx #>too_much_on_line
   jsr print
@@ -383,6 +396,8 @@ editor_get_range:
   beq editor_get_range_hyphen
   cmp #TOKEN_NUMBER
   beq editor_get_range_number
+  cmp #TOKEN_END
+  beq editor_get_range_number
   cmp #','
   beq editor_get_range_hyphen
 ;
@@ -407,7 +422,7 @@ editor_get_range_hyphen:
 ;  get the second line number
 ;
   jsr editor_get_number
-  bcc editor_bad_range
+  bcc editor_bad_rangeJ
 
 editor_get_range_number:
   lda token_value
