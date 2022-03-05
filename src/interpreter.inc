@@ -1626,7 +1626,7 @@ EX_LCDPOS = *
   sta hardware_work  ; save it
   jsr PULTOP   ; y
   and #1       ; can be 0 or 1
-  bne EX_LCDPOS_1
+  beq EX_LCDPOS_1
   lda #$40
 EX_LCDPOS_1:
   ora hardware_work  ; or in the column
