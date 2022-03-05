@@ -311,6 +311,9 @@ hardware_init:
   lda #%01000000      ; continuous interrupts on T1
   sta VIA_ACR
 
+  lda #0              ; Input-negative active edge
+  sta VIA_PCR
+
   lda #<BIT_INTERVAL  ; ie. baud rate interval
   sta VIA_T1C_L       ; for sending bits
   lda #>BIT_INTERVAL
