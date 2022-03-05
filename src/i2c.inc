@@ -1,4 +1,6 @@
 ;
+;  I2C interface routines
+;
 ; Author: Nick Gammon
 ; Date: 2 March 2022
 
@@ -36,9 +38,13 @@
 ;
 
 
+; Configuration of which VIA ports are used by SCL and SDA
 
 I2C_SCL     = %00000100   ; SCL (serial clock) - PA2
 I2C_SDA     = %00001000   ; SDA (serial data)  - PA3
+
+I2C_PORT    = VIA_PORTA   ; PORT A
+I2C_DDR     = VIA_DDRA    ; DDR  A
 
 ;
 ;  Initialise hardware for I2C comms.
@@ -51,20 +57,20 @@ i2c_init:
 ;  Set ports to low
 ;
   lda #I2C_SCL | I2C_SDA
-  trb VIA_PORTA
+  trb I2C_PORT
 
 ;
 ;  Set ports to input
 ;
 
   lda #I2C_SCL | I2C_SDA
-  trb VIA_DDRA
+  trb I2C_DDR
 
 
   rts
 
 ;---------------------------------------------
-;  delay between clock bits
+;  delay between clock bits - could make shorter if using a 1 MHz clock
 ;---------------------------------------------
 i2c_delay:
     nop
@@ -77,21 +83,21 @@ i2c_delay:
 ;---------------------------------------------
 i2c_toggle_clock:
   lda #I2C_SCL
-  trb VIA_DDRA      ; SCL high
+  trb I2C_DDR      ; SCL high
+  jsr i2c_delay
 ;
 ;  check if the slave wants us to wait by pulling the clock low
 ;
 i2c_toggle_clock_wait:
-  lda VIA_PORTA
+  lda I2C_PORT
   and #I2C_SCL
   beq i2c_toggle_clock_wait   ; should be high, but is low
 ;
 ;  we let the clock go high, and it actually IS high, so we can proceed
 ;
-  jsr i2c_delay
-  tsb VIA_DDRA      ; SCL low
+  tsb I2C_DDR       ; SCL low
   lda #I2C_SDA      ; immediately set SDA to low
-  trb VIA_DDRA
+  trb I2C_DDR
   jsr i2c_delay
   rts
 
@@ -111,16 +117,27 @@ i2c_toggle_clock_wait:
 
 i2c_begin_transmission:
 
-  pha   ; save address
+  pha             ; save address
 
   jsr i2c_init    ; set ports to low, and ports to input
+
+;
+;  Check if SDA or SCL are in use (low) - if so, wait until they are not
+;
+i2c_begin_transmission_loop:
+  lda #I2C_SDA
+  and I2C_PORT
+  beq i2c_begin_transmission_loop
+  lda #I2C_SCL
+  and I2C_PORT
+  beq i2c_begin_transmission_loop
 
 ;
 ;  The start condition pulls SDA low but SCL stays high
 ;
 
   lda #I2C_SDA
-  tsb VIA_DDRA
+  tsb I2C_DDR
   jsr i2c_delay
 
 ;
@@ -128,7 +145,7 @@ i2c_begin_transmission:
 ;
 
   lda #I2C_SCL
-  tsb VIA_DDRA
+  tsb I2C_DDR
   jsr i2c_delay
 
   pla   ; get address back
@@ -157,19 +174,19 @@ i2c_write_loop:
 ;  write a zero by setting SDA to output
 ;
   lda #I2C_SDA
-  tsb VIA_DDRA
+  tsb I2C_DDR
   bra i2c_write_clock
 ;
 ;  write a one by setting SDA to input
 ;
 i2c_write_one:
   lda #I2C_SDA
-  trb VIA_DDRA
+  trb I2C_DDR
 ;
 ;  if SDA is not high, another master has taken control of the bus, abandon this write
 ;
   nop
-  and VIA_PORTA
+  and I2C_PORT
   beq i2c_write_lost_arbitration   ; error return, give up
 
 ;---------------------------------------------
@@ -194,27 +211,27 @@ i2c_write_clock:
   ;
 
   lda #I2C_SDA
-  trb VIA_DDRA        ; SDA to input
+  trb I2C_DDR         ; SDA to input
 
   lda #I2C_SCL        ; clock high
-  trb VIA_DDRA
+  trb I2C_DDR
 
 ;
 ;  check if the slave wants us to wait by pulling the clock low
 ;
 i2c_write_clock_wait:
-  lda VIA_PORTA
+  lda I2C_PORT
   and #I2C_SCL
   beq i2c_write_clock_wait   ; should be high, but is low
 
   jsr i2c_delay       ; give it time to respond
 
   lda #I2C_SDA
-  and VIA_PORTA       ; read SDA
+  and I2C_PORT        ; read SDA
 
   tax                 ; save result for a moment
   lda #I2C_SCL        ; clock low
-  tsb VIA_DDRA
+  tsb I2C_DDR
 
   txa             ; get ack/nak bit back
 
@@ -242,16 +259,16 @@ i2c_read:
   ldy #0  ; current result
 
   lda #I2C_SDA
-  trb VIA_DDRA        ; SDA to input
+  trb I2C_DDR         ; SDA to input
 
 i2c_read_loop:
 
   lda #I2C_SCL        ; clock high
-  trb VIA_DDRA
+  trb I2C_DDR
   jsr i2c_delay       ; give it time to respond
 
   lda #I2C_SDA
-  and VIA_PORTA       ; read SDA
+  and I2C_PORT        ; read SDA
   beq i2c_read_zero
 ;
 ;  read a 1
@@ -274,7 +291,7 @@ i2c_read_zero:
 i2c_read_next:
 
   lda #I2C_SCL        ; clock low
-  tsb VIA_DDRA
+  tsb I2C_DDR
   jsr i2c_delay       ; give it time to respond
 
 ;
@@ -287,17 +304,17 @@ i2c_read_next:
   beq i2c_read_nak
 
   lda #I2C_SDA
-  tsb VIA_DDRA       ; pull SDA low to ACK the byte
+  tsb I2C_DDR         ; pull SDA low to ACK the byte
   bra i2c_read_ack_or_nak
 
 i2c_read_nak:
   lda #I2C_SDA
-  trb VIA_DDRA       ; pull SDA high to NAK the final byte
+  trb I2C_DDR         ; pull SDA high to NAK the final byte
 
 i2c_read_ack_or_nak:
 
   lda #I2C_SCL        ; clock high
-  trb VIA_DDRA
+  trb I2C_DDR
 
 ;
 ;  check if the slave wants us to wait by pulling the clock low
@@ -305,19 +322,19 @@ i2c_read_ack_or_nak:
 ;
 
 i2c_read_ack_or_nak_wait:
-  lda VIA_PORTA
+  lda I2C_PORT
   and #I2C_SCL
   beq i2c_read_ack_or_nak_wait   ; should be high, but is low
 
   jsr i2c_delay       ; give it time to respond
 
   lda #I2C_SCL        ; clock low
-  tsb VIA_DDRA
+  tsb I2C_DDR
   jsr i2c_delay
 
 i2c_read_done:
 
-  tya       ; result in A
+  tya                 ; result in A
   rts
 
 
@@ -335,7 +352,7 @@ i2c_end_transmission:
 ;  make sure SDA is low, otherwise it can't transition low to high
 ;
   lda #I2C_SDA
-  tsb VIA_DDRA
+  tsb I2C_DDR
 
   jsr i2c_delay
 
@@ -343,7 +360,7 @@ i2c_end_transmission:
 ;  Set SCL to input so it floats high
 ;
   lda #I2C_SCL
-  trb VIA_DDRA
+  trb I2C_DDR
 
   jsr i2c_delay
 
@@ -351,7 +368,7 @@ i2c_end_transmission:
 ;  Now with SCL high, set SDA to input so it also floats high
 ;
   lda #I2C_SDA
-  trb VIA_DDRA
+  trb I2C_DDR
 
   jsr i2c_delay
 
@@ -422,7 +439,7 @@ i2c_receive_message:
 ;  put serial data (SDA) into input mode so we can read from it
 ;
   lda #I2C_SDA
-  trb VIA_DDRA
+  trb I2C_DDR
 
 ;
 ;  receive each byte
