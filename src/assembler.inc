@@ -2381,6 +2381,10 @@ assembler_library_functions_table:
   makeAsmLibraryFunction "iscntrl",              iscntrl
   makeAsmLibraryFunction "isalpha",              isalpha
   makeAsmLibraryFunction "isalnum",              isalnum
+  makeAsmLibraryFunction "inbuf",                INBUF
+  makeAsmLibraryFunction "i2c_send_message",     i2c_send_message
+  makeAsmLibraryFunction "i2c_receive_message",  i2c_receive_message
+  makeAsmLibraryFunction "i2c_init",             i2c_init
   makeAsmLibraryFunction "hardware_init",        hardware_init
   makeAsmLibraryFunction "getin",                GETIN
   makeAsmLibraryFunction "gen_random",           gen_random
