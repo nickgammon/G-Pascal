@@ -28,8 +28,22 @@
 <div class="quick_link">
 <a href="file_menu.htm">Loading and saving</a>
 </div>
+<ul>
+<li><a href="#syntax">Editor commands</a></li>
+<li><a href="#delete">Delete</a></li>
+<li><a href="#find">Find</a></li>
+<li><a href="#insert">Insert</a></li>
+<li><a href="#list">List</a></li>
+<li><a href="#load">Load</a></li>
+<li><a href="#replace">Replace</a></li>
+<li><a href="#save">Save</a></li>
+<li><a href="#memory">Memory</a></li>
+<li><a href="#recommendations">Recommendations</a></li>
+</ul>
 <p>The inbuilt text editor is designed to allow you to try out small programs, and make modifications “on the fly” without having to download or upload code from your “main” computer.</p>
-<h2 id="editor-commands">Editor commands</h2>
+<p>In order to see what you are typing you must enable “local echo” on your terminal program. In the case of miniterm you use the “-e” command-line flag to do that.</p>
+<hr />
+<h2 id="syntax">Editor commands</h2>
 <p>The editor is available from the main “shell” prompt. Type <strong>H</strong> to see a list of editor commands:</p>
 <pre><code>Available actions:
 
@@ -48,18 +62,21 @@ RECover
 (Actions may be abbreviated)
 (Flags: &#39;I&#39;gnore case, &#39;G&#39;lobal, &#39;Q&#39;uiet)</code></pre>
 <p>You can assemble, compile (Pascal) or do a (Pascal) syntax check directly from the prompt (type <strong>A</strong>, <strong>C</strong> or <strong>S</strong>).</p>
-<p>The editor is line-based with each line having a number, automatically assigned. These numbers can be used to delete, insert, list, modify, find or replace. You need to press ENTER to have a command processed. Make sure you have “local echo” on in your terminal program (eg. miniterm) so that you can see your typing.</p>
+<p>The editor is line-based with each line having a number, automatically assigned. These numbers can be used to delete, insert, list, load, find or replace. You need to press ENTER to have a command processed. Make sure you have enabled “local echo” in your terminal program (eg. miniterm) so that you can see your typing.</p>
 <p>Commands have a line number range (if omitted, they affect all lines). For example to list lines 1 to 10:</p>
 <pre><code>L1-10</code></pre>
 <p>You may put spaces after the action, and between the line numbers if giving a range. You can also use a hyphen or comma to separate line numbers, e.g.</p>
 <pre><code>LIST 1-10
 LIST 1 10
 LIST 1, 10</code></pre>
-<p>Actions may be abbreviated. The minimal amount to type is in upper case, so “L” would be LIST and not LOAD, and “S” would be SYNTAX and not SAVE.</p>
-<p>As a shortcut, the command R on its own will be interpreted as Run (not Replace) as Replace would always need a delimiter after it.</p>
+<ul>
+<li>Actions may be abbreviated. The minimal amount to type is in upper case, so “L” would be LIST and not LOAD, and “S” would be SYNTAX and not SAVE.</li>
+<li>As a shortcut, the command R on its own will be interpreted as Run (not Replace) as Replace would always need a delimiter after it.</li>
+<li>The word “end” may be used in cases where you want the highest possible number, for example: “DELETE 100-end” to delete from line 100 onwards.</li>
+</ul>
 <hr />
 <h2 id="delete">Delete</h2>
-<p>Use DELETE to delete a range of lines (you cannot use DELETE on its own to delete the entire source). If you want to delete <em>everything</em> type “delete all” (or “d all”).</p>
+<p>Use DELETE to delete a range of lines (you cannot use DELETE on its own to delete the entire source). If you want to delete <em>everything</em> type “delete all” (or “del all”).</p>
 <hr />
 <h2 id="find">Find</h2>
 <p>Use FIND to find a string. The string delimiter can be any single character which is not a letter, number or space. This is intended to help you find lines with certain words on them. For example:</p>
@@ -80,16 +97,28 @@ LIST 1, 10</code></pre>
 <h2 id="insert">Insert</h2>
 <p>Use INSERT to insert new lines. Use <strong>I</strong> on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press <strong>Esc</strong>.</p>
 <p><strong>WARNING</strong>: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that displaying the line numbers takes quite a few calculations (binary to decimal conversion), which take time.</p>
-<p>If you are planning to “dump” your source onto the board, then use LOAD and “Load” it. This inserts source without displaying the line numbers.</p>
+<p>If you are planning to “paste” your source onto the board, use LOAD and “Load” it. This inserts source without displaying the line numbers.</p>
 <hr />
 <h2 id="list">List</h2>
-<p>Use LIST on its own to list the entire source. Otherwise list one line or a range, for example: Use LIST on its own to list the entire source. Otherwise list one line or a range, for example:</p>
+<p>Use LIST on its own to list the entire source. Otherwise list one line or a range, for example:</p>
 <pre><code>L
 L42
 L50-60</code></pre>
 <p>As an alternative, for exporting your file back to your PC/Mac, use SAVE to save the source. This lists it without line numbers, suitable for copying from your terminal program and pasting back into a text editor on your PC.</p>
 <p>Press Ctrl+C to abort a long listing.</p>
 <p>Control characters in the source are shown with a carat before them. For example if you had 0x01 in your source it would show as ^A if you listed it.</p>
+<hr />
+<h2 id="load">Load</h2>
+<p>This functions similarly to INSERT, however a line number is not displayed before each line of text. This saves time (converting binary to decimal is time-consuming) and is required if you are planning to paste code from your PC onto the board.</p>
+<p>Typically you would:</p>
+<ul>
+<li>Type “DEL ALL” (to delete existing source)</li>
+<li>Type “LOAD”.</li>
+<li>Paste your source from your PC</li>
+<li>Press <strong>Esc</strong> (escape) to stop the loading process.</li>
+</ul>
+<p>You may also want to compare the CRC of the loaded source with the CRC of your source file on your PC.</p>
+<p>See <a href="file_menu.htm">Loading and saving</a> for more details about loading, saving, and calculating file cyclic redundancy checks (CRCs).</p>
 <hr />
 <h2 id="replace">Replace</h2>
 <p>This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the “find” string and the “replace” string, separated by a delimiter of your choice. The string delimiter can be any single character which is not a letter, number or space.</p>
@@ -110,13 +139,20 @@ $0300: 7b 20 41 64 76 65 6e 74 75 72 65 2d 73 74 79 6c  {   A d v e n t u r e - 
 $0310: 65 20 67 61 6d 65 0a 20 20 41 75 74 68 6f 72 3a  e   g a m e .     A u t h o r :</code></pre>
 <p>Press Ctrl+C to abort a long listing.</p>
 <hr />
-<h2 id="recommendation">Recommendation</h2>
+<h2 id="save">Save</h2>
+<p>This lists your source, similarly to LIST, however without line numbers. This is useful for just getting an exact copy of your source which you can then copy from the screen of your terminal program and paste into a text editor on your PC, for saving to disk.</p>
+<p>See <a href="file_menu.htm">Loading and saving</a> for more details about loading, saving, and calculating file cyclic redundancy checks (CRCs).</p>
+<hr />
+<h2 id="recommendations">Recommendations</h2>
 <p>For large-scale changes I suggest keeping a copy of your source on your PC (you need to do this anyway as the board does not have file saving capability). For anything other than small one or two-line changes, it will be quicker and easier to change the source on your PC, and re-download it, rather than fiddling around in the Editor.</p>
 <p>The editor does not support cursor keys, so it is not the easiest editor to work with, particularly compared to modern editors available on PC/Macs.</p>
 <p>Keeping your original source elsewhere also protects you against rogue code which might overwrite your source, as there is no memory-protection hardware on these chips.</p>
 <hr />
 <div class="quick_link">
 <a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="file_menu.htm">Loading and saving</a>
 </div>
 <hr />
 <h2 id="license">License</h2>

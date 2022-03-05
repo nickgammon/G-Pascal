@@ -8,6 +8,7 @@
 <div class='quick_link'> [G-Pascal info](pascal_compiler.htm)</div>
 <div class='quick_link'> [Text editor](editor.htm) </div>
 <div class='quick_link'> [File menu](file_menu.htm) </div>
+<div class='quick_link'> [I2C support](i2c.htm) </div>
 
 ## Contents
 
@@ -24,6 +25,7 @@
 * [How to co-exist with Pascal code?](#co_exist)
 * [Access to EEPROM functions and variables](#eeprom_functions)
 * [Accessing the VIA (Versatile Interface Adapater) pins](#via_adapter)
+* [I^2^C support](#i2c)
 * [Debugging](#debugging)
 * [Credits](#credits)
 
@@ -560,6 +562,12 @@ write_loop:
 ;
   rts
 ```
+
+---
+
+## I^2^C support {#i2c}
+
+There are support functions for interfacing with I^2^C devices, such as real-time clocks, port expanders, and many other peripherals, with the board acting as an I^2^C master. See [I2C support](i2c.htm) for more details.
 
 ---
 

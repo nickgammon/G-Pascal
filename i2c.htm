@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>i2c</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="/G-Pascal/G-Pascal.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">I<sup>2</sup>C support</h1>
+</header>
+<p><strong>Author</strong>: Nick Gammon</p>
+<p><strong>Date written</strong>: March 2022</p>
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="assembler.htm">Assembler info</a>
+</div>
+<div class="quick_link">
+<a href="pascal_compiler.htm">G-Pascal info</a>
+</div>
+<div class="quick_link">
+<a href="editor.htm">Text editor</a>
+</div>
+<div class="quick_link">
+<a href="file_menu.htm">File menu</a>
+</div>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#about">About I<sup>2</sup>C</a></li>
+<li><a href="#limitations">Limitations</a></li>
+<li><a href="#wiring">Wiring</a></li>
+<li><a href="#api">Code API</a></li>
+<li><a href="#examples">Example code</a></li>
+<li><a href="#credits">Credits and references</a></li>
+</ul>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>The firmware on the EEPROM supports connecting to I2C devices as a master. This is implemented in software and does not require any additional hardware apart from two 4.7k pull-up resistors.</p>
+<hr />
+<h2 id="about">About I<sup>2</sup>C</h2>
+<p>See:</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/I%C2%B2C">I<sup>2</sup>C - Wikipedia</a></li>
+<li><a href="https://gammon.com.au/i2c">My tutorial about I2C</a></li>
+</ul>
+<p>The Two-Wire interface is extremely useful for connecting multiple devices, as they can all share the same two pins (plus a ground return). This is because the devices are “addressable”. Each device needs to have a unique address in the range 8 to 119. Address 0 is reserved as a “broadcast” address, addresses 1 to 7 are reserved for other purposes, and addresses 120 to 127 are reserved for future use.</p>
+<p>Screen capture of the logic analyzer while sending data to the MCP23017 chip (open image in new tab for more detail).</p>
+<p><img src="images/i2c%20example.png" /></p>
+<p>I2C uses an “open drain” system, which allows multiple devices to be connected to the SCL/SDA lines without any danger of them “fighting” over who sets the bus low or high. Devices (including the master) only ever drive the lines low (by setting the port to output and writing a zero). To send a 1-bit they set the port to high-impedence (input) and let the pull-up resistors pull the line high. This is why the pull-up resistors are required, without them the lines would never go high and the system would hang.</p>
+<p>Multiple devices may be connected simultaneously by simply connecting SDA and SCL together for each device. Only one set of pull-up resistors are required, you don’t need one pair for each device.</p>
+<hr />
+<h2 id="limitations">Limitations</h2>
+<ul>
+<li>You can only operate in “master” mode. This is the normal way of communicating with real-time clocks, port-expanders etc.</li>
+<li>The clock speed is around 40 kHz, if the board is clocked at 4 MHz. Thus it is 10 kHz if you clock your board at 1 MHz. This is no big deal as I2C is self-clocked and the exact clock rate doesn’t matter.</li>
+</ul>
+<hr />
+<h2 id="wiring">Wiring</h2>
+<p>The code expects you to connect:</p>
+<ul>
+<li>SCL (serial clock) to PA2 on the 6522 VIA chip (that is, pin 4 on the chip); and</li>
+<li>SDA (serial data) to PA3 on the 6522 VIA chip (that is, pin 5 on the chip)</li>
+</ul>
+<p>You can change that configuration by altering the code (i2c.inc) and re-assembling it.</p>
+<p>You <strong>need</strong> two pull-up resistors (recommended value is 4.7k) on SDA and SCL as shown below.</p>
+<p><img src="images/i2c%20wiring.png" /></p>
+<p>The above image shows how you might wire up a DS1307 clock chip and a MCP23017 port-expander. You can buy the clock chips on their own very cheaply, or as a pre-assembled board, as I did in my example photo.</p>
+<p><img src="images/i2c%20wiring%20photo.png" /></p>
+<p>The clock board shown has the pull-up resistors already on it. The photo also shows a MCP23017 I2C port-expander wired onto the same SCL/SDA pins as the clock.</p>
+<hr />
+<h2 id="api">Code API</h2>
+<p>The firmware on the EEPROM has three exposed functions (subroutines) you can call:</p>
+<h3 id="i2c_init">i2c_init</h3>
+<p>This just initialises the I2C interface, basically by putting SCL and SDA into input mode. You can call this once to make sure those two pins are inputs. However the other functions call this anyway, so it is not required, unless you want to ensure that the pins are correctly configured in advance of using I2C.</p>
+<h3 id="i2c_send_message">i2c_send_message</h3>
+<p>This is for sending data from the master (you) to the slave (some other chip). You need to:</p>
+<ul>
+<li>Place the address of the data to be sent into VALUE (low-order byte) and VALUE+1 (high-order byte)</li>
+<li>The length of the data into Y.</li>
+<li>The address of the device into A.</li>
+<li>Call i2c_send_message</li>
+</ul>
+<p>After the call the carry bit will be set on success and clear on failure.</p>
+<p>Example:</p>
+<pre><code>  lda #&lt;set_time_message
+  sta VALUE
+  lda #&gt;set_time_message
+  sta VALUE+1
+  ldy #8                ; length: register number + 7 data bytes
+  lda #CLOCK_PORT       ; DS1307 port
+  jsr i2c_send_message
+  bcc i2c_failure
+
+
+set_time_message:
+  dfb $00              ; start setting register zero
+  dfb $00,$32,$04      ; second, minute, hour  (4:34:00)
+  dfb $02              ; day of week: Tuesday
+  dfb $31,$01,$22      ; day / month / year  (31/01/22)
+
+CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68</code></pre>
+<h3 id="i2c_receive_message">i2c_receive_message</h3>
+<p>This is for receiving data from the slave (some other chip) to the master (you). You need to:</p>
+<ul>
+<li>Place the address of where the data is to be received into VALUE (low-order byte) and VALUE+1 (high-order byte)</li>
+<li>The length of the data into Y (the number of bytes to read)</li>
+<li>The address of the device into A.</li>
+<li>Call i2c_receive_message</li>
+</ul>
+<p>After the call the carry bit will be set on success and clear on failure.</p>
+<p>Example:</p>
+<pre><code>  lda #&lt;read_time_work
+  sta VALUE
+  lda #&gt;read_time_work
+  sta VALUE+1
+  ldy #7                    ; read 7 bytes
+  lda #CLOCK_PORT           ; DS1307 port
+  jsr i2c_receive_message
+  bcc i2c_failure
+
+read_time_work BLK 7               ; 7-byte workarea for reading time
+
+CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68</code></pre>
+<hr />
+<h2 id="examples">Example code</h2>
+<ul>
+<li><a href="examples/asm/i2c_port_expander_demo.asm">MCP23017 port-expander</a></li>
+<li><a href="examples/asm/set_i2c_clock.asm">Set DS1307 clock</a></li>
+<li><a href="examples/asm/read_i2c_clock.asm">Read DS1307 clock</a></li>
+</ul>
+<hr />
+<h2 id="credits">Credits and references</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/I%C2%B2C">I<sup>2</sup>C - Wikipedia</a></li>
+<li><a href="https://gammon.com.au/i2c">My tutorial about I2C</a></li>
+<li><a href="https://www.allaboutcircuits.com/technical-articles/the-i2c-bus-hardware-implementation-details/">The I2C Bus: Hardware Implementation Details</a></li>
+<li><a href="https://training.ti.com/i2c-i2c-microcontroller-basics">I2C microcontroller basics</a></li>
+<li><a href="https://training.ti.com/sites/default/files/docs/adcs-introduction-to-i2c-advanced-topics-presentation.pdf">Basics of I2C: Advanced Topics</a></li>
+<li><a href="http://fastbitlab.com/stm32-i2c-lecture-4-i2c-start-and-stop-conditions/">I2C Start and Stop Conditions</a></li>
+</ul>
+<hr />
+<div class="quick_link">
+<a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<hr />
+<h2 id="license">License</h2>
+<p>Information and images on this site are licensed under the <a href="https://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a> unless stated otherwise.</p>
+</body>
+</html>

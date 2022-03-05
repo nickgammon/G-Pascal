@@ -44,6 +44,9 @@
 <a href="adventure.htm">Adventure game</a>
 </div>
 <div class="quick_link">
+<a href="i2c.htm">I2C support</a>
+</div>
+<div class="quick_link">
 <a href="https://gammon.com.au/electronics">More electronics</a>
 </div>
 <h2 id="on-board-assembler-tiny-pascal-and-text-editor-for-ben-eaters-board">On-board assembler, tiny Pascal, and text editor for <a href="https://eater.net/6502">Ben Eater’s board</a></h2>
@@ -117,7 +120,8 @@ RECover
 <li>Support for the LCD interface described in Ben’s videos</li>
 <li>Other support functions for use by your assembler code, such as multiplication and division, CRC calculations, binary-to-decimal conversion</li>
 <li>Support for NMI (non-maskable interrupts) so that you can recover from runaway code</li>
-<li>There is approximately 12k of space available on the EEPROM to add your own functions</li>
+<li>Support for I<sup>2</sup>C communication for connecting to real-time clocks, port expanders, etc.</li>
+<li>There is over 11k of space available on the EEPROM to add your own functions</li>
 </ul></li>
 </ul>
 <p>Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:</p>
