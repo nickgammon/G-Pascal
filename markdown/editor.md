@@ -7,10 +7,25 @@
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
 <div class='quick_link'> [Loading and saving](file_menu.htm) </div>
 
+* [Editor commands](#syntax)
+* [Delete](#delete)
+* [Find](#find)
+* [Insert](#insert)
+* [List](#list)
+* [Load](#load)
+* [Replace](#replace)
+* [Save](#save)
+* [Memory](#memory)
+* [Recommendations](#recommendations)
+
 
 The inbuilt text editor is designed to allow you to try out small programs, and make modifications "on the fly" without having to download or upload code from your "main" computer.
 
-## Editor commands
+In order to see what you are typing you must enable "local echo" on your terminal program. In the case of miniterm you use the "-e" command-line flag to do that.
+
+---
+
+## Editor commands {#syntax}
 
 The editor is available from the main "shell" prompt. Type **H** to see a list of editor commands:
 
@@ -35,7 +50,7 @@ RECover
 
 You can assemble, compile (Pascal) or do a (Pascal) syntax check directly from the prompt (type **A**, **C** or **S**).
 
-The editor is line-based with each line having a number, automatically assigned. These numbers can be used to delete, insert, list, modify, find or replace. You need to press ENTER to have a command processed. Make sure you have "local echo" on in your terminal program (eg. miniterm) so that you can see your typing.
+The editor is line-based with each line having a number, automatically assigned. These numbers can be used to delete, insert, list, load, find or replace. You need to press ENTER to have a command processed. Make sure you have enabled "local echo" in your terminal program (eg. miniterm) so that you can see your typing.
 
 Commands have a line number range (if omitted, they affect all lines). For example to list lines 1 to 10:
 
@@ -52,19 +67,19 @@ LIST 1 10
 LIST 1, 10
 ```
 
-Actions may be abbreviated. The minimal amount to type is in upper case, so "L" would be LIST and not LOAD, and "S" would be SYNTAX and not SAVE.
-
-As a shortcut, the command R on its own will be interpreted as Run (not Replace) as Replace would always need a delimiter after it.
-
----
-
-## Delete
-
-Use DELETE to delete a range of lines (you cannot use DELETE on its own to delete the entire source). If you want to delete *everything* type "delete all" (or "d all").
+* Actions may be abbreviated. The minimal amount to type is in upper case, so "L" would be LIST and not LOAD, and "S" would be SYNTAX and not SAVE.
+* As a shortcut, the command R on its own will be interpreted as Run (not Replace) as Replace would always need a delimiter after it.
+* The word "end" may be used in cases where you want the highest possible number, for example: "DELETE 100-end" to delete from line 100 onwards.
 
 ---
 
-## Find
+## Delete {#delete}
+
+Use DELETE to delete a range of lines (you cannot use DELETE on its own to delete the entire source). If you want to delete *everything* type "delete all" (or "del all").
+
+---
+
+## Find {#find}
 
 Use FIND to find a string. The string delimiter can be any single character which is not a letter, number or space. This is intended to help you find lines with certain words on them. For example:
 
@@ -96,19 +111,18 @@ That would list all lines with "begin" on them between lines 20 and 999 (or the 
 
 ---
 
-## Insert
+## Insert {#insert}
 
 Use INSERT to insert new lines. Use **I** on its own to insert right at the start of the source. Otherwise if you give a line number the inserted lines will appear after that line. To cancel inserting, press **Esc**.
 
 **WARNING**: If you attempt to insert multiple lines very quickly your source will be corrupted. In particular, this will happen if you go into Insert mode and then paste a whole lot of text from your PC. The reason for this is that displaying the line numbers takes quite a few calculations (binary to decimal conversion), which take time.
 
-If you are planning to "dump" your source onto the board, then use LOAD and "Load" it. This inserts source without displaying the line numbers.
+If you are planning to "paste" your source onto the board, use LOAD and "Load" it. This inserts source without displaying the line numbers.
 
 ---
 
-## List
+## List {#list}
 
-Use LIST on its own to list the entire source. Otherwise list one line or a range, for example:
 Use LIST on its own to list the entire source. Otherwise list one line or a range, for example:
 
 ```
@@ -125,7 +139,24 @@ Control characters in the source are shown with a carat before them. For example
 
 ---
 
-## Replace
+## Load {#load}
+
+This functions similarly to INSERT, however a line number is not displayed before each line of text. This saves time (converting binary to decimal is time-consuming) and is required if you are planning to paste code from your PC onto the board.
+
+Typically you would:
+
+* Type "DEL ALL" (to delete existing source)
+* Type "LOAD".
+* Paste your source from your PC
+* Press **Esc** (escape) to stop the loading process.
+
+You may also want to compare the CRC of the loaded source with the CRC of your source file on your PC.
+
+See [Loading and saving](file_menu.htm) for more details about loading, saving, and calculating file cyclic redundancy checks (CRCs).
+
+---
+
+## Replace {#replace}
 
 This lets you replace one string with another, either in a range of lines or the whole source. You might want to rename a variable with this, for example. You need to specify the "find" string and the "replace" string, separated by a delimiter of your choice. The string delimiter can be any single character which is not a letter, number or space.
 
@@ -145,7 +176,7 @@ R 1-20 /dog/cat/ i
 
 ---
 
-## Memory
+## Memory {#memory}
 
 This lets you view any part of your RAM or ROM memory. You enter a start and end address, and the bytes in that range are displayed in hex, and also bytes in the range 0x20 to 0x7F are also displayed in ASCII on the right. eg.
 
@@ -157,10 +188,17 @@ $0310: 65 20 67 61 6d 65 0a 20 20 41 75 74 68 6f 72 3a  e   g a m e .     A u t 
 
 Press Ctrl+C to abort a long listing.
 
+---
+
+## Save {#save}
+
+This lists your source, similarly to LIST, however without line numbers. This is useful for just getting an exact copy of your source which you can then copy from the screen of your terminal program and paste into a text editor on your PC, for saving to disk.
+
+See [Loading and saving](file_menu.htm) for more details about loading, saving, and calculating file cyclic redundancy checks (CRCs).
 
 ---
 
-## Recommendation
+## Recommendations {#recommendations}
 
 For large-scale changes I suggest keeping a copy of your source on your PC (you need to do this anyway as the board does not have file saving capability). For anything other than small one or two-line changes, it will be quicker and easier to change the source on your PC, and re-download it, rather than fiddling around in the Editor.
 
@@ -173,6 +211,7 @@ Keeping your original source elsewhere also protects you against rogue code whic
 ---
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [Loading and saving](file_menu.htm) </div>
 
 
 ---

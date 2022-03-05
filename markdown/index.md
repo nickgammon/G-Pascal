@@ -11,6 +11,7 @@
 <div class='quick_link'> [Text editor](editor.htm) </div>
 <div class='quick_link'> [File menu](file_menu.htm) </div>
 <div class='quick_link'> [Adventure game](adventure.htm) </div>
+<div class='quick_link'> [I2C support](i2c.htm) </div>
 <div class='quick_link'> [More electronics](https://gammon.com.au/electronics) </div>
 
 ## On-board assembler, tiny Pascal, and text editor for [Ben Eater's board](https://eater.net/6502)
@@ -102,7 +103,8 @@ Demonstration video [here on Vimeo](https://vimeo.com/682663375).
     * Support for the LCD interface described in Ben's videos
     * Other support functions for use by your assembler code, such as multiplication and division, CRC calculations, binary-to-decimal conversion
     * Support for NMI (non-maskable interrupts) so that you can recover from runaway code
-    * There is approximately 12k of space available on the EEPROM to add your own functions
+    * Support for I^2^C communication for connecting to real-time clocks, port expanders, etc.
+    * There is over 11k of space available on the EEPROM to add your own functions
 
 Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:
 

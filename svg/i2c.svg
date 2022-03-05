@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="642.29169mm"
+   height="404.51941mm"
+   viewBox="0 0 642.29169 404.51941"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="i2c.svg"
+   inkscape:export-filename="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/images/i2c wiring photo.png"
+   inkscape:export-xdpi="39.669998"
+   inkscape:export-ydpi="39.669998">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="1421.1324"
+     inkscape:cy="656.44951"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="3773"
+     inkscape:window-height="2098"
+     inkscape:window-x="67"
+     inkscape:window-y="34"
+     inkscape:window-maximized="1"
+     fit-margin-top="1"
+     fit-margin-left="1"
+     fit-margin-right="1"
+     fit-margin-bottom="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(87.556557,-6.2938666)">
+    <image
+       sodipodi:absref="/run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/images/i2c photo.jpg"
+       y="7.2938666"
+       x="-86.556557"
+       id="image893"
+       xlink:href="file:///run/user/1000/gvfs/smb-share:server=10.0.0.2,share=www/G-Pascal/images/i2c%20photo.jpg"
+       preserveAspectRatio="none"
+       height="402.51941"
+       width="640.29169" />
+    <g
+       id="g905"
+       transform="translate(76.171815,-46.772167)">
+      <rect
+         ry="6.4144688"
+         y="431.75812"
+         x="91.41658"
+         height="20.847023"
+         width="53.453903"
+         id="rect900"
+         style="opacity:1;fill:#ff8080;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <text
+         id="text898"
+         y="449.76312"
+         x="97.81945"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.94249249px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.82747841px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332"
+           y="449.76312"
+           x="97.81945"
+           id="tspan896"
+           sodipodi:role="line">SCL</tspan></text>
+    </g>
+    <g
+       transform="translate(76.171815,-78.84451)"
+       id="g913">
+      <rect
+         style="opacity:1;fill:#ff8080;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect907"
+         width="53.453903"
+         height="20.847023"
+         x="91.41658"
+         y="431.75812"
+         ry="6.4144688" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.94249249px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="97.81945"
+         y="449.76312"
+         id="text911"><tspan
+           sodipodi:role="line"
+           id="tspan909"
+           x="97.81945"
+           y="449.76312"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.82747841px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332">SDA</tspan></text>
+    </g>
+    <g
+       id="g921"
+       transform="translate(-22.71791,-229.85179)">
+      <rect
+         ry="6.4144688"
+         y="429.65179"
+         x="90.565781"
+         height="20.847023"
+         width="81.78447"
+         id="rect915"
+         style="opacity:1;fill:#ff8080;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <text
+         id="text919"
+         y="443.57376"
+         x="97.795586"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.22702456px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.68107414px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332"
+           y="443.57376"
+           x="97.795586"
+           id="tspan917"
+           sodipodi:role="line">Test points</tspan></text>
+    </g>
+    <g
+       transform="translate(343.44134,-41.961312)"
+       id="g929">
+      <rect
+         style="opacity:1;fill:#ff8080;fill-opacity:1;stroke:#000000;stroke-width:0.10000001;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect923"
+         width="112.78773"
+         height="20.847023"
+         x="90.565781"
+         y="429.65179"
+         ry="6.4144688" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.22702456px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="96.000053"
+         y="443.57376"
+         id="text927"><tspan
+           sodipodi:role="line"
+           id="tspan925"
+           x="96.000053"
+           y="443.57376"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.68107414px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.26458332">Pull-up resistors</tspan></text>
+    </g>
+    <ellipse
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:3.80002999;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path931"
+       cx="395.85001"
+       cy="478.99307"
+       rx="25.587296"
+       ry="34.839115"
+       transform="matrix(0.96450087,-0.26407966,0.2694987,0.96300075,0,0)" />
+    <g
+       id="g958"
+       transform="matrix(0,-0.44272567,0.44165701,0,-237.26376,154.42027)"
+       style="stroke-width:2.26146603">
+      <rect
+         ry="6.4144688"
+         y="431.75812"
+         x="91.416611"
+         height="20.847023"
+         width="100.76044"
+         id="rect952"
+         style="opacity:1;fill:#ff8080;fill-opacity:1;stroke:#000000;stroke-width:0.22614659;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <text
+         id="text956"
+         y="449.76312"
+         x="96.272316"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.94249249px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.59834617"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.82747841px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.59834617"
+           y="449.76312"
+           x="96.272316"
+           id="tspan954"
+           sodipodi:role="line">SCL: PA2</tspan></text>
+    </g>
+    <g
+       style="stroke-width:2.26146603"
+       transform="matrix(0,-0.44272567,0.44165701,0,-224.4774,155.94492)"
+       id="g974">
+      <rect
+         style="opacity:1;fill:#ff8080;fill-opacity:1;stroke:#000000;stroke-width:0.22614659;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect968"
+         width="100.76044"
+         height="20.847023"
+         x="94.86039"
+         y="431.75812"
+         ry="6.4144688" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.94249249px;line-height:1.25;font-family:'Bitstream Charter';-inkscape-font-specification:'Bitstream Charter';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.59834617"
+         x="97.81945"
+         y="449.76312"
+         id="text972"><tspan
+           sodipodi:role="line"
+           id="tspan970"
+           x="97.81945"
+           y="449.76312"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.82747841px;font-family:sans-serif;-inkscape-font-specification:sans-serif;stroke-width:0.59834617">SDA: PA3</tspan></text>
+    </g>
+  </g>
+</svg>
