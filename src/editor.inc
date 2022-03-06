@@ -44,8 +44,6 @@ print_done:
   sta REG2
   rts
 
-introduction asc    "G-Pascal compiler, version 4.01.\n"
-             asciiz "Written by Nick Gammon.\nType H for help.\n"
 prompt       asciiz ": "
 bad_command  asciiz "Unknown command, type H for help.\n"
 
