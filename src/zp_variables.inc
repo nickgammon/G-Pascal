@@ -112,13 +112,12 @@ IO_A     reserve 1    ; dunno
 IO_Y     reserve 1    ; seems to be used to save and restore Y
 IO_X     reserve 1    ;  ditto for X
 RES      reserve 3    ; multiplication result
-MCAND    reserve 3    ; multiplicand
-DIVISOR  = MCAND      ; divisor for division (shares with multiplicand for multiplication)
+DIVISOR  reserve 3      ; divisor for division
 DVDN     reserve 3    ; dividend
 RMNDR    reserve 1    ; for division, 0 if positive, 0x80 if negative
 bcd_work    reserve 4    ; work area for converting binary to decimal (packed)
 bcd_result  reserve 8    ; work area for turning numbers into printable (unpacked)
-QT_TGL   reserve 1    ; quote toggle
+spi_mode   reserve 1   ; SPI mode: 0 to 3
 QUOT_SYM reserve 1     ; current quote symbol
 QT_SIZE  reserve 1    ; number of characters in reserved words
 ASS_OPERAND reserve 1 ; assembler operand type = see defines below
