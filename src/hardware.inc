@@ -333,6 +333,7 @@ hardware_init:
 
   stz serial_in_byte    ; non-zero means an interrupt put in incoming byte there
   stz serial_out_bit
+  stz spi_mode          ; default to SPI mode zero
 
   cli         ; enable interrupts
   rts
