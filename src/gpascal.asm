@@ -185,10 +185,14 @@ TEXT_START = *            ; where source goes in memory (currently $300)
   .include "hardware.inc"
   .include "gtoken.inc"
   .include "i2c.inc"
+  .include "spi.inc"
 
+
+introduction asc    "G-Pascal compiler, version 4.02.\n"
+             asciiz "Written by Nick Gammon.\nType H for help.\n"
 
   .if LCD_SUPPORT
-LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.01"
+LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.02"
   .endif
 
 ;
