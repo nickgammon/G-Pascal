@@ -55,6 +55,7 @@ EMULATOR = 0          ; for testing on a PC running an emulator
 LCD_SUPPORT = 1       ; 1 = support LCD, 0 = not. Unset if you have removed the LCD.
 SERIAL_DEBUGGING = 0  ; if set, toggle VIA PA2 when reading a bit, and PA3 when writing a bit
                       ;  DO NOT USE I2C if this is on, as I2C functions use these two pins
+USE_CP437_FONT = 1    ; include the symbols for the CP437 font for use with MAX7219 chip
 
 ;
 ;  CONFIGURATION
@@ -185,10 +186,17 @@ TEXT_START = *            ; where source goes in memory (currently $300)
   .include "hardware.inc"
   .include "gtoken.inc"
   .include "i2c.inc"
+  .include "spi.inc"
 
+  .if USE_CP437_FONT
+    .include "cp437_font.inc"
+  .endif
+
+introduction asc    "G-Pascal compiler, version 4.02.\n"
+             asciiz "Written by Nick Gammon.\nType H for help.\n"
 
   .if LCD_SUPPORT
-LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.01"
+LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.02"
   .endif
 
 ;

@@ -385,38 +385,38 @@ i2c_end_transmission:
 ;  Returns carry set on success, carry clear on failure
 ;
 ;---------------------------------------------
-i2c_send_message:
+i2c_send:
   sty hardware_work
   asl A     ; move zero into write bit
   jsr i2c_begin_transmission
-  bcc i2c_send_message_fail
+  bcc i2c_send_fail
 
 ;
 ;  send each byte
 ;
-i2c_send_message_loop:
+i2c_send_loop:
   lda hardware_work           ; number of bytes to go
-  beq i2c_send_message_done
+  beq i2c_send_done
   dec hardware_work
   ldy #0
   lda (VALUE),Y
   jsr i2c_write
-  bcc i2c_send_message_fail
+  bcc i2c_send_fail
   inc VALUE
-  bne i2c_send_message_loop
+  bne i2c_send_loop
   inc VALUE+1
-  bra i2c_send_message_loop
+  bra i2c_send_loop
 ;
 ;  sending done
 ;
-i2c_send_message_done:
+i2c_send_done:
   jsr i2c_end_transmission
   sec
   rts
 ;
 ;  sending failure
 ;
-i2c_send_message_fail:
+i2c_send_fail:
   jsr i2c_end_transmission
   clc
   rts
@@ -428,12 +428,12 @@ i2c_send_message_fail:
 ;  Length in Y
 ;---------------------------------------------
 
-i2c_receive_message:
+i2c_receive:
   sty hardware_work
   sec
   rol A   ; move one into write bit (so it is read mode)
   jsr i2c_begin_transmission
-  bcc i2c_receive_message_fail
+  bcc i2c_receive_fail
 
 ;
 ;  put serial data (SDA) into input mode so we can read from it
@@ -444,28 +444,28 @@ i2c_receive_message:
 ;
 ;  receive each byte
 ;
-i2c_receive_message_loop:
+i2c_receive_loop:
   lda hardware_work           ; number of bytes to go
-  beq i2c_receive_message_done
+  beq i2c_receive_done
   dec hardware_work
   jsr i2c_read
   ldy #0
   sta (VALUE),Y
   inc VALUE
-  bne i2c_receive_message_loop
+  bne i2c_receive_loop
   inc VALUE+1
-  bra i2c_receive_message_loop
+  bra i2c_receive_loop
 ;
 ;  receiving done
 ;
-i2c_receive_message_done:
+i2c_receive_done:
   jsr i2c_end_transmission
   sec
   rts
 ;
 ;  receiving failure
 ;
-i2c_receive_message_fail:
+i2c_receive_fail:
   jsr i2c_end_transmission
   clc
   rts

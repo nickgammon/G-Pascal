@@ -6,6 +6,7 @@
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
 <div class='quick_link'> [Assembler info](assembler.htm) </div>
+<div class='quick_link'> [SPI support](spi.htm)</div>
 <div class='quick_link'> [G-Pascal info](pascal_compiler.htm)</div>
 <div class='quick_link'> [Text editor](editor.htm) </div>
 <div class='quick_link'> [File menu](file_menu.htm) </div>
@@ -28,6 +29,8 @@
 ## Introduction {#introduction}
 
 The firmware on the EEPROM supports connecting to I2C devices as a master. This is implemented in software and does not require any additional hardware apart from two 4.7k pull-up resistors.
+
+Demonstration video [on Vimeo](https://vimeo.com/manage/videos/684851623)
 
 ---
 
@@ -87,14 +90,14 @@ The firmware on the EEPROM has three exposed functions (subroutines) you can cal
 
 This just initialises the I2C interface, basically by putting SCL and SDA into input mode. You can call this once to make sure those two pins are inputs. However the other functions call this anyway, so it is not required, unless you want to ensure that the pins are correctly configured in advance of using I2C.
 
-### i2c_send_message
+### i2c_send
 
 This is for sending data from the master (you) to the slave (some other chip). You need to:
 
 * Place the address of the data to be sent into VALUE  (low-order byte) and VALUE+1 (high-order byte)
 * The length of the data into Y.
 * The address of the device into A.
-* Call i2c_send_message
+* Call i2c_send
 
 After the call the carry bit will be set on success and clear on failure.
 
@@ -107,7 +110,7 @@ Example:
   sta VALUE+1
   ldy #8                ; length: register number + 7 data bytes
   lda #CLOCK_PORT       ; DS1307 port
-  jsr i2c_send_message
+  jsr i2c_send
   bcc i2c_failure
 
 
@@ -120,14 +123,14 @@ set_time_message:
 CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68
 ```
 
-### i2c_receive_message
+### i2c_receive
 
 This is for receiving data from the slave (some other chip) to the master (you). You need to:
 
 * Place the address of where the data is to be received into VALUE (low-order byte) and VALUE+1 (high-order byte)
 * The length of the data into Y (the number of bytes to read)
 * The address of the device into A.
-* Call i2c_receive_message
+* Call i2c_receive
 
 After the call the carry bit will be set on success and clear on failure.
 
@@ -140,7 +143,7 @@ Example:
   sta VALUE+1
   ldy #7                    ; read 7 bytes
   lda #CLOCK_PORT           ; DS1307 port
-  jsr i2c_receive_message
+  jsr i2c_receive
   bcc i2c_failure
 
 read_time_work BLK 7               ; 7-byte workarea for reading time
@@ -171,6 +174,7 @@ CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68
 ---
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [SPI support](spi.htm)</div>
 
 
 ---

@@ -2355,6 +2355,11 @@ assembler_library_functions_table:
   makeAsmLibraryFunction "tknjmp",               TKNJMP
   makeAsmLibraryFunction "reset",                START
   makeAsmLibraryFunction "srce",                 SRCE
+  makeAsmLibraryFunction "spi_transfer",         spi_transfer
+  makeAsmLibraryFunction "spi_ss_low",           spi_ss_low
+  makeAsmLibraryFunction "spi_ss_high",          spi_ss_high
+  makeAsmLibraryFunction "spi_send_two_bytes",   spi_send_two_bytes
+  makeAsmLibraryFunction "spi_init",             spi_init
   makeAsmLibraryFunction "serial_print_message", serial_print_message
   makeAsmLibraryFunction "serial_available",     serial_available
   makeAsmLibraryFunction "nmi",                  RESTART
@@ -2382,8 +2387,8 @@ assembler_library_functions_table:
   makeAsmLibraryFunction "isalpha",              isalpha
   makeAsmLibraryFunction "isalnum",              isalnum
   makeAsmLibraryFunction "inbuf",                INBUF
-  makeAsmLibraryFunction "i2c_send_message",     i2c_send_message
-  makeAsmLibraryFunction "i2c_receive_message",  i2c_receive_message
+  makeAsmLibraryFunction "i2c_send",             i2c_send
+  makeAsmLibraryFunction "i2c_receive",          i2c_receive
   makeAsmLibraryFunction "i2c_init",             i2c_init
   makeAsmLibraryFunction "hardware_init",        hardware_init
   makeAsmLibraryFunction "getin",                GETIN
@@ -2426,6 +2431,9 @@ assembler_library_functions_table:
   makeAsmLibraryFunction "crc_byte",             crc_byte
   makeAsmLibraryFunction "crc_addr",             crc_addr
   makeAsmLibraryFunction "crc16",                crc16
+  .if USE_CP437_FONT
+  makeAsmLibraryFunction "cp437_font",           cp437_font
+  .endif
   makeAsmLibraryFunction "cout",                 COUT
   makeAsmLibraryFunction "comstl",               COMSTL
   makeAsmLibraryFunction "call_y",               call_y
@@ -2434,6 +2442,7 @@ assembler_library_functions_table:
   makeAsmLibraryFunction "call_p",               call_p
   makeAsmLibraryFunction "call_a",               call_a
   makeAsmLibraryFunction "binary_to_decimal",    binary_to_decimal
+  makeAsmLibraryFunction "bcd_result",           bcd_result
 
   dfb 0   ; end of table
 
