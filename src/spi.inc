@@ -264,13 +264,15 @@ spi_ss_high:
 
 ;---------------------------------------------
 ;  send two bytes: first in A, second in X
-;   preserves Y
+;   preserves all registers
 ;---------------------------------------------
 spi_send_two_bytes:
+  pha
   jsr spi_ss_low    ; SS low
   jsr spi_transfer  ; send first byte
   txa               ; get second byte
   jsr spi_transfer  ; send second byte
   jsr spi_ss_high   ; SS high again
+  pla
   rts
 

@@ -6,6 +6,7 @@
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
 <div class='quick_link'> [Assembler info](assembler.htm) </div>
+<div class='quick_link'> [SPI support](spi.htm)</div>
 <div class='quick_link'> [G-Pascal info](pascal_compiler.htm)</div>
 <div class='quick_link'> [Text editor](editor.htm) </div>
 <div class='quick_link'> [File menu](file_menu.htm) </div>
@@ -28,6 +29,8 @@
 ## Introduction {#introduction}
 
 The firmware on the EEPROM supports connecting to I2C devices as a master. This is implemented in software and does not require any additional hardware apart from two 4.7k pull-up resistors.
+
+Demonstration video [on Vimeo](https://vimeo.com/manage/videos/684851623)
 
 ---
 
@@ -171,6 +174,7 @@ CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68
 ---
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [SPI support](spi.htm)</div>
 
 
 ---

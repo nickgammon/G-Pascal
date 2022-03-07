@@ -12,6 +12,7 @@
 <div class='quick_link'> [File menu](file_menu.htm) </div>
 <div class='quick_link'> [Adventure game](adventure.htm) </div>
 <div class='quick_link'> [I2C support](i2c.htm) </div>
+<div class='quick_link'> [SPI support](spi.htm) </div>
 <div class='quick_link'> [More electronics](https://gammon.com.au/electronics) </div>
 
 ## On-board assembler, tiny Pascal, and text editor for [Ben Eater's board](https://eater.net/6502)
@@ -201,9 +202,12 @@ You may need to modify the way the code interfaces with the hardware, depending 
 * [G-Pascal compiler features](pascal_compiler.htm) and limitations
 * [Assembler features](assembler.htm) and limitations
 * [Example code](examples/)
+* [Source code and documentation on GitHub](https://github.com/nickgammon/G-Pascal)
 * [Text editor](editor.htm)
 * [File menu](file_menu.htm)
 * [How to install](installation.htm)
+* [I2C support](i2c.htm)
+* [SPI support](spi.htm)
 * [History of G-Pascal](history.htm) and the assembler
 * [Ben Eater's 6502 board](https://eater.net/6502)
 * [Ben Eater's first 6502 board tutorial on YouTube](https://www.youtube.com/watch?v=LnzuMJLZRdU)

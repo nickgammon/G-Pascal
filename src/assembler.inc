@@ -2431,6 +2431,9 @@ assembler_library_functions_table:
   makeAsmLibraryFunction "crc_byte",             crc_byte
   makeAsmLibraryFunction "crc_addr",             crc_addr
   makeAsmLibraryFunction "crc16",                crc16
+  .if USE_CP437_FONT
+  makeAsmLibraryFunction "cp437_font",           cp437_font
+  .endif
   makeAsmLibraryFunction "cout",                 COUT
   makeAsmLibraryFunction "comstl",               COMSTL
   makeAsmLibraryFunction "call_y",               call_y

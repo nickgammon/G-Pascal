@@ -9,6 +9,7 @@
 <div class='quick_link'> [Text editor](editor.htm) </div>
 <div class='quick_link'> [File menu](file_menu.htm) </div>
 <div class='quick_link'> [I2C support](i2c.htm) </div>
+<div class='quick_link'> [SPI support](spi.htm) </div>
 
 ## Contents
 
@@ -25,7 +26,7 @@
 * [How to co-exist with Pascal code?](#co_exist)
 * [Access to EEPROM functions and variables](#eeprom_functions)
 * [Accessing the VIA (Versatile Interface Adapater) pins](#via_adapter)
-* [I^2^C support](#i2c)
+* [I^2^C and SPI support](#i2c)
 * [Debugging](#debugging)
 * [Credits](#credits)
 
@@ -565,9 +566,11 @@ write_loop:
 
 ---
 
-## I^2^C support {#i2c}
+## I^2^C and SPI support {#i2c}
 
 There are support functions for interfacing with I^2^C devices, such as real-time clocks, port expanders, and many other peripherals, with the board acting as an I^2^C master. See [I2C support](i2c.htm) for more details.
+
+There are also support functions for interfacing with SPI devices, such as 7-segment displays, 8x8 matrix displays, port expanders, and many other peripherals, with the board acting as an SPI master. See [SPI support](spi.htm) for more details.
 
 ---
 
@@ -688,10 +691,14 @@ Press Ctrl+C to abort a long listing.
 * [Jacksum](https://jacksum.net/en/index.html) was used to confirm CRC calculations
 * [Endianness - Wikipedia](https://en.wikipedia.org/wiki/Endianness)
 * Multiplication and division algorithms from [Multiplying and Dividing on the 6502 by Neil Parker](https://llx.com/Neil/a2/mult.html)
+* [I2C support](i2c.htm)
+* [SPI support](spi.htm)
 
 ---
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
+<div class='quick_link'> [I^2^C support](i2c.htm)</div>
+<div class='quick_link'> [SPI support](spi.htm)</div>
 
 
 ---
