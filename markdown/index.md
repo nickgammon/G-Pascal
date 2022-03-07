@@ -108,7 +108,7 @@ Demonstration video [here on Vimeo](https://vimeo.com/682663375).
 
 Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:
 
-* A 335-line assembler program testing all opcodes assembles in 9 seconds
+* A 335-line assembler program testing all opcodes assembles in 5 seconds
 * A 651-line G-Pascal program (the Adventure game) compiles in 6 seconds
 
 ---
