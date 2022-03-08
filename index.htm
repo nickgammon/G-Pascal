@@ -181,6 +181,27 @@ RECover
 <p>There is no particular reason this code wouldn’t run on other 6502 set-ups. You would need to be aware of the hardware addresses of things like your RAM (which presumably starts at 0x0000 because you need access to the 6502 hardware stack at 0x0100) and your ROM (which presumably covers 0xF000 to 0xFFFF because of the need to have NMI/Reset/IRQ vectors).</p>
 <p>You may need to modify the way the code interfaces with the hardware, depending on your personal setup.</p>
 <hr />
+<h2 id="construction-notes">Construction notes</h2>
+<p>My board was made from a genuine kit from <a href="https://eater.net/6502">Ben Eater’s website</a>, however I largely connected the pins using wire-wrapping rather than breadboard wires.</p>
+<p><img src="images/wire-wrap.jpg" /></p>
+<p>There were several reasons for this:</p>
+<ul>
+<li>I found running lots of breadboard wires in a confined space tedious, especially when there were a lot in close proximity to each other</li>
+<li>If you weren’t careful, touching the wires would tend to pop one out of the breadboard, due to the force from nearby wires in a cluster</li>
+<li>It was difficult or impossible to see whether you had run the right wire to the right pin</li>
+<li>Changing a wrong wire was difficult if it happened to be under a cluster of wires</li>
+<li>The wire-wrap posts made a convenient test point for attaching oscilloscope or logic analyser probes</li>
+</ul>
+<p>Wire wrapping is not much slower than putting in breadboard wires. You still have to cut the wires to length and strip them, so that part is much the same, except when the supplied breadboard wires happen to be exactly the right length. The only extra step is to insert the wire into the tool and twirl it around to bind it to the post.</p>
+<p>The extra things you need to do wire-wrapping are:</p>
+<ul>
+<li>A wire-wrap tool (see photo below) - around $US 20 from eBay</li>
+<li>A spool or two of AWG30 wire-wrapping wire - around $US 10 from eBay each</li>
+<li>Some header pins of the longer variety. You need them to be long enough to firmly go into the breadboard, and have enough room on top for two or three wire-wraps. The ones I used were 17.5 mm long (see bottom-right corner of photo below).</li>
+</ul>
+<p><img src="images/wire-wrapping%20tool.jpg" /></p>
+<p>There are various tutorials around for how to wire-wrap including <a href="https://learn.sparkfun.com/tutorials/working-with-wire/how-to-use-a-wire-wrap-tool">this one from Sparkfun</a>.</p>
+<hr />
 <h2 id="other-links">Other links</h2>
 <ul>
 <li><a href="hardware_mods.htm">Suggested hardware modifications</a> to Ben’s 6502 board including accessing more of the on-board RAM, and connecting up the board to your PC/Mac</li>

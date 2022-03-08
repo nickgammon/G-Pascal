@@ -197,6 +197,35 @@ You may need to modify the way the code interfaces with the hardware, depending 
 
 ---
 
+## Construction notes
+
+My board was made from a genuine kit from [Ben Eater's website](https://eater.net/6502), however I largely connected the pins using wire-wrapping rather than breadboard wires.
+
+![](images/wire-wrap.jpg)
+
+There were several reasons for this:
+
+* I found running lots of breadboard wires in a confined space tedious, especially when there were a lot in close proximity to each other
+* If you weren't careful, touching the wires would tend to pop one out of the breadboard, due to the force from nearby wires in a cluster
+* It was difficult or impossible to see whether you had run the right wire to the right pin
+* Changing a wrong wire was difficult if it happened to be under a cluster of wires
+* The wire-wrap posts made a convenient test point for attaching oscilloscope or logic analyser probes
+
+Wire wrapping is not much slower than putting in breadboard wires. You still have to cut the wires to length and strip them, so that part is much the same, except when the supplied breadboard wires happen to be exactly the right length. The only extra step is to insert the wire into the tool and twirl it around to bind it to the post.
+
+The extra things you need to do wire-wrapping are:
+
+* A wire-wrap tool (see photo below) - around $US 20 from eBay
+* A spool or two of AWG30 wire-wrapping wire - around $US 10 from eBay each
+* Some header pins of the longer variety. You need them to be long enough to firmly go into the breadboard, and have enough room on top for two or three wire-wraps. The ones I used were 17.5 mm long (see bottom-right corner of photo below).
+
+![](images/wire-wrapping tool.jpg)
+
+There are various tutorials around for how to wire-wrap including [this one from Sparkfun](https://learn.sparkfun.com/tutorials/working-with-wire/how-to-use-a-wire-wrap-tool).
+
+
+---
+
 ## Other links
 
 * [Suggested hardware modifications](hardware_mods.htm) to Ben's 6502 board including accessing more of the on-board RAM, and connecting up the board to your PC/Mac
