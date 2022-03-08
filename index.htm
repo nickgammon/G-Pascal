@@ -47,6 +47,9 @@
 <a href="i2c.htm">I2C support</a>
 </div>
 <div class="quick_link">
+<a href="spi.htm">SPI support</a>
+</div>
+<div class="quick_link">
 <a href="https://gammon.com.au/electronics">More electronics</a>
 </div>
 <h2 id="on-board-assembler-tiny-pascal-and-text-editor-for-ben-eaters-board">On-board assembler, tiny Pascal, and text editor for <a href="https://eater.net/6502">Ben Eater’s board</a></h2>
@@ -121,12 +124,13 @@ RECover
 <li>Other support functions for use by your assembler code, such as multiplication and division, CRC calculations, binary-to-decimal conversion</li>
 <li>Support for NMI (non-maskable interrupts) so that you can recover from runaway code</li>
 <li>Support for I<sup>2</sup>C communication for connecting to real-time clocks, port expanders, etc.</li>
-<li>There is over 11k of space available on the EEPROM to add your own functions</li>
+<li>Support for SPI communication for connecting to port expanders, display boards and other devices.</li>
+<li>There is over 9k of space available on the EEPROM to add your own functions (over 11k if you omit the CP437 character set from it)</li>
 </ul></li>
 </ul>
 <p>Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:</p>
 <ul>
-<li>A 335-line assembler program testing all opcodes assembles in 9 seconds</li>
+<li>A 335-line assembler program testing all opcodes assembles in 5 seconds</li>
 <li>A 651-line G-Pascal program (the Adventure game) compiles in 6 seconds</li>
 </ul>
 <hr />
@@ -183,9 +187,12 @@ RECover
 <li><a href="pascal_compiler.htm">G-Pascal compiler features</a> and limitations</li>
 <li><a href="assembler.htm">Assembler features</a> and limitations</li>
 <li><a href="examples/">Example code</a></li>
+<li><a href="https://github.com/nickgammon/G-Pascal">Source code and documentation on GitHub</a></li>
 <li><a href="editor.htm">Text editor</a></li>
 <li><a href="file_menu.htm">File menu</a></li>
 <li><a href="installation.htm">How to install</a></li>
+<li><a href="i2c.htm">I2C support</a></li>
+<li><a href="spi.htm">SPI support</a></li>
 <li><a href="history.htm">History of G-Pascal</a> and the assembler</li>
 <li><a href="https://eater.net/6502">Ben Eater’s 6502 board</a></li>
 <li><a href="https://www.youtube.com/watch?v=LnzuMJLZRdU">Ben Eater’s first 6502 board tutorial on YouTube</a></li>

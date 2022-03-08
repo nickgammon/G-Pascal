@@ -37,6 +37,9 @@
 <div class="quick_link">
 <a href="i2c.htm">I2C support</a>
 </div>
+<div class="quick_link">
+<a href="spi.htm">SPI support</a>
+</div>
 <h2 id="contents">Contents</h2>
 <ul>
 <li><a href="#Features">Features</a></li>
@@ -54,7 +57,7 @@
 <li><a href="#co_exist">How to co-exist with Pascal code?</a></li>
 <li><a href="#eeprom_functions">Access to EEPROM functions and variables</a></li>
 <li><a href="#via_adapter">Accessing the VIA (Versatile Interface Adapater) pins</a></li>
-<li><a href="#i2c">I<sup>2</sup>C support</a></li>
+<li><a href="#i2c">I<sup>2</sup>C and SPI support</a></li>
 <li><a href="#debugging">Debugging</a></li>
 <li><a href="#credits">Credits</a></li>
 </ul>
@@ -371,8 +374,9 @@ write_loop:
 ;
   rts</code></pre>
 <hr />
-<h2 id="i2c">I<sup>2</sup>C support</h2>
+<h2 id="i2c">I<sup>2</sup>C and SPI support</h2>
 <p>There are support functions for interfacing with I<sup>2</sup>C devices, such as real-time clocks, port expanders, and many other peripherals, with the board acting as an I<sup>2</sup>C master. See <a href="i2c.htm">I2C support</a> for more details.</p>
+<p>There are also support functions for interfacing with SPI devices, such as 7-segment displays, 8x8 matrix displays, port expanders, and many other peripherals, with the board acting as an SPI master. See <a href="spi.htm">SPI support</a> for more details.</p>
 <hr />
 <h2 id="debugging">Debugging</h2>
 <p>Debugging assembler code can be a pain. Below are a few suggestions.</p>
@@ -448,10 +452,18 @@ $0010: 00 00 00 00 00 00 00 37 c6 00 00 00 00 00 00 00 . . . . . . . 7 . . . . .
 <li><a href="https://jacksum.net/en/index.html">Jacksum</a> was used to confirm CRC calculations</li>
 <li><a href="https://en.wikipedia.org/wiki/Endianness">Endianness - Wikipedia</a></li>
 <li>Multiplication and division algorithms from <a href="https://llx.com/Neil/a2/mult.html">Multiplying and Dividing on the 6502 by Neil Parker</a></li>
+<li><a href="i2c.htm">I2C support</a></li>
+<li><a href="spi.htm">SPI support</a></li>
 </ul>
 <hr />
 <div class="quick_link">
 <a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="i2c.htm">I<sup>2</sup>C support</a>
+</div>
+<div class="quick_link">
+<a href="spi.htm">SPI support</a>
 </div>
 <hr />
 <h2 id="license">License</h2>

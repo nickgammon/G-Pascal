@@ -105,7 +105,8 @@ Demonstration video [here on Vimeo](https://vimeo.com/682663375).
     * Other support functions for use by your assembler code, such as multiplication and division, CRC calculations, binary-to-decimal conversion
     * Support for NMI (non-maskable interrupts) so that you can recover from runaway code
     * Support for I^2^C communication for connecting to real-time clocks, port expanders, etc.
-    * There is over 11k of space available on the EEPROM to add your own functions
+    * Support for SPI communication for connecting to port expanders, display boards and other devices.
+    * There is over 9k of space available on the EEPROM to add your own functions (over 11k if you omit the CP437 character set from it)
 
 Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:
 

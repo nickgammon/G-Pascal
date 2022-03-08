@@ -50,7 +50,7 @@ begin:
   sta VALUE+1
   ldy #8                ; length: register number + 7 data bytes
   lda #CLOCK_PORT       ; DS1307 port
-  jsr i2c_send_message
+  jsr i2c_send
   bcc i2c_failure
 
   lda #<done_message

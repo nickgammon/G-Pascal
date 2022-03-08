@@ -29,12 +29,11 @@ begin:
 loop:
 
   jsr serial_available
-  beq loop_no_key
   cmp #'C'-$40  ; ctrl+C?
-  bne loop_no_key
+  bne loop_no_abort
   rts   ; we are done!
 
-loop_no_key:
+loop_no_abort:
 
   lda #<select_register_message    ; set to register zero
   sta VALUE
@@ -42,7 +41,7 @@ loop_no_key:
   sta VALUE+1
   ldy #1
   lda #CLOCK_PORT               ; DS1307 port
-  jsr i2c_send_message
+  jsr i2c_send
   bcc i2c_failure
 
 ;
@@ -55,7 +54,7 @@ loop_no_key:
   sta VALUE+1
   ldy #7
   lda #CLOCK_PORT               ; DS1307 port
-  jsr i2c_receive_message
+  jsr i2c_receive
   bcc i2c_failure
 
 ;

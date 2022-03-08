@@ -42,7 +42,7 @@ See:
 * [Serial Peripheral Interface - Wikipedia](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)
 * [My tutorial about SPI](https://www.gammon.com.au/spi)
 
-SPI is commonly used in many devices such as port-expanders like the MCP23S17, micro SD cards, 7-segment displays and 8x8 matrix displays using the MAX7219 chip, and many others.
+SPI is commonly used in many devices such as port-expanders like the MCP23S17, micro SD cards, 7-segment and 8x8 matrix displays using the MAX7219 chip, and many others.
 
 Screen capture of the logic analyzer while sending data to the MAX7219 chip (open image in new tab for more detail).
 
@@ -60,7 +60,7 @@ Three of them (SS, MOSI, SCK) are outputs from the master, and one is an input f
 
 Note that on some devices the signals are labelled slightly differently:
 
-* MOSI can be called SIN (serial in) or DIN (data in)
+* MOSI can be called SIN (serial in), DIN (data in) or DI (data in)
 * SS can be called CS (chip select)
 * SCK can be called CLK (clock)
 
@@ -164,9 +164,9 @@ This is a 2k chunk of memory in the EEPROM with the character encoding for the C
 
 This looks like this:
 
-![](cp437_fonts.png)
+![](images/cp437_fonts.png)
 
-This is very useful if you want to draw character on a 8x8 dot matrix display, as putting the font data into your code could easily exceed your available RAM for your source.
+This is very useful if you want to draw characters on a 8x8 dot matrix display, as putting the font data into your code could easily exceed your available RAM for your source.
 
 The example file [Driving an 8x8 matrix display](examples/asm/8x8 matrix test.asm) shows you to use this font data. Basically each byte that can be displayed (from 0x00 to 0xFF) takes up 8 bytes of font data (one for each line of the display, therefore 8 bytes x 8 bits = 64 pixels).
 

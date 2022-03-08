@@ -29,6 +29,9 @@
 <a href="assembler.htm">Assembler info</a>
 </div>
 <div class="quick_link">
+<a href="spi.htm">SPI support</a>
+</div>
+<div class="quick_link">
 <a href="pascal_compiler.htm">G-Pascal info</a>
 </div>
 <div class="quick_link">
@@ -50,6 +53,7 @@
 <hr />
 <h2 id="introduction">Introduction</h2>
 <p>The firmware on the EEPROM supports connecting to I2C devices as a master. This is implemented in software and does not require any additional hardware apart from two 4.7k pull-up resistors.</p>
+<p>Demonstration video <a href="https://vimeo.com/manage/videos/684851623">on Vimeo</a></p>
 <hr />
 <h2 id="about">About I<sup>2</sup>C</h2>
 <p>See:</p>
@@ -86,13 +90,13 @@
 <p>The firmware on the EEPROM has three exposed functions (subroutines) you can call:</p>
 <h3 id="i2c_init">i2c_init</h3>
 <p>This just initialises the I2C interface, basically by putting SCL and SDA into input mode. You can call this once to make sure those two pins are inputs. However the other functions call this anyway, so it is not required, unless you want to ensure that the pins are correctly configured in advance of using I2C.</p>
-<h3 id="i2c_send_message">i2c_send_message</h3>
+<h3 id="i2c_send">i2c_send</h3>
 <p>This is for sending data from the master (you) to the slave (some other chip). You need to:</p>
 <ul>
 <li>Place the address of the data to be sent into VALUE (low-order byte) and VALUE+1 (high-order byte)</li>
 <li>The length of the data into Y.</li>
 <li>The address of the device into A.</li>
-<li>Call i2c_send_message</li>
+<li>Call i2c_send</li>
 </ul>
 <p>After the call the carry bit will be set on success and clear on failure.</p>
 <p>Example:</p>
@@ -102,7 +106,7 @@
   sta VALUE+1
   ldy #8                ; length: register number + 7 data bytes
   lda #CLOCK_PORT       ; DS1307 port
-  jsr i2c_send_message
+  jsr i2c_send
   bcc i2c_failure
 
 
@@ -113,13 +117,13 @@ set_time_message:
   dfb $31,$01,$22      ; day / month / year  (31/01/22)
 
 CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68</code></pre>
-<h3 id="i2c_receive_message">i2c_receive_message</h3>
+<h3 id="i2c_receive">i2c_receive</h3>
 <p>This is for receiving data from the slave (some other chip) to the master (you). You need to:</p>
 <ul>
 <li>Place the address of where the data is to be received into VALUE (low-order byte) and VALUE+1 (high-order byte)</li>
 <li>The length of the data into Y (the number of bytes to read)</li>
 <li>The address of the device into A.</li>
-<li>Call i2c_receive_message</li>
+<li>Call i2c_receive</li>
 </ul>
 <p>After the call the carry bit will be set on success and clear on failure.</p>
 <p>Example:</p>
@@ -129,7 +133,7 @@ CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68</code></pre>
   sta VALUE+1
   ldy #7                    ; read 7 bytes
   lda #CLOCK_PORT           ; DS1307 port
-  jsr i2c_receive_message
+  jsr i2c_receive
   bcc i2c_failure
 
 read_time_work BLK 7               ; 7-byte workarea for reading time
@@ -155,6 +159,9 @@ CLOCK_PORT     = $68  ; DS1307 is on I2C port 0x68</code></pre>
 <hr />
 <div class="quick_link">
 <a href="index.htm">Back to main G-Pascal page</a>
+</div>
+<div class="quick_link">
+<a href="spi.htm">SPI support</a>
 </div>
 <hr />
 <h2 id="license">License</h2>
