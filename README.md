@@ -64,11 +64,13 @@ Full documentation can be viewed at <https://gammon.com.au/G-Pascal>
     * Support for the LCD interface described in Ben's videos
     * Other support functions for use by your assembler code, such as multiplication and division, CRC calculations, binary-to-decimal conversion
     * Support for NMI (non-maskable interrupts) so that you can recover from runaway code
-    * There is approximately 12k of space available on the EEPROM to add your own functions
+    * Support for I^2^C communication for connecting to real-time clocks, port expanders, etc.
+    * Support for SPI communication for connecting to port expanders, display boards and other devices.
+    * There is over 9k of space available on the EEPROM to add your own functions (over 11k if you omit the CP437 character set from it)
 
 Both the Pascal compiler and assembler are quite fast. Any program that will fit into memory will compile in a few seconds. For example, using a 1 MHz clock:
 
-* A 335-line assembler program testing all opcodes assembles in 9 seconds
+* A 335-line assembler program testing all opcodes assembles in 5 seconds
 * A 651-line G-Pascal program (the Adventure game) compiles in 6 seconds
 
 ---
@@ -82,4 +84,11 @@ Both the Pascal compiler and assembler are quite fast. Any program that will fit
 * The software can be downloaded from GitHub
 * The source is licensed under the MIT License.
 
+---
 
+## Example videos
+
+* [Editing, compiling and assembling](https://vimeo.com/682663375)
+* [I2C](https://vimeo.com/684851623)
+* [7-segment display](https://vimeo.com/685664548)
+* [8x8 dot matrix display](https://vimeo.com/685666821)

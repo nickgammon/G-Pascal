@@ -30,8 +30,8 @@ The firmware on the EEPROM supports connecting to SPI devices. This is implement
 
 Demonstration videos on Vimeo of:
 
-* [7-segment display](https://vimeo.com/manage/videos/685664548)
-* [8x8 dot matrix display](https://vimeo.com/manage/videos/685666821)
+* [7-segment display](https://vimeo.com/685664548)
+* [8x8 dot matrix display](https://vimeo.com/685666821)
 
 ---
 

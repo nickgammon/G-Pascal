@@ -30,7 +30,7 @@
 
 The firmware on the EEPROM supports connecting to I2C devices as a master. This is implemented in software and does not require any additional hardware apart from two 4.7k pull-up resistors.
 
-Demonstration video [on Vimeo](https://vimeo.com/manage/videos/684851623)
+Demonstration video [on Vimeo](https://vimeo.com/684851623)
 
 ---
 
