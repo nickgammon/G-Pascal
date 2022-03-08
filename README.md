@@ -64,7 +64,7 @@ Full documentation can be viewed at <https://gammon.com.au/G-Pascal>
     * Support for the LCD interface described in Ben's videos
     * Other support functions for use by your assembler code, such as multiplication and division, CRC calculations, binary-to-decimal conversion
     * Support for NMI (non-maskable interrupts) so that you can recover from runaway code
-    * Support for I^2^C communication for connecting to real-time clocks, port expanders, etc.
+    * Support for I2C communication for connecting to real-time clocks, port expanders, etc.
     * Support for SPI communication for connecting to port expanders, display boards and other devices.
     * There is over 9k of space available on the EEPROM to add your own functions (over 11k if you omit the CP437 character set from it)
 
