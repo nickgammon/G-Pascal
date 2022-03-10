@@ -189,8 +189,9 @@ serial_in_loop:
 
   .if SERIAL_DEBUGGING
     lda #SERIAL_DEBUG1_MASK     ; toggle debug flag (2 cycles)
-    tsb VIA_PORTA               ; (6 cycles)
-    trb VIA_PORTA               ; (6 cycles)
+    tsb VIA_PORTA               ; paint the fence: up (6 cycles)
+    trb VIA_PORTA               ; down (6 cycles)
+                                ; look eye! always look eye
   .else
     NOP    ; take the same time so the timing isn't thrown out
     NOP    ; 2 cycles each

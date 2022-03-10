@@ -129,7 +129,7 @@ If you have loaded a program, and the CRC fails, try compiling or assembling it.
 
 If you cannot resolve the difference try loading or saving the same file again. Also try removing trailing spaces which are hard to spot in the source, and may make the versions on your PC and Ben's Board different. The source in G-Pascal always has a trailing newline at the end of every line (including the last) so make sure your file on disk ends with a newline.
 
-The editor discards newlines when accepting input. You should make sure that your file on disk ends with newlines only (0x0A) and not carriage-return (0x0D) as well. Modern editors have methods of converting files to newline-only endings. Personally I use [Geany](https://www.geany.org/).
+The editor discards carriage-returns (0x0D) when accepting input. You should make sure that your file on disk ends with newlines only (0x0A) and not carriage-return (0x0D) as well. Modern editors have methods of converting files to newline-only endings. Personally I use [Geany](https://www.geany.org/).
 
 ---
 
