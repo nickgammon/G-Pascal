@@ -21,6 +21,7 @@
 * [Recommendations](#recommendations)
 * [Info](#info)
 * [Run / Debug / Trace / Resume](#run)
+* [Poke / JSR / JMP](#poke)
 
 
 The inbuilt text editor is designed to allow you to try out small programs, and make modifications "on the fly" without having to download or upload code from your "main" computer.
@@ -47,6 +48,7 @@ INfo
 Memory first_address last_address
 Compile/Syntax/Assemble
 RUn/DEBug/Trace/RESume
+Poke/Jsr/JMp
 RECover
 (Actions may be abbreviated)
 (Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)
@@ -247,6 +249,12 @@ As described on [the Pascal information page](pascal_compiler.htm) you can trace
 ### Resume
 
 As described on [the Assembler information page](assembler.htm) this resumes execution from a current breakpoint (placed by inserting a BRK instruction in your code).
+
+---
+
+## Poke / JSR / JMP {#poke}
+
+These debugging techniqes are described on [the Assembler information page](assembler.htm).
 
 ---
 

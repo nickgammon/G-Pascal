@@ -28,6 +28,14 @@
 * [Accessing the VIA (Versatile Interface Adapater) pins](#via_adapter)
 * [I^2^C and SPI support](#i2c)
 * [Debugging](#debugging)
+    * [Toggling an LED](#toggle_led)
+    * [Inserting breakpoints](#breakpoints)
+    * [Resume after breakpoint (RES)](#resume)
+    * [Debugging prints](#debugging_print)
+    * [View memory (MEM)](#view_memory)
+    * [Change memory (POKE)](#change_memory)
+    * [JSR to address](#jsr)
+    * [JMP to address](#jmp)
 * [Credits](#credits)
 
 **Author**: Nick Gammon (written in 2022)
@@ -578,7 +586,9 @@ There are also support functions for interfacing with SPI devices, such as 7-seg
 
 Debugging assembler code can be a pain. Below are a few suggestions.
 
-### Toggling an LED
+---
+
+### Toggling an LED {#toggle_led}
 
 You can use a handful of instructions to toggle one of the VIA pins, like this:
 
@@ -597,9 +607,10 @@ The VIA pins are set to output by default in the hardware initialisation routine
 
 This toggling is very fast, you would not see it with the naked eye. An oscilloscope or logic analyser could show if that port was toggled. Alternatively leave it on (omit the "trb" instruction) and then you could see if a particular code path had been traversed.
 
+---
 
 
-### Inserting breakpoints
+### Inserting breakpoints {#breakpoints}
 
 Another technique is to put BRK instructions into your code. The processor actually advances two bytes after a breakpoint, so the byte after BRK is reserved for a breakpoint number. Thus, if you are uncertain if your code has reached a particular spot you can put a BRK there, followed by a breakpoint number, e.g.
 
@@ -631,13 +642,28 @@ From the above we conclude that, in this case, a JSR at $975D called something (
 
 You could sprinkle multiple BRK instructions through your code to confirm or deny that certain parts of code are executed each with their own unique breakpoint "ID" so you can see which one was reached (without having to match the breakpoint address to the generated code address).
 
-If you do not put an "ID" byte after the BRK, then the code shown will simply be the opcode of the next instruction in the source.
+If you do not put an "ID" byte after the BRK, then the code shown will simply be the opcode of the next instruction in the source. If you are planning to do a RESUME then you must put an "ID" byte after each BRK. You could insert breakpoints in places where you want to check the contents of various registers, or other memory locations, and then type RESUME afterwards to move onto the next breakpoint.
 
-### Resume after breakpoint
+You can resume execution after hitting a breakpoint, see below.
+
+---
+
+### Resume after breakpoint (RES) {#resume}
 
 After hitting a breakpoint, you can type RESUME to continue at the next instruction. In this case you **must** put a breakpoint identifier after the breakpoint, or the code will be resumed one byte from the correct place. This means you can put various breakpoints in your code and check that registers (and other memory addresses) are what you expect before resuming execution.
 
-### Debugging prints
+The processor registers are loaded with the values saved when the BRK was executed. These values are saved in the following memory locations:
+
+* $10 - A register
+* $11 - X register
+* $12 - Y register
+* $13 - status register
+* $14 - stack register
+* $15/$16 - address of breakpoint (placed into the program counter)
+
+---
+
+### Debugging prints {#debugging_print}
 
 Another technique is to put "debugging prints" inside your code. This could be used instead of inserting BRK instructions if you just want a breadcrumb trail of what is being executed and in what order. For example:
 
@@ -672,17 +698,77 @@ Now in your code you could do something like this:
   pla             ; retrieve A
 ```
 
-### View memory
+---
+
+### View memory {#view_memory}
 
 You can use the MEMORY command to view any range of memory. For example, to look at the zero-page registers:
 
 ```
 : mem $0 $1f
 $0000: d3 c7 00 da c9 00 00 00 00 ff ff ff ff 00 00 00  . . . . . . . . . . . . . . . .
-$0010: 00 00 00 00 00 00 00 37 c6 00 00 00 00 00 00 00 . . . . . . . 7 . . . . . . . .
+$0010: 00 00 00 00 00 00 00 37 c6 00 00 00 00 00 00 00  . . . . . . . 7 . . . . . . . .
 ```
 
-Press Ctrl+C to abort a long listing.
+Press Ctrl+C to abort a long listing. Values in the range 0x20 to 0x7F are shown in ASCII on the right of the hex numbers. Other values are shown as a period.
+
+---
+
+### Change memory {#change_memory}
+
+For debugging purposes you can use "POKE" to alter any memory address. There is no checking if you are altering a sane memory location.
+
+For example:
+
+```
+POKE $1000 $12 $34 'A'
+```
+
+That would put $12 into address $1000, $34 into address $1001, and $41 into address $1002.
+
+You will get a message, and poking will cease, if the value read back from that location is not the value you are attempting to place there. This would happen if you were writing to read-only memory.
+
+You can poke one or more locations (sequentially). The maximum number depends on what will fit into the editor's command-line buffer which is 256 bytes long including the trailing newline and 0x00 byte.
+
+---
+
+### JSR to address {#jsr}
+
+You can call any subroutine by using "JSR" in the shell. eg.
+
+```
+JSR $1234
+```
+
+Prior to executing the JSR, the shell loads the processor registers from zero-page memory as follows:
+
+* $10 - A register
+* $11 - X register
+* $12 - Y register
+* $13 - status register
+
+You could use POKE to seed those registers.
+
+After the subroutine returns, those four locations will have the new values of those registers placed in them.
+
+---
+
+### JMP to address {#jmp}
+
+You can jump to any address by using "JMP" in the shell. eg.
+
+```
+JMP $1234
+```
+
+Prior to executing the JMP, the shell loads the processor registers from zero-page memory as follows:
+
+* $10 - A register
+* $11 - X register
+* $12 - Y register
+* $13 - status register
+
+You could use POKE to seed those registers.
 
 ---
 
