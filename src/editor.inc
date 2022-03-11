@@ -20,21 +20,13 @@ print:
   stx REG2+1
   ldy #0
 print_loop:
-  lda  serial_in_byte_received
-  beq  print_not_abort
-  cmp  #KEY_ABORT
-  bne  print_done
-  lda  #FLAG_ABORTED    ; set aborted flag
-  tsb  system_flags
-  bra  print_done
-print_not_abort:
   lda (REG2),y
   beq print_done
   jsr COUT
   iny
   bne print_loop  ; give up if we overflow
 print_done:
-  stz serial_in_byte_received
+;  stz serial_in_byte_received   ; TODO: Not sure about this
 ;
 ;  get REG2 back
 ;
@@ -163,6 +155,7 @@ editor_handlers:
   makeHandler "FIND",    editor_find
   makeHandler "REPLACE", editor_replace
   makeHandler "RUN",     editor_run
+  makeHandler "RESUME",  editor_resume
   makeHandler "RECOVER", editor_recover
   dfb 0
 
@@ -178,7 +171,7 @@ editor_help_info:
   asc "INfo\n"
   asc "Memory      first_address last_address\n"
   asc "Compile/Syntax/Assemble\n"
-  asc "RUn/DEBug/Trace\n"
+  asc "RUn/DEBug/Trace/RESume\n"
   asc "RECover\n"
   asc "(Actions may be abbreviated)\n"
   asc "(Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)\n"
@@ -1808,9 +1801,21 @@ editor_recover_not_needed:
   jsr print
   jmp main_prompt
 
+not_assembler_message asciiz "Cannot trace or debug assembler code\n"
 
 editor_debug:
   jsr editor_check_no_more
+  lda  #FLAG_VALID_ASSEMBLE
+  and  system_flags
+  beq editor_debug_ok
+
+editor_not_assembler:
+  lda #<not_assembler_message
+  ldx #>not_assembler_message
+  jsr print
+  jmp main_prompt
+
+editor_debug_ok:
   lda #1
   sta  DBGFLG
   sta  DCODE
@@ -1818,6 +1823,9 @@ editor_debug:
 
 editor_trace:
   jsr editor_check_no_more
+  lda  #FLAG_VALID_ASSEMBLE
+  and  system_flags
+  bne  editor_not_assembler
   lda  #$80
   sta  DBGFLG
   sta  DCODE
@@ -1828,6 +1836,7 @@ editor_info  = *
   jsr editor_check_no_more
   jsr show_source_start
   jsr show_source_end
+  jsr show_source_lines
   jsr crc_source
   jmp main_prompt
 
@@ -1885,12 +1894,80 @@ show_source_start:
   jsr PRBYTECR
   rts
 
+source_line_count asciiz "Source lines:  "    ; count of lines
+show_source_lines:
+  stz VALUE      ; line count in this case
+  stz VALUE+1
+  stz VALUE+2
+
+  lda #<TEXT_START
+  sta PCODE
+  lda #>TEXT_START
+  sta PCODE+1
+  ldy #0
+
+editor_line_count_loop:
+  lda (PCODE),y
+  beq editor_line_count_done    ; 0x00 means end of source
+  cmp #NL                       ; newline?
+  bne editor_line_count_not_newline
+  inc VALUE
+  bne editor_line_count_not_newline
+  inc VALUE+1
+;
+;  increment pointer
+;
+editor_line_count_not_newline:
+  inc PCODE
+  bne editor_line_count_loop
+  inc PCODE+1
+  bra editor_line_count_loop
+
+editor_line_count_done:
+  lda #<source_line_count
+  ldx #>source_line_count
+  jsr print
+  jsr display_in_decimal
+  jsr CROUT
+  rts
+
 editor_assemble:
   jsr editor_check_no_more
   jmp ASSEMBLE
 
+no_break_message asciiz "No BRK previously encountered\n"
 
-
+editor_resume:
+  jsr CHK_VAL     ; check we had a valid compile/assemble
+  lda system_flags
+  and #FLAG_BRK_REACHED    ; BRK reached yet?
+  bne editor_resume_ok
+  lda #<no_break_message
+  ldx #>no_break_message
+  jsr print
+  jmp main_prompt
+editor_resume_ok:
+  lda #FLAG_BRK_REACHED    ; no BRK reached yet
+  trb system_flags
+;
+;  put the stack back to what it was and push the
+;   processor flags and breakpoint address
+;
+  clc
+  lda call_s
+  adc #5      ; undo effect of pushing X and Y, and the 3 pushes the processor did
+  tax
+  txs         ; switch back to what the stack pointer was
+  lda brk_address+1   ; put stuff back ready for rti
+  pha
+  lda brk_address
+  pha
+  lda call_p
+  pha         ; processor flags
+  lda call_a  ; get registers back
+  ldy call_y
+  ldx call_x
+  rti
 
 ;16-bit number comparison...
 ;
