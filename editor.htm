@@ -28,6 +28,12 @@
 <div class="quick_link">
 <a href="file_menu.htm">Loading and saving</a>
 </div>
+<div class="quick_link">
+<a href="pascal_compiler.htm">G-Pascal info</a>
+</div>
+<div class="quick_link">
+<a href="assembler.htm">Assembler info</a>
+</div>
 <ul>
 <li><a href="#syntax">Editor commands</a></li>
 <li><a href="#delete">Delete</a></li>
@@ -39,6 +45,9 @@
 <li><a href="#save">Save</a></li>
 <li><a href="#memory">Memory</a></li>
 <li><a href="#recommendations">Recommendations</a></li>
+<li><a href="#info">Info</a></li>
+<li><a href="#run">Run / Debug / Trace / Resume</a></li>
+<li><a href="#poke">Poke / JSR / JMP</a></li>
 </ul>
 <p>The inbuilt text editor is designed to allow you to try out small programs, and make modifications “on the fly” without having to download or upload code from your “main” computer.</p>
 <p>In order to see what you are typing you must enable “local echo” on your terminal program. In the case of miniterm you use the “-e” command-line flag to do that.</p>
@@ -57,7 +66,8 @@ Help
 INfo
 Memory first_address last_address
 Compile/Syntax/Assemble
-RUn/DEBug/Trace
+RUn/DEBug/Trace/RESume
+Poke/Jsr/JMp
 RECover
 (Actions may be abbreviated)
 (Flags: &#39;I&#39;gnore case, &#39;G&#39;lobal, &#39;Q&#39;uiet)</code></pre>
@@ -147,6 +157,29 @@ $0310: 65 20 67 61 6d 65 0a 20 20 41 75 74 68 6f 72 3a  e   g a m e .     A u t 
 <p>For large-scale changes I suggest keeping a copy of your source on your PC (you need to do this anyway as the board does not have file saving capability). For anything other than small one or two-line changes, it will be quicker and easier to change the source on your PC, and re-download it, rather than fiddling around in the Editor.</p>
 <p>The editor does not support cursor keys, so it is not the easiest editor to work with, particularly compared to modern editors available on PC/Macs.</p>
 <p>Keeping your original source elsewhere also protects you against rogue code which might overwrite your source, as there is no memory-protection hardware on these chips.</p>
+<hr />
+<h2 id="info">Info</h2>
+<p>Typing INFO will tell you various things about your source file, for example:</p>
+<pre><code>Source starts at $0300
+Source ends   at $3a63
+Source lines:  645
+Source length: 14178 bytes
+Source CRC       $efdf</code></pre>
+<p>For more information about the CRC value see the <a href="file_menu.htm">Loading and saving</a> page.</p>
+<hr />
+<h2 id="run">Run / Debug / Trace / Resume</h2>
+<p>These are for executing your program in various ways.</p>
+<h3 id="run-1">Run</h3>
+<p>This runs (executes) the most recently-compiled code. The system automatically knows if you did a compile (Pascal) or an assemble (Assembler) and executes your code appropriately.</p>
+<h3 id="debug">Debug</h3>
+<p>As described on <a href="pascal_compiler.htm">the Pascal information page</a> you can debug your Pascal code, which shows the P-code address, the current P-code being executed, and the base and stack frame information.</p>
+<h3 id="trace">Trace</h3>
+<p>As described on <a href="pascal_compiler.htm">the Pascal information page</a> you can trace your Pascal code, which shows the P-code address, and the current P-code being executed.</p>
+<h3 id="resume">Resume</h3>
+<p>As described on <a href="assembler.htm">the Assembler information page</a> this resumes execution from a current breakpoint (placed by inserting a BRK instruction in your code).</p>
+<hr />
+<h2 id="poke">Poke / JSR / JMP</h2>
+<p>These debugging techniqes are described on <a href="assembler.htm">the Assembler information page</a>.</p>
 <hr />
 <div class="quick_link">
 <a href="index.htm">Back to main G-Pascal page</a>

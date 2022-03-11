@@ -61,10 +61,13 @@
 <li><p>The documented WD65C02 instruction set, with all operand modes</p></li>
 <li><p>Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.</p></li>
 <li><p>Relocation of the output to any memory address (ORG directive)</p></li>
+<li><p>Support for debugging using breakpoints (BRK instruction)</p></li>
 <li><p>Here is “hello world” in assembler:</p>
-<pre class="asm"><code>      jmp begin   ; skip the message
+<pre><code>      jmp begin   ; skip the message
+
 hello asciiz &quot;Hello, world!&quot;
-begin = *
+
+begin:
       lda #&lt;hello
       ldx #&gt;hello
       jsr print
