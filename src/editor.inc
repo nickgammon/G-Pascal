@@ -157,6 +157,9 @@ editor_handlers:
   makeHandler "RUN",     editor_run
   makeHandler "RESUME",  editor_resume
   makeHandler "RECOVER", editor_recover
+  makeHandler "POKE",    editor_poke
+  makeHandler "JSR",     editor_jsr
+  makeHandler "JMP",     editor_jmp
   dfb 0
 
 editor_help_info:
@@ -172,6 +175,7 @@ editor_help_info:
   asc "Memory      first_address last_address\n"
   asc "Compile/Syntax/Assemble\n"
   asc "RUn/DEBug/Trace/RESume\n"
+  asc "Poke/Jsr/JMp\n"
   asc "RECover\n"
   asc "(Actions may be abbreviated)\n"
   asc "(Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)\n"
@@ -1626,7 +1630,6 @@ editor_memory_loop3:
   lda current_line
   cmp #16
   bcc editor_memory_loop
-  jsr PUTSP
   jsr editor_memory_show_ascii
   stz current_line      ; count of bytes shown
   bra editor_memory_loop
@@ -1641,6 +1644,7 @@ editor_memory_show_ascii:
 ;
 ;  now the ASCII equivalents
 ;
+  jsr PUTSP
   ldy #0
 editor_memory_ascii:
   lda (this_line_addr),Y
@@ -1790,6 +1794,7 @@ editor_recover:
   bne  editor_recover_not_needed
   lda  #' '
   sta  (FROM),Y
+editor_done_message:
   lda #<recover_done
   ldx #>recover_done
   jsr print
@@ -1894,6 +1899,9 @@ show_source_start:
   jsr PRBYTECR
   rts
 
+;--------------------------------------------
+;  show_source_lines - show count of number of source lines
+;--------------------------------------------
 source_line_count asciiz "Source lines:  "    ; count of lines
 show_source_lines:
   stz VALUE      ; line count in this case
@@ -1937,6 +1945,9 @@ editor_assemble:
 
 no_break_message asciiz "No BRK previously encountered\n"
 
+;--------------------------------------------
+;  editor_resume - resume after a breakpoint
+;--------------------------------------------
 editor_resume:
   jsr CHK_VAL     ; check we had a valid compile/assemble
   lda system_flags
@@ -1968,6 +1979,190 @@ editor_resume_ok:
   ldy call_y
   ldx call_x
   rti
+
+
+editor_poke_message asciiz "Need an address and at least one value\n"
+
+;--------------------------------------------
+;  editor_poke - put stuff into memory
+;--------------------------------------------
+editor_poke:
+;
+;  first check how many numbers are on the input line
+;
+  stz find_count
+  lda token_start
+  sta from_line
+  lda token_start+1
+  sta from_line+1
+
+editor_poke_loop:
+  jsr get_token
+  beq editor_poke_got_all_numbers
+  cmp #TOKEN_NUMBER
+  beq editor_poke_got_number
+  cmp #TOKEN_STRING           ; a one-byte string is OK, eg. poke $1000 'a'
+  bne editor_poke_bad_token
+  lda find_count
+  beq editor_poke_bad_token   ; however not for the address
+  lda token_length
+  cmp #1
+  beq editor_poke_got_number
+;
+;  here when we got neither a number or a single-byte string
+;
+editor_poke_bad_token:
+  jmp editor_bad_number
+editor_poke_got_number:
+  inc find_count
+  lda find_count
+  cmp #1
+  bne editor_poke_not_first
+;
+;  here for first number - must be in range 0x0000 to 0xffff
+;
+  lda token_value+2
+  beq editor_poke_loop
+  jmp editor_line_number_too_big
+editor_poke_not_first:
+;
+;  here for subsequent numbers - must be in range 0x00 to 0xff
+;
+  lda token_value+1
+  ora token_value+2
+  beq editor_poke_loop
+  jmp editor_line_number_too_big
+
+;
+;  must have at least two numbers
+;
+editor_poke_got_all_numbers:
+  lda find_count
+  cmp #2
+  bcs editor_poke_got_enough
+  lda #<editor_poke_message
+  ldx #>editor_poke_message
+  jsr print
+  jmp main_prompt
+
+editor_poke_got_enough:
+;
+;  reset for get_token to do its stuff again
+;
+  lda from_line
+  sta token_start
+  lda from_line+1
+  sta token_start+1
+;
+;  get address again - we know it is valid since we checked above
+;
+  jsr get_token
+;
+;  where to put stuff
+;
+  lda token_value
+  sta from_line
+  lda token_value+1
+  sta from_line+1
+
+editor_poking_loop:
+  jsr get_token
+  bne editor_poke_another
+  jmp editor_done_message
+
+editor_poke_another:
+  ldy #0
+  lda token_value
+  sta (from_line),y
+;
+;  check change was successful - if not, probably trying to change ROM
+;
+  cmp (from_line),y
+  bne editor_poke_failed
+  inc from_line
+  bne editor_poking_loop
+  inc from_line+1
+  bra editor_poking_loop
+
+editor_poke_failed_message asciiz "Failed to change address $"
+editor_poke_to_message     asciiz " to $"
+
+editor_poke_failed:
+  lda #<editor_poke_failed_message
+  ldx #>editor_poke_failed_message
+  jsr print
+  lda from_line+1
+  jsr PRBYTE
+  lda from_line
+  jsr PRBYTE
+  lda #<editor_poke_to_message
+  ldx #>editor_poke_to_message
+  jsr print
+  lda token_value
+  jsr PRBYTE
+  jsr CROUT
+  jmp main_prompt
+
+;--------------------------------------------
+;  editor_jsr - jump to subroutine
+;--------------------------------------------
+editor_jsr:
+  jsr get_token
+  cmp #TOKEN_NUMBER
+  beq editor_jsr_got_number
+  jmp editor_bad_number
+;
+;  check in range 0x0000 to 0xFFFF
+;
+editor_jsr_got_number:
+  lda token_value+2
+  beq editor_jsr_number_in_range
+  jmp editor_line_number_too_big
+
+editor_jsr_number_in_range:
+  lda  call_p      ; status register
+  pha
+  lda  call_a      ; A register
+  ldx  call_x      ; X register
+  ldy  call_y      ; Y register
+  plp              ; get status register back
+  jsr  editor_jsr_got_number_execute  ; call the subroutine
+  php              ; save the status register
+  sta  call_a      ; store the A/X/Y register
+  stx  call_x
+  sty  call_y
+  pla              ; get status register back
+  sta  call_p      ; save it
+  jmp main_prompt
+
+editor_jsr_got_number_execute  jmp  (token_value)
+
+
+;--------------------------------------------
+;  editor_jmp - jump to address
+;--------------------------------------------
+editor_jmp:
+  jsr get_token
+  cmp #TOKEN_NUMBER
+  beq editor_jmp_got_number
+  jmp editor_bad_number
+;
+;  check in range 0x0000 to 0xFFFF
+;
+editor_jmp_got_number:
+  lda token_value+2
+  beq editor_jmp_number_in_range
+  jmp editor_line_number_too_big
+
+editor_jmp_number_in_range:
+  lda  call_p      ; status register
+  pha
+  lda  call_a      ; A register
+  ldx  call_x      ; X register
+  ldy  call_y      ; Y register
+  plp              ; get status register back
+  jmp  (token_value)
+
 
 ;16-bit number comparison...
 ;
