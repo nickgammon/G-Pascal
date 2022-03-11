@@ -1,11 +1,7 @@
 begin
   lcdclear;
-  lcdwrite ("Hello, world!")
+  lcdwrite ("Hello, world!");
+
+  writeln ("Hello, world!");
 end.
-
-
-begin
-  writeln ("Hello, world!")
-end.
-
 
