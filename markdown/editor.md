@@ -6,6 +6,8 @@
 
 <div class='quick_link'> [Back to main G-Pascal page](index.htm)</div>
 <div class='quick_link'> [Loading and saving](file_menu.htm) </div>
+<div class='quick_link'> [G-Pascal info](pascal_compiler.htm)</div>
+<div class='quick_link'> [Assembler info](assembler.htm)</div>
 
 * [Editor commands](#syntax)
 * [Delete](#delete)
@@ -17,6 +19,8 @@
 * [Save](#save)
 * [Memory](#memory)
 * [Recommendations](#recommendations)
+* [Info](#info)
+* [Run / Debug / Trace / Resume](#run)
 
 
 The inbuilt text editor is designed to allow you to try out small programs, and make modifications "on the fly" without having to download or upload code from your "main" computer.
@@ -42,7 +46,7 @@ Help
 INfo
 Memory first_address last_address
 Compile/Syntax/Assemble
-RUn/DEBug/Trace
+RUn/DEBug/Trace/RESume
 RECover
 (Actions may be abbreviated)
 (Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)
@@ -206,7 +210,43 @@ The editor does not support cursor keys, so it is not the easiest editor to work
 
 Keeping your original source elsewhere also protects you against rogue code which might overwrite your source, as there is no memory-protection hardware on these chips.
 
+---
 
+## Info {#info}
+
+Typing INFO will tell you various things about your source file, for example:
+
+```
+Source starts at $0300
+Source ends   at $3a63
+Source lines:  645
+Source length: 14178 bytes
+Source CRC       $efdf
+```
+
+For more information about the CRC value see the [Loading and saving](file_menu.htm) page.
+
+---
+
+## Run / Debug / Trace / Resume  {#run}
+
+These are for executing your program in various ways.
+
+### Run
+
+This runs (executes) the most recently-compiled code. The system automatically knows if you did a compile (Pascal) or an assemble (Assembler) and executes your code appropriately.
+
+### Debug
+
+As described on [the Pascal information page](pascal_compiler.htm) you can debug your Pascal code, which shows the P-code address, the current P-code being executed, and the base and stack frame information.
+
+### Trace
+
+As described on [the Pascal information page](pascal_compiler.htm) you can trace your Pascal code, which shows the P-code address, and the current P-code being executed.
+
+### Resume
+
+As described on [the Assembler information page](assembler.htm) this resumes execution from a current breakpoint (placed by inserting a BRK instruction in your code).
 
 ---
 

@@ -25,13 +25,16 @@ Demonstration video [here on Vimeo](https://vimeo.com/682663375).
     * The documented WD65C02 instruction set, with all operand modes
     * Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.
     * Relocation of the output to any memory address (ORG directive)
+    * Support for debugging using breakpoints (BRK instruction)
     * Here is "hello world" in assembler:
 
 
-        ```asm
+        ```
               jmp begin   ; skip the message
+
         hello asciiz "Hello, world!"
-        begin = *
+
+        begin:
               lda #<hello
               ldx #>hello
               jsr print

@@ -633,6 +633,10 @@ You could sprinkle multiple BRK instructions through your code to confirm or den
 
 If you do not put an "ID" byte after the BRK, then the code shown will simply be the opcode of the next instruction in the source.
 
+### Resume after breakpoint
+
+After hitting a breakpoint, you can type RESUME to continue at the next instruction. In this case you **must** put a breakpoint identifier after the breakpoint, or the code will be resumed one byte from the correct place. This means you can put various breakpoints in your code and check that registers (and other memory addresses) are what you expect before resuming execution.
+
 ### Debugging prints
 
 Another technique is to put "debugging prints" inside your code. This could be used instead of inserting BRK instructions if you just want a breadcrumb trail of what is being executed and in what order. For example:

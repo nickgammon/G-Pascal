@@ -52,20 +52,21 @@ Once you have finished loading you can type INFO to see something like this:
 
 ```
 Source starts at $0300
-Source ends   at $3b0e
-Source length: 14349 bytes
-Source CRC       $1de5
+Source ends   at $3a63
+Source lines:  645
+Source length: 14178 bytes
+Source CRC       $efdf
 ```
 
-You are then told the source length (14349 bytes) and Cyclic Redundancy Check (CRC) which is $1de5. This can be used to verify that the source loaded without errors. In this case I am using "Jacksum" to do the CRC on my PC.
+You are then told the source length (14178 bytes) and Cyclic Redundancy Check (CRC) which is $efdf. This can be used to verify that the source loaded without errors. In this case I am using "Jacksum" to do the CRC on my PC.
 
 ```
 $ jacksum -a crc:16,1021,FFFF,false,false,0 -x adventure.pas
 
-1de5	14349	adventure.pas
+efdf	14178	adventure.pas
 ```
 
-You can see that both the file length (14349) and the checksum ($1de5) agree, therefore the file loaded reliably.
+You can see that both the file length (14178) and the checksum ($efdf) agree, therefore the file loaded reliably.
 
 You can re-check the CRC lat any time by using the INFO action. Of course, the CRC will change as you change the source.
 
