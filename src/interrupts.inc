@@ -23,6 +23,10 @@ brk_executed:
   sta brk_address
   pla           ; high order address of BRK
   sta brk_address+1
+
+  ldx  #NEW_STK
+  txs             ; reset stack so we don't write over it
+
   cli           ; allow interrupts now so we can print
 
 ;
@@ -112,12 +116,24 @@ brk_executed3:
   jsr PUTSP
   plx
   inx
-  bne brk_executed3
+  beq brk_executed4
+  lda #FLAG_VALID_ASSEMBLE
+  and system_flags
+  beq brk_executed3
+;
+;  for run/assembler break, stop when stack reaches RUNNING_STACK_TOP
+;
+  cpx #(RUNNING_STACK_TOP + 1)
+  beq brk_executed4         ; we started here so let's stop here
+  bra brk_executed3
 
 ;
 ;  we are done now
 ;
+brk_executed4:
   jsr CROUT
+  lda #FLAG_BRK_REACHED
+  tsb system_flags
   jmp main_prompt
 
 stack_message asciiz "Stack: "
