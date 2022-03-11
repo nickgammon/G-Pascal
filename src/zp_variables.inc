@@ -227,4 +227,4 @@ FLAG_VALID_COMPILE  = %00001000
 FLAG_VALID_ASSEMBLE = %00010000
 FLAG_RUNNING        = %00100000
 FLAG_ONLY_ALPHA     = %01000000   ; for editor, so you can L5 to do LIST 5
-FLAG_ABORTED        = %10000000   ; Ctrl+C pressed during printing
+FLAG_BRK_REACHED    = %10000000   ; Breakpoint encountered during run
