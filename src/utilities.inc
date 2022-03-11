@@ -919,34 +919,38 @@ PRBYTECR =  *
 ;
 ;
 CHK_VAL  =  *
-         LDA  #FLAG_VALID_COMPILE
-         ORA  #FLAG_VALID_ASSEMBLE
+         lda  #FLAG_VALID_COMPILE
+         ora  #FLAG_VALID_ASSEMBLE
          and  system_flags
-         BNE  CHK_VAL9
-         LDA  #<no_valid_compile_message    ; No valid Compile or Assemble done before
-         LDX  #>no_valid_compile_message
-         JSR  print
-         JMP  main_prompt
+         bne  CHK_VAL9
+         lda  #<no_valid_compile_message    ; No valid Compile or Assemble done before
+         ldx  #>no_valid_compile_message
+         jsr  print
+         jmp  main_prompt
 CHK_VAL9 =  *
 BELL1X   =  *          ; no bell yet
-         RTS
+         rts
 ;
-CHK_RUN  JSR  CHK_VAL
+CHK_RUN  jsr  CHK_VAL
          lda  #FLAG_VALID_ASSEMBLE
          and  system_flags
          bne  run_assembler
-         JMP  INTERP
+         jmp  INTERP
 run_assembler:
+         ldx #RUNNING_STACK_TOP           ; don't use all of stack
+         txs
+         lda #FLAG_BRK_REACHED    ; no BRK reached yet
+         trb system_flags
          jsr call_assembler
-         JMP  EX_FINISHD
+         jmp  EX_FINISHD
 ;
 ;  let's assume they put a RTS at the end of their code
 ;
 call_assembler:
-         LDA  #<running_message   ; Running
-         LDX  #>running_message
-         JSR  print
-         JMP (ACT_PCDA)
+         lda  #<running_message   ; Running
+         ldx  #>running_message
+         jsr  print
+         jmp (ACT_PCDA)
 
 ;
 
