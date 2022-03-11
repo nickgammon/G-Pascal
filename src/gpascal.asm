@@ -65,6 +65,8 @@ START_OF_ROM = $8000     ; where the ROM chip starts
 HIGHEST_RAM  = $3FFF      ; original board hardware
 ;HIGHEST_RAM  = $5FFF    ; with suggested additional AND gate
 
+RUNNING_STACK_TOP = $C0   ; top of stack when running assembler code
+
 ;
 ;  serial output
 ;
@@ -192,11 +194,11 @@ TEXT_START = *            ; where source goes in memory (currently $300)
     .include "cp437_font.inc"
   .endif
 
-introduction asc    "G-Pascal compiler, version 4.02.\n"
+introduction asc    "G-Pascal compiler, version 4.03.\n"
              asciiz "Written by Nick Gammon.\nType H for help.\n"
 
   .if LCD_SUPPORT
-LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.02"
+LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.03"
   .endif
 
 ;
