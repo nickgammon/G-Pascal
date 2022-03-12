@@ -304,7 +304,7 @@ The following assembler directives are supported:
 
 * DFB *expression* \[, *expression* \]
 
-     A single byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.
+     A byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.
 
      ```
        dfb $01,$02,$03,$04
@@ -584,7 +584,7 @@ There are also support functions for interfacing with SPI devices, such as 7-seg
 
 ## Debugging {#debugging}
 
-Debugging assembler code can be a pain. Below are a few suggestions.
+Debugging assembler code can be a pain. Below are a few suggestions. Note that when running assembler code the stack pointer is changed to $CF rather than $FF. In other words, the top of the stack is address $1CF. This is so that, if you hit a breakpoint and use various commands like MEM, PEEK and so on, the use of the stack in the Editor does not corrupt your user stack.
 
 ---
 

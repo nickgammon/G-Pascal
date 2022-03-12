@@ -146,7 +146,6 @@ The editor discards carriage-returns (0x0D) when accepting input. You should mak
 * [How do CRCs work? - Ben Eater (YouTube)](https://www.youtube.com/watch?v=izG7qT0EpBw) (Video)
 * [Jacksum](https://jacksum.net/en/index.html)
 * [CRC16-CCITT](http://srecord.sourceforge.net/crc16-ccitt.html)
-* [Error Detection and Correction](https://nptel.ac.in/content/storage2/courses/106105080/pdf/M3L2.pdf) (PDF)
 * [Geany text editor](https://www.geany.org/)
 
 ---

@@ -96,7 +96,8 @@ Demonstration video [here on Vimeo](https://vimeo.com/682663375).
     INfo
     Memory      first_address last_address
     Compile/Syntax/Assemble
-    RUn/DEBug/Trace
+    RUn/DEBug/Trace/RESume
+    Poke/Jsr/JMp
     RECover
     (Actions may be abbreviated)
     (Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)
