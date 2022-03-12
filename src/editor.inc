@@ -2120,6 +2120,7 @@ editor_jsr_got_number:
   jmp editor_line_number_too_big
 
 editor_jsr_number_in_range:
+  jsr editor_check_no_more
   lda  call_p      ; status register
   pha
   lda  call_a      ; A register
@@ -2155,6 +2156,7 @@ editor_jmp_got_number:
   jmp editor_line_number_too_big
 
 editor_jmp_number_in_range:
+  jsr editor_check_no_more
   lda  call_p      ; status register
   pha
   lda  call_a      ; A register
