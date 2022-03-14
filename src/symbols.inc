@@ -7,6 +7,7 @@ SYMPRV   =  0         ; address of previous symbol (for working backwards throug
 SYMLVL   =  2         ; nested level (eg. entering a procedure/function increments the level,
                       ;                   and leaving it decrements the level)
                       ; - used to detect duplicate symbols at the same level
+SYMLIB   =  2         ; (re-used above for assembler symbols: 0 = user-declared, 1 = library)
 SYMTYP   =  3         ; Symbol type: C = constant, V = variable, Y = function return value
                       ;              P = procedure, F = function, A = array
                       ;              p = library procedure, f = library function
