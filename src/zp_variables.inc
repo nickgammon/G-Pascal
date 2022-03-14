@@ -136,7 +136,7 @@ exp_operator reserve 1  ; current operator for expression evaluation
 exp_operator_precedence reserve 1 ; current operator precedence
 exp_evaluation_function reserve 2 ; function to evaluate an expression
 exp_unary_ok reserve 1  ; true if the next token can be a unary operator (like: - < >)
-show_symbols reserve 1  ; true to list the symbol table after an assemble
+show_symbols reserve 1  ; 4 = list the symbol table after an assemble, 8 = include library symbols
 ass_current_label reserve 2 ; current symbol table address of the label on this line
 str_work reserve 1      ; work byte for string compares
   .if LCD_SUPPORT
