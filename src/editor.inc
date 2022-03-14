@@ -160,6 +160,7 @@ editor_handlers:
   makeHandler "POKE",    editor_poke
   makeHandler "JSR",     editor_jsr
   makeHandler "JMP",     editor_jmp
+  makeHandler "LIBRARY", editor_library
   dfb 0
 
 editor_help_info:
@@ -171,7 +172,7 @@ editor_help_info:
   asc "Replace     line_number_range /target/replacement/flags\n"
   asc "\n"
   asc "Help\n"
-  asc "INfo\n"
+  asc "INfo/LIBrary\n"
   asc "Memory      first_address last_address\n"
   asc "Compile/Syntax/Assemble\n"
   asc "RUn/DEBug/Trace/RESume\n"
@@ -1985,6 +1986,12 @@ editor_poke_message asciiz "Need an address and at least one value\n"
 
 ;--------------------------------------------
 ;  editor_poke - put stuff into memory
+;
+;  Note that as we do two passes over the input line, if they
+;  choose a one-character string, get_token parses strings
+;  into INBUF, so INBUF will be corrupted, however even in
+;  the worst-case scenario: p8'a'
+;  The corruption is only over the 'p' and re-parsing works OK. Just.
 ;--------------------------------------------
 editor_poke:
 ;
@@ -2164,6 +2171,115 @@ editor_jmp_number_in_range:
   ldy  call_y      ; Y register
   plp              ; get status register back
   jmp  (token_value)
+
+;--------------------------------------------
+;  editor_library - list library symbols
+;--------------------------------------------
+editor_library:
+  jsr get_token
+  beq editor_library_no_search
+  cmp #TOKEN_IDENTIFIER
+  beq editor_library_search
+  jmp editor_check_no_more_failed
+
+editor_library_search:
+  jsr editor_check_no_more
+;
+;  put a null after the end of the search string
+;
+  ldy token_length
+  lda #0
+  sta (token_address),Y
+;
+;  force match string to lower-case
+;
+  ldy #0
+editor_library_make_lower_loop:
+  lda (token_address),Y
+  beq editor_library_no_search
+  jsr MAKE_LOWER
+  sta (token_address),Y
+  iny
+  bne editor_library_make_lower_loop
+
+editor_library_no_search:
+  lda #<assembler_library_functions_table
+  sta REG
+  lda #>assembler_library_functions_table
+  sta REG+1
+editor_library_loop:
+  ldy #0
+  lda (REG),Y
+  beq editor_library_done   ; end of names
+
+;
+;  filter out unwanted names
+;
+
+  lda token_type
+  cmp #TOKEN_IDENTIFIER
+  bne editor_library_name_loop    ; no filter
+  ldy #0
+editor_library_filter_loop:
+  lda (token_address),Y
+  beq edit_library_continue  ; end of search string, must have matched
+  cmp (REG),y
+  bne editor_library_filter_reject  ; doesn't match, therefore discard it
+  iny
+  bra editor_library_filter_loop
+
+editor_library_filter_reject:
+  ldy #0
+editor_library_filter_reject_loop:
+  iny
+  lda (REG),Y
+  bne editor_library_filter_reject_loop
+  bra editor_library_name_onto_next
+
+edit_library_continue:
+  ldy #0
+;
+;  find name length
+;
+editor_library_name_loop
+  iny
+  inc token_length
+  lda (REG),Y
+  bne editor_library_name_loop
+
+  iny             ; get next byte
+  lda (REG),Y     ; get function address low-byte
+  pha
+  iny             ; get next byte
+  lda #'$'
+  jsr COUT
+  lda (REG),Y     ; get function address high-byte
+  jsr PRBYTE      ; show high-order address byte
+  pla
+  jsr PRBYTE      ; show high-order address byte
+  jsr PUTSP
+  lda REG
+  ldx REG+1
+  dey             ; subtract 2, leaving the length of the name in Y
+  dey
+  jsr PT
+  jsr CROUT
+
+editor_library_name_onto_next:
+  iny         ; add 2 to get past the address
+  iny
+  iny         ; get past that last 0x00  byte
+  tya         ; move REG onto next entry
+  clc
+  adc REG
+  sta REG
+  lda #0
+  adc REG+1
+  sta REG+1
+  bra editor_library_loop
+
+editor_library_done:
+  jmp main_prompt
 
 
 ;16-bit number comparison...
