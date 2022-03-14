@@ -668,6 +668,8 @@ The processor registers are loaded with the values saved when the BRK was execut
 * $14 - stack register
 * $15/$16 - address of breakpoint (placed into the program counter)
 
+![](images/Breakpoint register saves.png)
+
 ---
 
 ### Debugging prints {#debugging_print}
@@ -741,14 +743,17 @@ A possible use of POKE would be to insert extra breakpoints "on the fly" while y
 
 * Find a suitable address / place of interest in your code
 * Note the machine-code instructions at that address by (using MEM), plus the next one (write them down)
-* Replace those two bytes (using POKE) with a $00 (BRK) followed by a breakpoint number
+* Replace those two bytes (using POKE) with a $00 (BRK) followed by a breakpoint number. eg. POKE $1234 $00 $42
 * Resume your code so the new breakpoint is eventually reached (using RES)
 * After noting the contents of registers, stack, and memory, replace those two bytes with the ones you previously noted (using POKE)
-* Back up the address of the breakpoint by two bytes, so the replaced instruction is executed. To do that, find the contents of locations $15/$16, subtract two from them, and poke them back into $16/$17. Remember $16 is the low-order byte and $17 is the high-order byte.
+* Back up the address of the breakpoint by two bytes, so the replaced instruction is executed. To do that, find the contents of locations $15/$16, subtract two from them, and poke them back into $15/$16. Remember $15 is the low-order byte and $16 is the high-order byte.
 * Possibly insert another breakpoint further on in the code for the next point-of-interest stopping point
 * Resume your code so it continues from the instruction you just replaced (RESUME)
 
 You could also use POKE to remove instructions by replacing them with a NOP instruction ($EA).
+
+![](images/Breakpoint register saves.png)
+
 
 ---
 
