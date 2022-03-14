@@ -440,6 +440,7 @@ Stack: 8c 9b 42 9b 5f 97</code></pre>
 <li>$14 - stack register</li>
 <li>$15/$16 - address of breakpoint (placed into the program counter)</li>
 </ul>
+<p><img src="images/Breakpoint%20register%20saves.png" /></p>
 <hr />
 <h3 id="debugging_print">Debugging prints</h3>
 <p>Another technique is to put “debugging prints” inside your code. This could be used instead of inserting BRK instructions if you just want a breadcrumb trail of what is being executed and in what order. For example:</p>
@@ -486,14 +487,15 @@ $0010: 00 00 00 00 00 00 00 37 c6 00 00 00 00 00 00 00  . . . . . . . 7 . . . . 
 <ul>
 <li>Find a suitable address / place of interest in your code</li>
 <li>Note the machine-code instructions at that address by (using MEM), plus the next one (write them down)</li>
-<li>Replace those two bytes (using POKE) with a $00 (BRK) followed by a breakpoint number</li>
+<li>Replace those two bytes (using POKE) with a $00 (BRK) followed by a breakpoint number. eg. POKE $1234 $00 $42</li>
 <li>Resume your code so the new breakpoint is eventually reached (using RES)</li>
 <li>After noting the contents of registers, stack, and memory, replace those two bytes with the ones you previously noted (using POKE)</li>
-<li>Back up the address of the breakpoint by two bytes, so the replaced instruction is executed. To do that, find the contents of locations $15/$16, subtract two from them, and poke them back into $16/$17. Remember $16 is the low-order byte and $17 is the high-order byte.</li>
+<li>Back up the address of the breakpoint by two bytes, so the replaced instruction is executed. To do that, find the contents of locations $15/$16, subtract two from them, and poke them back into $15/$16. Remember $15 is the low-order byte and $16 is the high-order byte.</li>
 <li>Possibly insert another breakpoint further on in the code for the next point-of-interest stopping point</li>
 <li>Resume your code so it continues from the instruction you just replaced (RESUME)</li>
 </ul>
 <p>You could also use POKE to remove instructions by replacing them with a NOP instruction ($EA).</p>
+<p><img src="images/Breakpoint%20register%20saves.png" /></p>
 <hr />
 <h3 id="jsr">JSR to address</h3>
 <p>You can call any subroutine by using “JSR” in the shell. eg.</p>
