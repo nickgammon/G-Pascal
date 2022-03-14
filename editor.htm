@@ -46,6 +46,7 @@
 <li><a href="#memory">Memory</a></li>
 <li><a href="#recommendations">Recommendations</a></li>
 <li><a href="#info">Info</a></li>
+<li><a href="#library">Library</a></li>
 <li><a href="#run">Run / Debug / Trace / Resume</a></li>
 <li><a href="#poke">Poke / JSR / JMP</a></li>
 </ul>
@@ -63,7 +64,7 @@ Find        line_number_range /target/flags
 Replace     line_number_range /target/replacement/flags
 
 Help
-INfo
+INfo/LIBrary
 Memory first_address last_address
 Compile/Syntax/Assemble
 RUn/DEBug/Trace/RESume
@@ -166,6 +167,31 @@ Source lines:  645
 Source length: 14178 bytes
 Source CRC       $efdf</code></pre>
 <p>For more information about the CRC value see the <a href="file_menu.htm">Loading and saving</a> page.</p>
+<hr />
+<h2 id="library">Library</h2>
+<p>This lists all of the inbuilt assembler library function addresses, and also relevant zero-page address variables. For example:</p>
+<pre><code>: library
+$0060 bcd_result
+$945f binary_to_decimal
+$0010 call_a
+$0013 call_p
+$0014 call_s
+$0011 call_x
+$0012 call_y
+...
+$caa6 write_char
+$0017 write_function
+$ca97 write_to_lcd
+$ca8c write_to_serial</code></pre>
+<p>Note that the addresses shown will probably be different in your version, as they will change as more things are added to the system.</p>
+<p>You can also supply a “filter” word, to narrow down the search to symbols matching that (partial) word, for example:</p>
+<pre><code>: lib spi
+$d243 spi_init
+$d2ed spi_send_two_bytes
+$d2e5 spi_ss_high
+$d2dd spi_ss_low
+$d279 spi_transfer</code></pre>
+<p>You could also use this to jog your memory about the exact function name spelling, as in the example above for the SPI functions.</p>
 <hr />
 <h2 id="run">Run / Debug / Trace / Resume</h2>
 <p>These are for executing your program in various ways.</p>
