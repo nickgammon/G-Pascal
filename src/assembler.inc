@@ -161,6 +161,9 @@ ass_identifier:
   stz token_value+2
   lda #SYMBOL_CONSTANT
   jsr ADDSYM
+  ldy #SYMLIB     ; the "level" of user symbols is 0
+  lda #0
+  sta (SYMITM),Y
   bra ass_added_symbol
 
 ;
@@ -2004,7 +2007,7 @@ asm_do_list1:
 
 
   lda ASS_VALUE
-  and #$04
+  and #($04|$08)
   sta show_symbols
 ;
 ;  output a newline, to get past the asterisks
@@ -2313,6 +2316,19 @@ list_symbols_check     =  *
          jmp  list_symbols_done       ; finished if symitm and symitm+1 are both zero
 
 list_symbols_line = *
+         ldy  #SYMLIB
+         lda  (SYMITM),Y
+         beq  list_symbols_user
+;
+;  this is a library symbol - do they want to see it?
+;
+         lda show_symbols
+         and #8
+         beq list_symbols_next  ; apparently not
+;
+;  here to show this symbol
+;
+list_symbols_user:
          ldy  #SYMDSP
          iny
          lda  (SYMITM),Y  ; displacement
@@ -2341,111 +2357,113 @@ list_symbols_done = *
          rts
 
 assembler_library_functions_table:
-;
-;  put them in reverse alphabetic order so they come out in alphabetic
-;  order if you request a symbols list
-;
-  makeAsmLibraryFunction "write_to_serial",      write_to_serial
-  makeAsmLibraryFunction "write_to_lcd",         write_to_lcd
-  makeAsmLibraryFunction "write_function",       write_function
-  makeAsmLibraryFunction "write_char",           write_char
-  makeAsmLibraryFunction "value",                VALUE
-  makeAsmLibraryFunction "value2",               VALUE2
-  makeAsmLibraryFunction "typing_latency",       typing_latency
-  makeAsmLibraryFunction "tknjmp",               TKNJMP
-  makeAsmLibraryFunction "reset",                START
-  makeAsmLibraryFunction "srce",                 SRCE
-  makeAsmLibraryFunction "spi_transfer",         spi_transfer
-  makeAsmLibraryFunction "spi_ss_low",           spi_ss_low
-  makeAsmLibraryFunction "spi_ss_high",          spi_ss_high
-  makeAsmLibraryFunction "spi_send_two_bytes",   spi_send_two_bytes
-  makeAsmLibraryFunction "spi_init",             spi_init
-  makeAsmLibraryFunction "serial_print_message", serial_print_message
-  makeAsmLibraryFunction "serial_available",     serial_available
-  makeAsmLibraryFunction "nmi",                  RESTART
-  makeAsmLibraryFunction "remain",               REMAIN
-  makeAsmLibraryFunction "random",               random
-  makeAsmLibraryFunction "putsp",                PUTSP
-  makeAsmLibraryFunction "print",                print
-  makeAsmLibraryFunction "prchar",               PRCHAR
-  makeAsmLibraryFunction "prbyte",               PRBYTE
-  makeAsmLibraryFunction "pinmode",              pinmode
-  makeAsmLibraryFunction "lcd_wait",             lcd_wait
-  makeAsmLibraryFunction "lcd_second_line",      lcd_second_line
-  makeAsmLibraryFunction "lcd_print_message",    lcd_print_message
-  makeAsmLibraryFunction "lcd_print_char",       lcd_print_char
-  makeAsmLibraryFunction "lcd_instruction",      lcd_instruction
-  makeAsmLibraryFunction "lcd_home",             lcd_home
-  makeAsmLibraryFunction "lcd_get_address",      lcd_get_address
-  makeAsmLibraryFunction "lcd_clear_display",    lcd_clear_display
-  makeAsmLibraryFunction "isxdigit",             isxdigit
-  makeAsmLibraryFunction "isupper",              isupper
-  makeAsmLibraryFunction "isspace",              isspace
-  makeAsmLibraryFunction "islower",              islower
-  makeAsmLibraryFunction "isdigit",              isdigit
-  makeAsmLibraryFunction "iscntrl",              iscntrl
-  makeAsmLibraryFunction "isalpha",              isalpha
-  makeAsmLibraryFunction "isalnum",              isalnum
-  makeAsmLibraryFunction "inbuf",                INBUF
-  makeAsmLibraryFunction "i2c_send",             i2c_send
-  makeAsmLibraryFunction "i2c_receive",          i2c_receive
-  makeAsmLibraryFunction "i2c_init",             i2c_init
-  makeAsmLibraryFunction "hardware_init",        hardware_init
-  makeAsmLibraryFunction "getin",                GETIN
-  makeAsmLibraryFunction "gen_random",           gen_random
-  makeAsmLibraryFunction "exp_unary_minus",      exp_unary_minus
-  makeAsmLibraryFunction "exp_true",             exp_true
-  makeAsmLibraryFunction "exp_subtract",         exp_subtract
-  makeAsmLibraryFunction "exp_shift_right",      exp_shift_right
-  makeAsmLibraryFunction "exp_shift_left",       exp_shift_left
-  makeAsmLibraryFunction "exp_not",              exp_not
-  makeAsmLibraryFunction "exp_neq",              exp_neq
-  makeAsmLibraryFunction "exp_negate",           exp_negate
-  makeAsmLibraryFunction "exp_multiply",         exp_multiply
-  makeAsmLibraryFunction "exp_modulo",           exp_modulo
-  makeAsmLibraryFunction "exp_low_byte",         exp_low_byte
-  makeAsmLibraryFunction "exp_logical_or",       exp_logical_or
-  makeAsmLibraryFunction "exp_logical_and",      exp_logical_and
-  makeAsmLibraryFunction "exp_less_than",        exp_less_than
-  makeAsmLibraryFunction "exp_leq",              exp_leq
-  makeAsmLibraryFunction "exp_high_byte",        exp_high_byte
-  makeAsmLibraryFunction "exp_greater_than",     exp_greater_than
-  makeAsmLibraryFunction "exp_geq",              exp_geq
-  makeAsmLibraryFunction "exp_false",            exp_false
-  makeAsmLibraryFunction "exp_eql",              exp_eql
-  makeAsmLibraryFunction "exp_divide",           exp_divide
-  makeAsmLibraryFunction "exp_bitwise_xor",      exp_bitwise_xor
-  makeAsmLibraryFunction "exp_bitwise_or",       exp_bitwise_or
-  makeAsmLibraryFunction "exp_bitwise_and",      exp_bitwise_and
-  makeAsmLibraryFunction "exp_add",              exp_add
-  makeAsmLibraryFunction "exp_abs_val",          exp_abs_val
-  makeAsmLibraryFunction "display_in_decimal",   display_in_decimal
-  makeAsmLibraryFunction "digitalwrite",         digitalwrite
-  makeAsmLibraryFunction "digitalread",          digitalread
-  makeAsmLibraryFunction "dest",                 DEST
-  makeAsmLibraryFunction "delay",                delay
-  makeAsmLibraryFunction "delay_1ms",            delay_1ms
-  makeAsmLibraryFunction "crout",                CROUT
-  makeAsmLibraryFunction "crc_val",              crc_val
-  makeAsmLibraryFunction "crc_num",              crc_num
-  makeAsmLibraryFunction "crc_byte",             crc_byte
-  makeAsmLibraryFunction "crc_addr",             crc_addr
-  makeAsmLibraryFunction "crc16",                crc16
-  .if USE_CP437_FONT
-  makeAsmLibraryFunction "cp437_font",           cp437_font
-  .endif
-  makeAsmLibraryFunction "cout",                 COUT
-  makeAsmLibraryFunction "comstl",               COMSTL
-  makeAsmLibraryFunction "call_y",               call_y
-  makeAsmLibraryFunction "call_x",               call_x
-  makeAsmLibraryFunction "call_s",               call_s
-  makeAsmLibraryFunction "call_p",               call_p
-  makeAsmLibraryFunction "call_a",               call_a
-  makeAsmLibraryFunction "binary_to_decimal",    binary_to_decimal
   makeAsmLibraryFunction "bcd_result",           bcd_result
+  makeAsmLibraryFunction "binary_to_decimal",    binary_to_decimal
+  makeAsmLibraryFunction "call_a",               call_a
+  makeAsmLibraryFunction "call_p",               call_p
+  makeAsmLibraryFunction "call_s",               call_s
+  makeAsmLibraryFunction "call_x",               call_x
+  makeAsmLibraryFunction "call_y",               call_y
+  makeAsmLibraryFunction "comstl",               COMSTL
+  makeAsmLibraryFunction "cout",                 COUT
+  .if USE_CP437_FONT
+    makeAsmLibraryFunction "cp437_font",         cp437_font
+  .endif
+  makeAsmLibraryFunction "crc16",                crc16
+  makeAsmLibraryFunction "crc_addr",             crc_addr
+  makeAsmLibraryFunction "crc_byte",             crc_byte
+  makeAsmLibraryFunction "crc_num",              crc_num
+  makeAsmLibraryFunction "crc_val",              crc_val
+  makeAsmLibraryFunction "crout",                CROUT
+  makeAsmLibraryFunction "delay_1ms",            delay_1ms
+  makeAsmLibraryFunction "delay",                delay
+  makeAsmLibraryFunction "dest",                 DEST
+  makeAsmLibraryFunction "digitalread",          digitalread
+  makeAsmLibraryFunction "digitalwrite",         digitalwrite
+  makeAsmLibraryFunction "display_in_decimal",   display_in_decimal
+  makeAsmLibraryFunction "exp_abs_val",          exp_abs_val
+  makeAsmLibraryFunction "exp_add",              exp_add
+  makeAsmLibraryFunction "exp_bitwise_and",      exp_bitwise_and
+  makeAsmLibraryFunction "exp_bitwise_or",       exp_bitwise_or
+  makeAsmLibraryFunction "exp_bitwise_xor",      exp_bitwise_xor
+  makeAsmLibraryFunction "exp_divide",           exp_divide
+  makeAsmLibraryFunction "exp_eql",              exp_eql
+  makeAsmLibraryFunction "exp_false",            exp_false
+  makeAsmLibraryFunction "exp_geq",              exp_geq
+  makeAsmLibraryFunction "exp_greater_than",     exp_greater_than
+  makeAsmLibraryFunction "exp_high_byte",        exp_high_byte
+  makeAsmLibraryFunction "exp_leq",              exp_leq
+  makeAsmLibraryFunction "exp_less_than",        exp_less_than
+  makeAsmLibraryFunction "exp_logical_and",      exp_logical_and
+  makeAsmLibraryFunction "exp_logical_or",       exp_logical_or
+  makeAsmLibraryFunction "exp_low_byte",         exp_low_byte
+  makeAsmLibraryFunction "exp_modulo",           exp_modulo
+  makeAsmLibraryFunction "exp_multiply",         exp_multiply
+  makeAsmLibraryFunction "exp_negate",           exp_negate
+  makeAsmLibraryFunction "exp_neq",              exp_neq
+  makeAsmLibraryFunction "exp_not",              exp_not
+  makeAsmLibraryFunction "exp_shift_left",       exp_shift_left
+  makeAsmLibraryFunction "exp_shift_right",      exp_shift_right
+  makeAsmLibraryFunction "exp_subtract",         exp_subtract
+  makeAsmLibraryFunction "exp_true",             exp_true
+  makeAsmLibraryFunction "exp_unary_minus",      exp_unary_minus
+  makeAsmLibraryFunction "gen_random",           gen_random
+  makeAsmLibraryFunction "getin",                GETIN
+  makeAsmLibraryFunction "hardware_init",        hardware_init
+  makeAsmLibraryFunction "i2c_init",             i2c_init
+  makeAsmLibraryFunction "i2c_receive",          i2c_receive
+  makeAsmLibraryFunction "i2c_send",             i2c_send
+  makeAsmLibraryFunction "inbuf",                INBUF
+  makeAsmLibraryFunction "isalnum",              isalnum
+  makeAsmLibraryFunction "isalpha",              isalpha
+  makeAsmLibraryFunction "iscntrl",              iscntrl
+  makeAsmLibraryFunction "isdigit",              isdigit
+  makeAsmLibraryFunction "islower",              islower
+  makeAsmLibraryFunction "isspace",              isspace
+  makeAsmLibraryFunction "isupper",              isupper
+  makeAsmLibraryFunction "isxdigit",             isxdigit
+  makeAsmLibraryFunction "lcd_clear_display",    lcd_clear_display
+  makeAsmLibraryFunction "lcd_get_address",      lcd_get_address
+  makeAsmLibraryFunction "lcd_home",             lcd_home
+  makeAsmLibraryFunction "lcd_instruction",      lcd_instruction
+  makeAsmLibraryFunction "lcd_print_char",       lcd_print_char
+  makeAsmLibraryFunction "lcd_print_message",    lcd_print_message
+  makeAsmLibraryFunction "lcd_second_line",      lcd_second_line
+  makeAsmLibraryFunction "lcd_wait",             lcd_wait
+  makeAsmLibraryFunction "nmi",                  RESTART
+  makeAsmLibraryFunction "pinmode",              pinmode
+  makeAsmLibraryFunction "prbyte",               PRBYTE
+  makeAsmLibraryFunction "prchar",               PRCHAR
+  makeAsmLibraryFunction "print",                print
+  makeAsmLibraryFunction "putsp",                PUTSP
+  makeAsmLibraryFunction "random",               random
+  makeAsmLibraryFunction "remain",               REMAIN
+  makeAsmLibraryFunction "reset",                START
+  makeAsmLibraryFunction "serial_available",     serial_available
+  makeAsmLibraryFunction "serial_print_message", serial_print_message
+  makeAsmLibraryFunction "spi_init",             spi_init
+  makeAsmLibraryFunction "spi_send_two_bytes",   spi_send_two_bytes
+  makeAsmLibraryFunction "spi_ss_high",          spi_ss_high
+  makeAsmLibraryFunction "spi_ss_low",           spi_ss_low
+  makeAsmLibraryFunction "spi_transfer",         spi_transfer
+  makeAsmLibraryFunction "srce",                 SRCE
+  makeAsmLibraryFunction "tknjmp",               TKNJMP
+  makeAsmLibraryFunction "typing_latency",       typing_latency
+  makeAsmLibraryFunction "value2",               VALUE2
+  makeAsmLibraryFunction "value",                VALUE
+  makeAsmLibraryFunction "write_char",           write_char
+  makeAsmLibraryFunction "write_function",       write_function
+  makeAsmLibraryFunction "write_to_lcd",         write_to_lcd
+  makeAsmLibraryFunction "write_to_serial",      write_to_serial
 
   dfb 0   ; end of table
 
+;
+;  Assembler library symbols will be loaded from the above table into
+;  the symbol table. The symbol type will be SYMBOL_CONSTANT, the
+;  displacement will be the address of the symbol, and SYMLIB will
+;  be 1 to indicate an inbuilt symbol.
+;
 
 add_assembler_library_functions:
   lda #<assembler_library_functions_table
@@ -2487,6 +2505,9 @@ add_assembler_library_functions_name_loop
   phy
   ldy #SYMDSP+1
   sta (SYMITM),Y  ; save function address high-byte
+  ldy #SYMLIB     ; the "level" of library symbols is 1
+  lda #1
+  sta (SYMITM),Y
   ply
 
   iny         ; get past that last byte
