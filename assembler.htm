@@ -181,13 +181,15 @@ begin = *
 <ul>
 <li>1 : Show the source during assembly (with the generated address on the left)</li>
 <li>2 : Show the generated opcodes during assembly</li>
-<li>4 : Show the symbol table at the completion of the assembly</li>
+<li>4 : Show the symbol table at the completion of the assembly for user-defined symbols</li>
+<li>8 : Show the symbol table at the completion of the assembly for system-defined (library) symbols</li>
 </ul>
 <p>For example:</p>
-<pre class="asm"><code>  LIST 1     ; show source
-  LIST 1|2   ; show source and generated code (alternatively: LIST 3)
-  LIST 1|2|4 ; show source, generated code, and symbols (alternatively: LIST 7)
-  LIST 0     ; stop listing anything</code></pre>
+<pre class="asm"><code>  LIST 1        ; show source
+  LIST 1|2      ; show source and generated code (alternatively: LIST 3)
+  LIST 1|2|4    ; show source, generated code, and user-defined symbols (alternatively: LIST 7)
+  LIST 1|2|4|8  ; show source, generated code, and ALL symbols (alternatively: LIST 15)
+  LIST 0        ; stop listing anything</code></pre>
 <p>The assembler does two passes, the first to find the address of forward-declared symbols, and the second to output the machine code. The listing is shown during the second pass, unless there is an error, in which case the line in error is shown.</p></li>
 <li><p>LIST</p>
 <p>Same as “LIST 3”.</p></li>
@@ -217,7 +219,7 @@ message_length EQU    end_message - start_message   ; calculate message length</
 <p>The output generation is relocated to whatever <em>expression</em> evaluates to, from this point on. If this line had a label the label evaluates to the address <em>before</em> the relocation.</p>
 <pre><code>   org $5000    ; output code at $5000 onwards now</code></pre></li>
 <li><p>DFB <em>expression</em> [, <em>expression</em> ]</p>
-<p>A single byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.</p>
+<p>A byte is emitted to the output, which is the value of the expression. It must evaluate to 0x00 to 0xFF. Multiple bytes may be emitted separated by commas.</p>
 <pre><code>  dfb $01,$02,$03,$04</code></pre></li>
 <li><p>DFW <em>expression</em> [, <em>expression</em> ]</p>
 <p>Two bytes (one word) are emitted to the output, which is the value of the expression. It must evaluate to 0x0000 to 0xFFFF. The bytes are emitted in little-endian order, that is the low-order byte first, followed by the high-order byte. Multiple words may be emitted separated by commas.</p>
@@ -389,7 +391,9 @@ write_loop:
 <p>There are also support functions for interfacing with SPI devices, such as 7-segment displays, 8x8 matrix displays, port expanders, and many other peripherals, with the board acting as an SPI master. See <a href="spi.htm">SPI support</a> for more details.</p>
 <hr />
 <h2 id="debugging">Debugging</h2>
-<p>Debugging assembler code can be a pain. Below are a few suggestions.</p>
+<p>Debugging assembler code can be a pain — I know from experience. Below are a few suggestions.</p>
+<h2 id="stack-pointer-changed-when-running-assembler-code">Stack pointer changed when running assembler code</h2>
+<p>When running assembler code the stack pointer is changed to $CF rather than $FF. In other words, the top of the stack is address $1CF. This is so that, if you hit a breakpoint and use various commands like MEM, POKE and so on, the use of the stack in the Editor does not corrupt your user stack. This will reduce your available stack size by 48 bytes (out of 256). That still allows 208 nested subroutine calls, assuming you don’t also push stuff onto the stack, which should be plenty. If it isn’t, in your code you can change the stack pointer, however then the stack “backtrace” shown when you hit a BRK will not be correct.</p>
 <hr />
 <h3 id="toggle_led">Toggling an LED</h3>
 <p>You can use a handful of instructions to toggle one of the VIA pins, like this:</p>
@@ -464,20 +468,32 @@ debug_point:
   jsr debug_point ; display message
   pla             ; retrieve A</code></pre>
 <hr />
-<h3 id="view_memory">View memory</h3>
+<h3 id="view_memory">View memory (MEM)</h3>
 <p>You can use the MEMORY command to view any range of memory. For example, to look at the zero-page registers:</p>
 <pre><code>: mem $0 $1f
 $0000: d3 c7 00 da c9 00 00 00 00 ff ff ff ff 00 00 00  . . . . . . . . . . . . . . . .
 $0010: 00 00 00 00 00 00 00 37 c6 00 00 00 00 00 00 00  . . . . . . . 7 . . . . . . . .</code></pre>
 <p>Press Ctrl+C to abort a long listing. Values in the range 0x20 to 0x7F are shown in ASCII on the right of the hex numbers. Other values are shown as a period.</p>
 <hr />
-<h3 id="change_memory">Change memory</h3>
+<h3 id="change_memory">Change memory (POKE)</h3>
 <p>For debugging purposes you can use “POKE” to alter any memory address. There is no checking if you are altering a sane memory location.</p>
 <p>For example:</p>
 <pre><code>POKE $1000 $12 $34 &#39;A&#39;</code></pre>
 <p>That would put $12 into address $1000, $34 into address $1001, and $41 into address $1002.</p>
 <p>You will get a message, and poking will cease, if the value read back from that location is not the value you are attempting to place there. This would happen if you were writing to read-only memory.</p>
 <p>You can poke one or more locations (sequentially). The maximum number depends on what will fit into the editor’s command-line buffer which is 256 bytes long including the trailing newline and 0x00 byte.</p>
+<p>A possible use of POKE would be to insert extra breakpoints “on the fly” while you are debugging. For example, once you hit one breakpoint (which you put in the code), you may be curious to know what the registers have in them a few instructions later. Referring to your listing for guidance about where to insert your breakpoints you could:</p>
+<ul>
+<li>Find a suitable address / place of interest in your code</li>
+<li>Note the machine-code instructions at that address by (using MEM), plus the next one (write them down)</li>
+<li>Replace those two bytes (using POKE) with a $00 (BRK) followed by a breakpoint number</li>
+<li>Resume your code so the new breakpoint is eventually reached (using RES)</li>
+<li>After noting the contents of registers, stack, and memory, replace those two bytes with the ones you previously noted (using POKE)</li>
+<li>Back up the address of the breakpoint by two bytes, so the replaced instruction is executed. To do that, find the contents of locations $15/$16, subtract two from them, and poke them back into $16/$17. Remember $16 is the low-order byte and $17 is the high-order byte.</li>
+<li>Possibly insert another breakpoint further on in the code for the next point-of-interest stopping point</li>
+<li>Resume your code so it continues from the instruction you just replaced (RESUME)</li>
+</ul>
+<p>You could also use POKE to remove instructions by replacing them with a NOP instruction ($EA).</p>
 <hr />
 <h3 id="jsr">JSR to address</h3>
 <p>You can call any subroutine by using “JSR” in the shell. eg.</p>
