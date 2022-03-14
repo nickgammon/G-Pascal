@@ -223,16 +223,18 @@ The following assembler directives are supported:
 
     * 1 : Show the source during assembly (with the generated address on the left)
     * 2 : Show the generated opcodes during assembly
-    * 4 : Show the symbol table at the completion of the assembly
+    * 4 : Show the symbol table at the completion of the assembly for user-defined symbols
+    * 8 : Show the symbol table at the completion of the assembly for system-defined (library) symbols
 
     For example:
 
 
     ```asm
-      LIST 1     ; show source
-      LIST 1|2   ; show source and generated code (alternatively: LIST 3)
-      LIST 1|2|4 ; show source, generated code, and symbols (alternatively: LIST 7)
-      LIST 0     ; stop listing anything
+      LIST 1        ; show source
+      LIST 1|2      ; show source and generated code (alternatively: LIST 3)
+      LIST 1|2|4    ; show source, generated code, and user-defined symbols (alternatively: LIST 7)
+      LIST 1|2|4|8  ; show source, generated code, and ALL symbols (alternatively: LIST 15)
+      LIST 0        ; stop listing anything
     ```
 
 
@@ -584,7 +586,12 @@ There are also support functions for interfacing with SPI devices, such as 7-seg
 
 ## Debugging {#debugging}
 
-Debugging assembler code can be a pain. Below are a few suggestions. Note that when running assembler code the stack pointer is changed to $CF rather than $FF. In other words, the top of the stack is address $1CF. This is so that, if you hit a breakpoint and use various commands like MEM, PEEK and so on, the use of the stack in the Editor does not corrupt your user stack.
+Debugging assembler code can be a pain --- I  know from experience. Below are a few suggestions.
+
+
+## Stack pointer changed when running assembler code
+
+When running assembler code the stack pointer is changed to $CF rather than $FF. In other words, the top of the stack is address $1CF. This is so that, if you hit a breakpoint and use various commands like MEM, POKE and so on, the use of the stack in the Editor does not corrupt your user stack. This will reduce your available stack size by 48 bytes (out of 256). That still allows 208 nested subroutine calls, assuming you don't also push stuff onto the stack, which should be plenty. If it isn't, in your code you can change the stack pointer, however then the stack "backtrace" shown when you hit a BRK will not be correct.
 
 ---
 
@@ -700,7 +707,7 @@ Now in your code you could do something like this:
 
 ---
 
-### View memory {#view_memory}
+### View memory (MEM) {#view_memory}
 
 You can use the MEMORY command to view any range of memory. For example, to look at the zero-page registers:
 
@@ -714,7 +721,7 @@ Press Ctrl+C to abort a long listing. Values in the range 0x20 to 0x7F are shown
 
 ---
 
-### Change memory {#change_memory}
+### Change memory (POKE) {#change_memory}
 
 For debugging purposes you can use "POKE" to alter any memory address. There is no checking if you are altering a sane memory location.
 
@@ -729,6 +736,19 @@ That would put $12 into address $1000, $34 into address $1001, and $41 into addr
 You will get a message, and poking will cease, if the value read back from that location is not the value you are attempting to place there. This would happen if you were writing to read-only memory.
 
 You can poke one or more locations (sequentially). The maximum number depends on what will fit into the editor's command-line buffer which is 256 bytes long including the trailing newline and 0x00 byte.
+
+A possible use of POKE would be to insert extra breakpoints "on the fly" while you are debugging. For example, once you hit one breakpoint (which you put in the code), you may be curious to know what the registers have in them a few instructions later. Referring to your listing for guidance about where to insert your breakpoints you could:
+
+* Find a suitable address / place of interest in your code
+* Note the machine-code instructions at that address by (using MEM), plus the next one (write them down)
+* Replace those two bytes (using POKE) with a $00 (BRK) followed by a breakpoint number
+* Resume your code so the new breakpoint is eventually reached (using RES)
+* After noting the contents of registers, stack, and memory, replace those two bytes with the ones you previously noted (using POKE)
+* Back up the address of the breakpoint by two bytes, so the replaced instruction is executed. To do that, find the contents of locations $15/$16, subtract two from them, and poke them back into $16/$17. Remember $16 is the low-order byte and $17 is the high-order byte.
+* Possibly insert another breakpoint further on in the code for the next point-of-interest stopping point
+* Resume your code so it continues from the instruction you just replaced (RESUME)
+
+You could also use POKE to remove instructions by replacing them with a NOP instruction ($EA).
 
 ---
 
