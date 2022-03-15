@@ -131,21 +131,6 @@ CHKRHB   =  *
          LDX  #34     ; ERROR: ] expected
          JSR  CHKTKN
          JMP  pas_get_token
-;
-GET_LEV  =  *
-         LDA  LEVEL
-         LDY  #SYMLVL
-         SEC
-         SBC  (SYMITM),Y
-         STA  DISPL
-         RTS
-;
-GET_DAT  =  *
-         LDY  #SYMDAT
-         LDA  (SYMITM),Y
-         STA  DATTYP
-         RTS
-;
 
 
 
@@ -212,40 +197,7 @@ PSHPCODE =  *
          PHA
          LDA  BSAVE
          RTS
-;
-;  Get the offset of this current symbol into OFFSET
-;
-GET_OFF  =  *
-         PHA
-         LDY  #SYMDSP
-         LDA  (SYMITM),Y
-         STA  OFFSET
-         INY
-         LDA  (SYMITM),Y
-         STA  OFFSET+1
-         LDY  #SYMTYP
-         LDA  (SYMITM),Y
-         CMP  #SYMBOL_VARIABLE
-         BEQ  GETO_1
-         CMP  #SYMBOL_ARRAY
-         BEQ  GETO_1
-         CMP  #SYMBOL_FUNCTION_RETURN
-         BNE  GETO_2
-;
-;  here if the symbol is a variable, array or function return value
-;   subtract the offset from -3
-;
-GETO_1   =  *
-         SEC
-         LDA  #$FD
-         SBC  OFFSET
-         STA  OFFSET
-         LDA  #$FF
-         SBC  OFFSET+1
-         STA  OFFSET+1
-GETO_2   =  *
-         PLA
-         RTS
+
 ;
 GETEXPR  =  *
          JSR  pas_get_token

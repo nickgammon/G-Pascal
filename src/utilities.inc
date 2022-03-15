@@ -935,7 +935,15 @@ CHK_RUN  jsr  CHK_VAL
          lda  #FLAG_VALID_ASSEMBLE
          and  system_flags
          bne  run_assembler
+;
+;  If we somehow get here without Pascal included, go back to editor
+;
+         .if  USE_PASCAL
          jmp  INTERP
+         .else
+         jmp main_prompt
+         .endif ; USE_PASCAL
+
 run_assembler:
          ldx #RUNNING_STACK_TOP           ; don't use all of stack
          txs
@@ -1009,4 +1017,47 @@ COUT:
 
 COUT_CALL:
   jmp (write_function)
+
+
+DM7      asciiz  "Error occurred at P-code "
+
+;
+; Ding a bell - however we don't have it on this board
+;
+BELL1    =  *
+         pha
+         lda  #0
+         sta  RUNNING
+         jsr  CROUT
+         pla
+         rts
+;
+;
+RUNERR   jsr  BELL1
+         lda  #<DM7  ; Error occurred at P-code
+         ldx  #>DM7
+         jsr  print
+         lda  LASTP+1
+         jsr  PRBYTE
+         lda  LASTP
+         jsr  DISHX
+EX_FINISHD  =  *
+         lda  #0
+         jsr  CROUT
+         lda  #<FIN_MSG
+         ldx  #>FIN_MSG
+         jsr  print
+         stz  serial_in_byte_received  ; get rid of read-ahead
+         jsr  GETIN      ; wait till message seen
+         jsr  CROUT      ; output a newline in case they press space or something
+         jmp  RESTART
+;
+FIN_MSG  asciiz  'Run finished - press a key ...'
+
+ass_error:
+  lda ASS_EMIT_COUNT
+  beq ass_error1
+  jsr CROUT
+ass_error1:
+  jmp ERROR
 

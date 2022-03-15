@@ -395,35 +395,54 @@ negate_token_value:
 
 
 gtoken_table:
+;
+;  Pascal comments
+;
+  .if USE_PASCAL
   tknjmpItem '(',gc_lh_paren
   tknjmpItem '{',gc_lh_brace
-  tknjmpItem '"',gc_quote
-  tknjmpItem SINGLE_QUOTE,gc_quote
-  tknjmpItem '$',gc_dollar
-  tknjmpItem '%',gc_percent
-  tknjmpItem ':',gc_colon
-  tknjmpItem '<',gc_less_than
-  tknjmpItem '>',gc_greater_than
-  tknjmpItem '-',gc_minus
-  tknjmpItem '+',gc_plus
-  tknjmpItem '&',gc_ampersand
-  tknjmpItem '|',gc_bar
-  tknjmpItem '=',gc_equals
-  tknjmpItem '!',gc_bang
+  .endif    ; USE_PASCAL
+;
+;  Assembler comments
+;
+  .if USE_ASSEMBLER
   tknjmpItem ';',gc_semicolon
+  .endif  ; USE_ASSEMBLER
+
+;
+;  Other tokens which need special processing
+;
+  tknjmpItem '"',gc_quote             ; quoted string
+  tknjmpItem SINGLE_QUOTE,gc_quote    ; quoted string
+  tknjmpItem '$',gc_dollar            ; hex literal
+  tknjmpItem '%',gc_percent           ; binary literal
+  tknjmpItem ':',gc_colon             ; might be :=
+  tknjmpItem '<',gc_less_than         ; might be <= or <>
+  tknjmpItem '>',gc_greater_than      ; might be >=
+  tknjmpItem '-',gc_minus             ; might be start of numeric literal
+  tknjmpItem '+',gc_plus              ; might be start of numeric literal
+  tknjmpItem '&',gc_ampersand         ; might be &&
+  tknjmpItem '|',gc_bar               ; might be ||
+  tknjmpItem '=',gc_equals            ; might be ==
+  tknjmpItem '!',gc_bang              ; might be !=
+
   dfb        0   ; end of table
 
+  .if USE_PASCAL
 gtoken_directive_table:
   tknjmpItem 'S',gc_directive_symbols
   tknjmpItem 'L',gc_directive_list
   tknjmpItem 'P',gc_directive_pcodes
   tknjmpItem 'N',gc_directive_nolist
   dfb        0
+  .endif    ; USE_PASCAL
 
 ; single byte token, in A
 gc_single_byte_tokenJ jmp gc_single_byte_token
 ; single byte token in token_type
 gc_single_byte_already_knownJ jmp gc_single_byte_already_known
+
+  .if USE_PASCAL
 
 gc_lh_brace:
   ldy #0
@@ -581,6 +600,9 @@ gc_directive_nolist:
   stz DCODE
   jmp gc_pascal_comment_find_end
 
+  .endif   ; USE_PASCAL
+
+  .if USE_ASSEMBLER
 ;
 ;  semicolons start comments in the assembler
 ;
@@ -611,6 +633,7 @@ gc_assembler_comment_keep_looking:
   inc token_start+1
   bra gc_assembler_comment_find_end
 
+  .endif  ; USE_ASSEMBLER
 
 gc_backslash_tokens:
          DFB  'A',$07  ; bell ($07)

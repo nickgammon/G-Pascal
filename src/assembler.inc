@@ -1348,13 +1348,6 @@ ass_emit1:
   inc ASS_EMIT_COUNT
   rts
 
-ass_error:
-  lda ASS_EMIT_COUNT
-  beq ass_error1
-  jsr CROUT
-ass_error1:
-  jmp ERROR
-
 ass_fixup_bbr_branch:
   lda REMAIN+1
   bne ass_emit_zero_page_too_high

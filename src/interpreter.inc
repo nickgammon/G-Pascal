@@ -229,7 +229,6 @@ execution_address_table  =  *
 ;
 DM1               asciiz  ' Stack: '
 DM2               asciiz  ' Base:  '
-running_message   asciiz  'Running\n'
 
 ;
 DEBUG    =  *
@@ -332,7 +331,6 @@ INTERP   =  *
 ;
 DM5      asciiz  "Illegal instruction\n"
 DM6      asciiz  'Break ...\n'
-DM7      asciiz  "Error occurred at P-code "
 
 ;
 ; DISPLAY (X) CHARACTERS FROM (WORK)
@@ -360,38 +358,6 @@ DIS5_A   =  *
          bne  DIS5
          rts
 
-;
-; Ding a bell - however we don't have it on this board
-;
-BELL1    =  *
-         pha
-         lda  #0
-         sta  RUNNING
-         jsr  CROUT
-         pla
-         rts
-;
-;
-RUNERR   jsr  BELL1
-         lda  #<DM7  ; Error occurred at P-code
-         ldx  #>DM7
-         jsr  print
-         lda  LASTP+1
-         jsr  PRBYTE
-         lda  LASTP
-         jsr  DISHX
-EX_FINISHD  =  *
-         lda  #0
-         jsr  CROUT
-         lda  #<FIN_MSG
-         ldx  #>FIN_MSG
-         jsr  print
-         stz  serial_in_byte_received  ; get rid of read-ahead
-         jsr  GETIN      ; wait till message seen
-         jsr  CROUT      ; output a newline in case they press space or something
-         jmp  RESTART
-;
-FIN_MSG  asciiz  'Run finished - press a key ...'
 ;
 ;
 CHK_KBD  =  *

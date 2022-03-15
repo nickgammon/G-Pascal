@@ -142,8 +142,12 @@ editor_handlers:
   makeHandler "LOAD",    editor_load
   makeHandler "DELETE",  editor_delete
   makeHandler "HELP",    editor_help
+
+  .if USE_PASCAL
   makeHandler "COMPILE" ,editor_compile
   makeHandler "SYNTAX",  editor_syntax
+  .endif ; USE_PASCAL
+
   makeHandler "SAVE",    editor_save
 ;  makeHandler "TEST",    editor_test
   makeHandler "MEMORY",  editor_memory
@@ -151,7 +155,11 @@ editor_handlers:
   makeHandler "INFO",    editor_info
   makeHandler "TRACE",   editor_trace
   makeHandler "DEBUG",   editor_debug
+
+  .if USE_ASSEMBLER
   makeHandler "ASSEMBLE",editor_assemble
+  .endif  ; USE_ASSEMBLER
+
   makeHandler "FIND",    editor_find
   makeHandler "REPLACE", editor_replace
   makeHandler "RUN",     editor_run
@@ -160,7 +168,9 @@ editor_handlers:
   makeHandler "POKE",    editor_poke
   makeHandler "JSR",     editor_jsr
   makeHandler "JMP",     editor_jmp
+  .if USE_ASSEMBLER
   makeHandler "LIBRARY", editor_library
+  .endif  ; USE_ASSEMBLER
   dfb 0
 
 editor_help_info:
@@ -170,14 +180,25 @@ editor_help_info:
   asc "Insert/LOad after_line\n"
   asc "Find        line_number_range /target/flags\n"
   asc "Replace     line_number_range /target/replacement/flags\n"
+  asc "RECover\n"
   asc "\n"
   asc "Help\n"
-  asc "INfo/LIBrary\n"
+  asc "INfo\n"
   asc "Memory      first_address last_address\n"
-  asc "Compile/Syntax/Assemble\n"
-  asc "RUn/DEBug/Trace/RESume\n"
+
+  .if USE_ASSEMBLER
+  asc "Assemble\n"
+  asc "LIBrary\n"
+  .endif  ; USE_ASSEMBLER
+
+  .if USE_PASCAL
+  asc "Compile/Syntax\n"
+  .endif  ; USE_PASCAL
+
+  asc "RUn\n"
+  asc "DEBug/Trace\n"
+  asc "RESume\n"
   asc "Poke/Jsr/JMp\n"
-  asc "RECover\n"
   asc "(Actions may be abbreviated)\n"
   asc "(Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)\n"
   dfb 0
@@ -1556,18 +1577,6 @@ find_source_end_done =  *
 ;
 brk_resumed asciiz "\nResumed after BRK\n"
 
-editor_test:
-  lda #$12
-  ldx #$23
-  ldy #$42
-  cmp #$12
-  brk
-  dfb $99   ; break number
-  lda #<brk_resumed
-  ldx #>brk_resumed
-  jsr print
-  rts
-
 ;
 ;  memory dump
 ;
@@ -1674,8 +1683,11 @@ editor_memory_not_high:
   jsr CROUT
   rts
 
+;
+;  for testing during development, omit for now
+;
 
-
+  .if 0
 
 symbol_table_message asciiz "Addr Prev L  T Dsp  Ar Da Ln Name\n"
 
@@ -1777,6 +1789,7 @@ ST_SYMTBL_LIST_DONE = *
 
   jmp main_prompt
 
+  .endif  ; 0
 
 recover_done asciiz "Done\n"
 recover_not_needed asciiz "Not needed\n"
@@ -1846,6 +1859,7 @@ editor_info  = *
   jsr crc_source
   jmp main_prompt
 
+  .if USE_PASCAL
 editor_compile:
   jsr editor_check_no_more
   lda  #0
@@ -1857,6 +1871,7 @@ editor_syntax:
   lda #1
   sta  SYNTAX
   jmp  COMPIL
+  .endif    ; USE_PASCAL
 
 editor_run:
   jsr editor_check_no_more
@@ -1940,9 +1955,11 @@ editor_line_count_done:
   jsr CROUT
   rts
 
+  .if USE_ASSEMBLER
 editor_assemble:
   jsr editor_check_no_more
   jmp ASSEMBLE
+  .endif  ; USE_ASSEMBLER
 
 no_break_message asciiz "No BRK previously encountered\n"
 
@@ -2172,6 +2189,7 @@ editor_jmp_number_in_range:
   plp              ; get status register back
   jmp  (token_value)
 
+  .if USE_ASSEMBLER
 ;--------------------------------------------
 ;  editor_library - list library symbols
 ;--------------------------------------------
@@ -2281,6 +2299,7 @@ editor_library_name_onto_next:
 editor_library_done:
   jmp main_prompt
 
+  .endif  ; USE_ASSEMBLER
 
 ;16-bit number comparison...
 ;

@@ -53,9 +53,13 @@
 
 EMULATOR = 0          ; for testing on a PC running an emulator
 LCD_SUPPORT = 1       ; 1 = support LCD, 0 = not. Unset if you have removed the LCD.
+USE_CP437_FONT = 1    ; 1 = include the symbols for the CP437 font for use with MAX7219 chip, 0 = omit them
+USE_PASCAL = 1        ; 1 = include the G-Pascal compiler, 0 = omit it
+USE_ASSEMBLER = 1     ; 1 = include the assembler, 0 = omit it
+
 SERIAL_DEBUGGING = 0  ; if set, toggle VIA PA2 when reading a bit, and PA3 when writing a bit
                       ;  DO NOT USE I2C if this is on, as I2C functions use these two pins
-USE_CP437_FONT = 1    ; include the symbols for the CP437 font for use with MAX7219 chip
+
 
 ;
 ;  CONFIGURATION
@@ -178,13 +182,20 @@ TEXT_START = *            ; where source goes in memory (currently $300)
   .include "editor.inc"
   .include "utilities.inc"
   .include "errors.inc"
+  .if USE_ASSEMBLER
   .include "assembler.inc"
+  .endif    ; USE_ASSEMBLER
+
   .include "math.inc"
+
+  .if USE_PASCAL
+  .include "compiler.inc"
   .include "interpreter.inc"
+  .endif  ; USE_PASCAL
+
   .include "interrupts.inc"
   .include "lcd.inc"
   .include "symbols.inc"
-  .include "compiler.inc"
   .include "hardware.inc"
   .include "gtoken.inc"
   .include "i2c.inc"
@@ -194,12 +205,14 @@ TEXT_START = *            ; where source goes in memory (currently $300)
     .include "cp437_font.inc"
   .endif
 
-introduction asc    "G-Pascal compiler, version 4.04.\n"
+introduction asc    "G-Pascal compiler, version 4.05.\n"
              asciiz "Written by Nick Gammon.\nType H for help.\n"
 
   .if LCD_SUPPORT
-LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.04"
+LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.05"
   .endif
+
+running_message   asciiz  'Running\n'
 
 ;
 ; here for cold start - clear text file to null etc. etc.
@@ -253,6 +266,7 @@ REST1    =  *
   sta  RUNNING
   jmp  main_start    ; go to "shell"
 
+end_of_rom_routines dfb 0
 
 ;
 ;  processor hardware vectors
