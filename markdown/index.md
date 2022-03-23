@@ -227,24 +227,48 @@ The extra things you need to do wire-wrapping are:
 
 There are various tutorials around for how to wire-wrap including [this one from Sparkfun](https://learn.sparkfun.com/tutorials/working-with-wire/how-to-use-a-wire-wrap-tool).
 
+---
+
+## Hardware theory and notes
+
+A *considerable* amount of detail about the 6502 and suggested schematics are at [Garth Wilson's 6502 primer: Building your own 6502 computer](http://wilsonminesco.com/6502primer/). There is a [schematic](http://wilsonminesco.com/6502primer/potpourri.html) on his site which looks similar to the one Ben used. There is also a lot of background detail there and suggestions for alternatives.
+
+---
+
+## Questions or comments
+
+Questions or comments may be posted by joining [my forum](http://www.gammon.com.au/forum/index.php?bbtopic_id=125).
 
 ---
 
 ## Other links
 
+### This site
+
 * [Suggested hardware modifications](hardware_mods.htm) to Ben's 6502 board including accessing more of the on-board RAM, and connecting up the board to your PC/Mac
 * [G-Pascal compiler features](pascal_compiler.htm) and limitations
 * [Assembler features](assembler.htm) and limitations
 * [Example code](examples/)
-* [Source code and documentation on GitHub](https://github.com/nickgammon/G-Pascal)
 * [Text editor](editor.htm)
 * [File menu](file_menu.htm)
 * [How to install](installation.htm)
 * [I2C support](i2c.htm)
 * [SPI support](spi.htm)
 * [History of G-Pascal](history.htm) and the assembler
+* [My forum with posts about electronics](https://www.gammon.com.au/forum/index.php?bbsection_id=14)
+* [G-Pascal part of my forum](http://www.gammon.com.au/forum/index.php?bbtopic_id=125)
+
+### Source code and documentation on GitHub
+
+* [https://github.com/nickgammon/G-Pascal](https://github.com/nickgammon/G-Pascal)
+
+### Other sites
+
 * [Ben Eater's 6502 board](https://eater.net/6502)
 * [Ben Eater's first 6502 board tutorial on YouTube](https://www.youtube.com/watch?v=LnzuMJLZRdU)
+* [Garth Wilson's 6502 primer: Building your own 6502 computer](http://wilsonminesco.com/6502primer/)
+* [6502 forum](http://forum.6502.org/)
+* [Reddit: Ben Eater](https://www.reddit.com/r/beneater/)
 
 ---
 
