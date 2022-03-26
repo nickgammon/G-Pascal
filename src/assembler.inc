@@ -1461,34 +1461,23 @@ OPCODE_LOOKUP_TABLE = *
 ;  zero-page opcodes go first as they are preferred if we are accessing a zero-page address
 ;
     makeOpcodeLookup  3,  ASS_OPERAND_ZERO_PAGE, OPCODE_ASS_OPERAND_ZERO_PAGE, ass_emit_zero_page ; (11)
-    makeOpcodeLookup  1,  ASS_OPERAND_ZERO_PAGE, OPCODE_ASS_OPERAND_ZERO_PAGE_TOKENISED, ass_emit_zero_page ; (11)
     makeOpcodeLookup  3,  ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT, OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT, ass_emit_zero_page ; (12)
-    makeOpcodeLookup  1,  ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT, OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT_TOKENISED, ass_emit_zero_page ; (12)
     makeOpcodeLookup  3,  ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X, OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X, ass_emit_zero_page ; (13)
-    makeOpcodeLookup  1,  ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X, OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X_TOKENISED, ass_emit_zero_page ; (13)
     makeOpcodeLookup  3,  ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_Y, OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_Y, ass_emit_zero_page ; (14)
     makeOpcodeLookup  3,  ASS_OPERAND_ZERO_PAGE_INDIRECT, OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT, ass_emit_zero_page ; (15)
-    makeOpcodeLookup  1,  ASS_OPERAND_ZERO_PAGE_INDIRECT, OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT_TOKENISED, ass_emit_zero_page ; (15)
     makeOpcodeLookup  3,  ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y, OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y, ass_emit_zero_page ; (16)
-    makeOpcodeLookup  1,  ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y, OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y_TOKENISED, ass_emit_zero_page ; (16)
 
 ;
 ;  non zero-page opcodes
 ;
     makeOpcodeLookup  4,  ASS_OPERAND_ABSOLUTE, OPCODE_4_CHAR_ZERO_PAGE,  ass_emit_zero_page  ; (11)
     makeOpcodeLookup  3,  ASS_OPERAND_ABSOLUTE, OPCODE_ASS_OPERAND_ABSOLUTE,  ass_emit_absolute  ; (1)
-    makeOpcodeLookup  1,  ASS_OPERAND_ABSOLUTE, OPCODE_ASS_OPERAND_ABSOLUTE_TOKENISED,  ass_emit_absolute  ; (1)
-
     makeOpcodeLookup  3,  ASS_OPERAND_ABSOLUTE_INDEXED_INDIRECT, OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_INDIRECT, ass_emit_absolute ; (2)
     makeOpcodeLookup  3,  ASS_OPERAND_ABSOLUTE_INDEXED_WITH_X, OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_X, ass_emit_absolute ; (3)
-    makeOpcodeLookup  1,  ASS_OPERAND_ABSOLUTE_INDEXED_WITH_X, OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_X_TOKENISED, ass_emit_absolute ; (3)
     makeOpcodeLookup  3,  ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y, OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y, ass_emit_absolute ; (4)
-    makeOpcodeLookup  1,  ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y, OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y_TOKENISED, ass_emit_absolute ; (4)
     makeOpcodeLookup  3,  ASS_OPERAND_ABSOLUTE_INDIRECT, OPCODE_ASS_OPERAND_ABSOLUTE_INDIRECT, ass_emit_absolute ; (5)
-    makeOpcodeLookup  1,  ASS_OPERAND_ABSOLUTE_INDIRECT, OPCODE_ASS_OPERAND_IMMEDIATE_TOKENISED, ass_emit_absolute ; (5)
     makeOpcodeLookup  3,  ASS_OPERAND_ACCUMULATOR_A, OPCODE_ASS_OPERAND_ACCUMULATOR_A, 0 ; (6)
     makeOpcodeLookup  3,  ASS_OPERAND_IMMEDIATE, OPCODE_ASS_OPERAND_IMMEDIATE, ass_emit_immediate ; (7)
-    makeOpcodeLookup  1,  ASS_OPERAND_IMMEDIATE, OPCODE_ASS_OPERAND_IMMEDIATE_TOKENISED, ass_emit_immediate ; (7)
     makeOpcodeLookup  3,  ASS_OPERAND_IMPLIED,  OPCODE_3_CHAR_IMPLIED,    0  ; (8) and (10)
     makeOpcodeLookup  4,  ASS_OPERAND_ZERO_PAGE_AND_ABSOLUTE, OPCODE_4_CHAR_BRANCH,     ass_fixup_bbr_branch  ; (9)
     makeOpcodeLookup  3,  ASS_OPERAND_ABSOLUTE, OPCODE_3_CHAR_BRANCH,     ass_fixup_branch  ; (9)
@@ -1598,6 +1587,17 @@ OPCODE_3_CHAR_IMPLIED = *
   asc "TXS",$9A
   asc "TYA",$98
   asc "WAI",$CB
+
+;
+;  these ones imply the use of the A register
+;
+  asc "ASL",$0A
+  asc "DEC",$3A
+  asc "INC",$1A
+  asc "LSR",$4A
+  asc "ROL",$2A
+  asc "ROR",$6A
+
   dfb 0
 
 ;------------------------------------
@@ -1655,14 +1655,6 @@ OPCODE_ASS_OPERAND_ABSOLUTE = *
   dfb 0
 
 ;------------------------------------
-;  ASS_OPERAND_ABSOLUTE - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ABSOLUTE_TOKENISED = *
-  dfb TOKEN_AND,$2D
-  dfb 0
-
-
-;------------------------------------
 ;  ASS_OPERAND_ABSOLUTE_INDEXED_INDIRECT
 ;------------------------------------
 OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_INDIRECT = *
@@ -1693,13 +1685,6 @@ OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_X = *
   dfb 0
 
 ;------------------------------------
-;  ASS_OPERAND_ABSOLUTE_INDEXED_WITH_X - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_X_TOKENISED = *
-  dfb TOKEN_AND,$3D
-  dfb 0
-
-;------------------------------------
 ;  ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y
 ;------------------------------------
 OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y = *
@@ -1712,13 +1697,6 @@ OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y = *
   asc "ORA",$19
   asc "SBC",$F9
   asc "STA",$99
-  dfb 0
-
-;------------------------------------
-;  ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ABSOLUTE_INDEXED_WITH_Y_TOKENISED = *
-  dfb TOKEN_AND,$39
   dfb 0
 
 ;------------------------------------
@@ -1759,13 +1737,6 @@ OPCODE_ASS_OPERAND_IMMEDIATE = *
   dfb 0
 
 ;------------------------------------
-;  ASS_OPERAND_IMMEDIATE - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_IMMEDIATE_TOKENISED = *
-  dfb TOKEN_AND,$29
-  dfb 0
-
-;------------------------------------
 ;  ASS_OPERAND_ZERO_PAGE
 ;------------------------------------
 OPCODE_ASS_OPERAND_ZERO_PAGE = *
@@ -1796,14 +1767,6 @@ OPCODE_ASS_OPERAND_ZERO_PAGE = *
   dfb 0
 
 ;------------------------------------
-;  ASS_OPERAND_ZERO_PAGE  - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ZERO_PAGE_TOKENISED = *
-  dfb TOKEN_AND,$25
-  dfb 0
-
-
-;------------------------------------
 ;  ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT
 ;------------------------------------
 OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT = *
@@ -1816,14 +1779,6 @@ OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT = *
   asc "SBC",$E1
   asc "STA",$81
   dfb 0
-
-;------------------------------------
-;  ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT  - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_INDIRECT_TOKENISED  = *
-  dfb TOKEN_AND,$21
-  dfb 0
-
 
 ;------------------------------------
 ;  ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X
@@ -1850,13 +1805,6 @@ OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X = *
   dfb 0
 
 ;------------------------------------
-;  ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X  - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_X_TOKENISED = *
-  dfb TOKEN_AND,$35
-  dfb 0
-
-;------------------------------------
 ;  ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_Y
 ;------------------------------------
 OPCODE_ASS_OPERAND_ZERO_PAGE_INDEXED_WITH_Y = *
@@ -1879,13 +1827,6 @@ OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT = *
   dfb 0
 
 ;------------------------------------
-;  ASS_OPERAND_ZERO_PAGE_INDIRECT  - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT_TOKENISED = *
-  dfb TOKEN_AND,$32
-  dfb 0
-
-;------------------------------------
 ;  ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y
 ;------------------------------------
 OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y = *
@@ -1898,14 +1839,6 @@ OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y = *
   asc "SBC",$F1
   asc "STA",$91
   dfb 0
-
-;------------------------------------
-;  ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y - for tokenised opcodes like AND
-;------------------------------------
-OPCODE_ASS_OPERAND_ZERO_PAGE_INDIRECT_INDEXED_WITH_Y_TOKENISED  = *
-  dfb TOKEN_AND,$31
-  dfb 0
-
 
 ; ---------------------------
 ; Compiler directives

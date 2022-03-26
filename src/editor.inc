@@ -183,7 +183,7 @@ editor_help_info:
   asc "RECover\n"
   asc "\n"
   asc "Help\n"
-  asc "INfo\n"
+  asc "INFo\n"
   asc "Memory      first_address last_address\n"
 
   .if USE_ASSEMBLER
