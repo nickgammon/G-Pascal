@@ -81,7 +81,7 @@
 <li><p>Full expression evaluation of operands, with operator precedence, parentheses, bitwise operations and so on.</p></li>
 <li><p>Relocation of the output to any memory address (ORG directive)</p></li>
 <li><p>Here is “hello world” in assembler:</p>
-<pre class="asm"><code>      jmp begin   ; skip the message
+<pre><code>      jmp begin   ; skip the message
 hello asciiz &quot;Hello, world!&quot;
 begin = *
       lda #&lt;hello
@@ -99,7 +99,7 @@ begin = *
 <hr />
 <h2 id="syntax">Syntax and notes</h2>
 <p>The assembler is intended to be compatible — to a point — with the vasm6502 assembler, in particular when run on your PC like this:</p>
-<pre class="sh"><code>vasm6502_oldstyle MYFILE.asm  -wdc02 -esc -Fbin -o MYFILE.bin -L MYFILE.list</code></pre>
+<pre><code>vasm6502_oldstyle MYFILE.asm  -wdc02 -esc -Fbin -o MYFILE.bin -L MYFILE.list</code></pre>
 <p>Note that there is a limit to how much can be implemented in a few kB of EEPROM. Thus source files written in this assembler should compile in vasm, however if you use extra features of vasm (like conditional compiles) then these are not supported. In other words, file written here should be compatible with vasm, not necessarily the other way around.</p>
 <p>Vasm is available from <a href="http://sun.hasenbraten.de/vasm/" class="uri">http://sun.hasenbraten.de/vasm/</a></p>
 <p>The assembler is line-based, that is each line is treated separately, and is terminated by the newline character (0x0A).</p>
@@ -129,12 +129,13 @@ begin = *
 <p>Operands are separated from the opcode by one or more spaces.</p>
 <ul>
 <li><p>The operand "*" evaluates to the current output code address, eg.</p>
-<pre class="asm"><code>foo =   *       ; foo is assigned to the current address
+<pre><code>foo =   *       ; foo is assigned to the current address
     bra *+4   ; branch to 4 bytes ahead of this instruction</code></pre></li>
-<li><p>In the case of opcodes which may or may not use the A register as an operand, the “A” must be explicitly provided, eg.</p>
-<pre class="asm"><code>  LSR A</code></pre></li>
+<li><p>In the case of opcodes which may or may not use the A register as an operand, the “A” may be omitted. eg.</p>
+<pre><code>  LSR    ; logical shift A right
+  INC    ; increment A</code></pre></li>
 <li><p>String operands only apply to the ASC, ASCII, ASCIIZ and STRING directives. In those cases a quoted string of any length (up to 255 characters) may be the operand. In a similar way to the Pascal compiler, strings may start with either single of double quotes, and contain the other type of quote inside. Alternatively you may double the starting quote to include it in the string. eg. ‘Nick’‘s cat’. In other places strings of one to three characters long may be used, and will be treated as numbers. Eg.</p>
-<pre class="asm"><code>  lda #&#39;A&#39;   ; load A with $41</code></pre>
+<pre><code>  lda #&#39;A&#39;   ; load A with $41</code></pre>
 <p>Strings may also contain “escape” sequences of a backslash followed by a letter, as follows:</p>
 <pre><code>  \A    bell ($07)
   \B    backspace ($08)
@@ -163,7 +164,7 @@ begin = *
   10.   &amp;&amp; (logical and)
   11.   || (logical or)</code></pre>
 <p>The high-byte and low-byte operators are unary operators with a high precedence. Depending on their location in the expression they are not considered to be comparison operators. For example :</p>
-<pre class="asm"><code>  lda #&gt;foo           ; load A with the high-order byte of the address of foo
+<pre><code>  lda #&gt;foo           ; load A with the high-order byte of the address of foo
   lda #&gt;(foo + $100)  ; load A with the high-order byte of the address of (foo + $100)
   lda #&lt;foo           ; load A with the low-order byte of the address of foo</code></pre>
 <p>There is a <a href="examples/asm/expression_evaluator_test.asm">operator evaluation</a> test file you can try.</p></li>
@@ -185,7 +186,7 @@ begin = *
 <li>8 : Show the symbol table at the completion of the assembly for system-defined (library) symbols</li>
 </ul>
 <p>For example:</p>
-<pre class="asm"><code>  LIST 1        ; show source
+<pre><code>  LIST 1        ; show source
   LIST 1|2      ; show source and generated code (alternatively: LIST 3)
   LIST 1|2|4    ; show source, generated code, and user-defined symbols (alternatively: LIST 7)
   LIST 1|2|4|8  ; show source, generated code, and ALL symbols (alternatively: LIST 15)
@@ -200,7 +201,7 @@ begin = *
 <pre><code>  assert 2 + 2 == 4</code></pre></li>
 <li><p>ASC <em>string</em></p>
 <p>Insert the string into the code, with no terminator.</p>
-<pre class="asm"><code>  asc &quot;Hello, world!&quot;</code></pre></li>
+<pre><code>  asc &quot;Hello, world!&quot;</code></pre></li>
 <li><p>ASCII <em>string</em></p>
 <p>Same as ASC.</p></li>
 <li><p>ASCIIZ <em>string</em></p>
@@ -208,10 +209,10 @@ begin = *
 <li><p>STRING <em>string</em></p>
 <p>Same as ASCIIZ.</p></li>
 <li><p><em>label</em> EQU <em>address</em></p>
-<p>The specified label takes on the address of the evaluated expression. Alternatively, the address may be the symbol "*" which means “the current address”.</p>
+<p>The specified label takes on the address of the evaluated expression.</p>
 <pre><code>EEPROM         EQU    $8000
 start_message  ASC    &quot;Hi there&quot;
-end_message    EQU    *
+end_message    EQU    *   ; end_message becomes the current output address
 message_length EQU    end_message - start_message   ; calculate message length</code></pre></li>
 <li><p><em>label</em> = <em>address</em></p>
 <p>Same as EQU.</p></li>
@@ -228,13 +229,13 @@ message_length EQU    end_message - start_message   ; calculate message length</
 <p>Same as DFW.</p></li>
 <li><p>BLK <em>expression</em></p>
 <p>The assembler emits <em>expression</em> zeroes. For example:</p>
-<pre class="asm"><code>  BLK 10    ; emit 10 zeroes, advancing the output address by 10</code></pre></li>
+<pre><code>  BLK 10    ; emit 10 zeroes, advancing the output address by 10</code></pre></li>
 <li><p>RESERVE <em>expression</em></p>
 <p>The assembler advances the output address by <em>expression</em> bytes <em>without</em> emitting anything. This could be handy for reserving blocks of memory without overwriting them during the assembly process.</p></li>
 <li><p>SYM <em>expression</em></p>
 <p>Relocate the symbol table, used during assembly, to the address that <em>expression</em> evaluates to. This must be done before any symbols are created (that is, before any labels). The intention of this is to allow you to make a “safe place” for code which could be shared by the Pascal compiler and the assembler, as described below.</p>
 <p>For example:</p>
-<pre class="asm"><code>  SYM $4800     ; symbols are to be placed at $4800 (growing downwards)
+<pre><code>  SYM $4800     ; symbols are to be placed at $4800 (growing downwards)
   ORG $4800     ; code is to be placed at $4800 (growing updwards)</code></pre>
 <p>You will not get an error if you have already created symbols (labels), however once the symbol table has been relocated the library symbols will be reloaded into the new location, and your existing symbols discarded.</p></li>
 </ul>
@@ -250,16 +251,16 @@ message_length EQU    end_message - start_message   ; calculate message length</
 <p>A safer approach is to move the symbol table (with a compiler and assembler directive) and free up a block of memory, like this:</p>
 <p><img src="images/Assembler%20memory%20organisation%20with%20symbol%20table%20relocation.svg.png" /></p>
 <p>To do this, in the assembler we need two extra lines, right at the start of the source file:</p>
-<pre class="asm"><code>  SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
+<pre><code>  SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
   ORG $5800     ; code is to be placed at $5800 (growing upwards)</code></pre>
 <p>If you haven’t installed my RAM extending mod, change the address from $5800 to $3800, as RAM ends at $4000 in that case.</p>
 <p>Now when you assemble your code the output goes to $5800 and is not affected by the symbol table growing, or the later loading of Pascal source.</p>
 <p>Meanwhile, in your Pascal code you need to do a similar thing:</p>
-<pre class="pas"><code>{%S $5800 }</code></pre>
+<pre><code>{%S $5800 }</code></pre>
 <p>That ensures that the Pascal compiler symbol table also starts lower in memory, thus not clobbering the generated machine code. That directive also relocates the run-time stack to the same address.</p>
 <hr />
 <h3 id="example-of-co-existence">Example of co-existence</h3>
-<pre class="asm"><code>  SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
+<pre><code>  SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
   ORG $5800     ; code is to be placed at $5800 (growing upwards)
 
 ; interface routines in the EEPROM
@@ -273,7 +274,7 @@ begin = *
       rts</code></pre>
 <p>Load and assemble (LOAD then ASS) the above assembler code, which relocates itself to $5800 and with the symbol table moved to $5800 to avoid a clash with the symbols.</p>
 <p>You can test that on its own now by typing RUN. The runtime system automatically starts running at the first <em>emitted</em> object code. In this case, that is the “jmp start” instruction.</p>
-<pre class="pas"><code>  { Relocate symbol table and runtime stack: } {%s $5800}
+<pre><code>  { Relocate symbol table and runtime stack: } {%s $5800}
   { Note: hello_world_relocated.asm should be loaded and compiled before running this }
 
 begin
@@ -289,7 +290,7 @@ end .</code></pre>
 <p>If you are desperately short of RAM, and want to avoid these being loaded into the symbol table by the assembler, you could recompile the source, omitting or commenting-out some or all of those in assembler.inc. Look for assembler_library_functions_table. Leave the table there, but omit some or all of the contents.</p>
 <p>A list of them is with explanations <a href="doc/on_board_functions_and_variables.txt">here</a>.</p>
 <p>Example of using the inbuilt functions to multiply two numbers and display the result:</p>
-<pre class="asm"><code>;
+<pre><code>;
 ;  put 47302 into value
 ;
   lda #&lt;47302
@@ -334,7 +335,7 @@ end .</code></pre>
 </ul>
 <p><img src="images/VIA%20pin%20mappings.png" /></p>
 <p>Example:</p>
-<pre class="asm"><code>
+<pre><code>
 ;
 ;  digitalWrite example
 ;

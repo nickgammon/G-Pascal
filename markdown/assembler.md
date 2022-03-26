@@ -56,7 +56,7 @@ The G-Pascal assembler is a 65C02 assembler, entirely resident in the EEPROM, an
 * Here is "hello world" in assembler:
 
 
-    ```asm
+    ```
           jmp begin   ; skip the message
     hello asciiz "Hello, world!"
     begin = *
@@ -83,7 +83,7 @@ The G-Pascal assembler is a 65C02 assembler, entirely resident in the EEPROM, an
 
 The assembler is intended to be compatible --- to a point --- with the vasm6502 assembler, in particular when run on your PC like this:
 
-```sh
+```
 vasm6502_oldstyle MYFILE.asm  -wdc02 -esc -Fbin -o MYFILE.bin -L MYFILE.list
 ```
 
@@ -134,16 +134,17 @@ Operands are separated from the opcode by one or more spaces.
 * The operand "*" evaluates to the current output code address, eg.
 
 
-    ```asm
+    ```
     foo =   *       ; foo is assigned to the current address
         bra *+4   ; branch to 4 bytes ahead of this instruction
     ```
 
-* In the case of opcodes which may or may not use the A register as an operand, the "A" must be explicitly provided, eg.
+* In the case of opcodes which may or may not use the A register as an operand, the "A" may be omitted. eg.
 
 
-    ```asm
-      LSR A
+    ```
+      LSR    ; logical shift A right
+      INC    ; increment A
     ```
 
 
@@ -151,7 +152,7 @@ Operands are separated from the opcode by one or more spaces.
 
 
 
-    ```asm
+    ```
       lda #'A'   ; load A with $41
     ```
 
@@ -195,7 +196,7 @@ Operands are separated from the opcode by one or more spaces.
 
 
 
-    ```asm
+    ```
       lda #>foo           ; load A with the high-order byte of the address of foo
       lda #>(foo + $100)  ; load A with the high-order byte of the address of (foo + $100)
       lda #<foo           ; load A with the low-order byte of the address of foo
@@ -229,7 +230,7 @@ The following assembler directives are supported:
     For example:
 
 
-    ```asm
+    ```
       LIST 1        ; show source
       LIST 1|2      ; show source and generated code (alternatively: LIST 3)
       LIST 1|2|4    ; show source, generated code, and user-defined symbols (alternatively: LIST 7)
@@ -263,7 +264,7 @@ The following assembler directives are supported:
     Insert the string into the code, with no terminator.
 
 
-    ```asm
+    ```
       asc "Hello, world!"
     ```
 
@@ -282,12 +283,12 @@ The following assembler directives are supported:
 
 * *label* EQU *address*
 
-    The specified label takes on the address of the evaluated expression. Alternatively, the address may be the symbol "*" which means "the current address".
+    The specified label takes on the address of the evaluated expression.
 
     ```
     EEPROM         EQU    $8000
     start_message  ASC    "Hi there"
-    end_message    EQU    *
+    end_message    EQU    *   ; end_message becomes the current output address
     message_length EQU    end_message - start_message   ; calculate message length
     ```
 
@@ -329,7 +330,7 @@ The following assembler directives are supported:
     The assembler emits *expression* zeroes. For example:
 
 
-    ```asm
+    ```
       BLK 10    ; emit 10 zeroes, advancing the output address by 10
     ```
 
@@ -345,7 +346,7 @@ The following assembler directives are supported:
     For example:
 
 
-    ```asm
+    ```
       SYM $4800     ; symbols are to be placed at $4800 (growing downwards)
       ORG $4800     ; code is to be placed at $4800 (growing updwards)
     ```
@@ -377,7 +378,7 @@ A safer approach is to move the symbol table (with a compiler and assembler dire
 To do this, in the assembler we need two extra lines, right at the start of the source file:
 
 
-```asm
+```
   SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
   ORG $5800     ; code is to be placed at $5800 (growing upwards)
 ```
@@ -391,7 +392,7 @@ Meanwhile, in your Pascal code you need to do a similar thing:
 
 
 
-```pas
+```
 {%S $5800 }
 ```
 
@@ -404,7 +405,7 @@ That ensures that the Pascal compiler symbol table also starts lower in memory, 
 
 
 
-```asm
+```
   SYM $5800     ; symbols are to be placed at $5800 (growing downwards)
   ORG $5800     ; code is to be placed at $5800 (growing upwards)
 
@@ -425,7 +426,7 @@ Load and assemble (LOAD then ASS) the above assembler code, which relocates itse
 You can test that on its own now by typing RUN. The runtime system automatically starts running at the first *emitted* object code. In this case, that is the "jmp start" instruction.
 
 
-```pas
+```
   { Relocate symbol table and runtime stack: } {%s $5800}
   { Note: hello_world_relocated.asm should be loaded and compiled before running this }
 
@@ -456,7 +457,7 @@ Example of using the inbuilt functions to multiply two numbers and display the r
 
 
 
-```asm
+```
 ;
 ;  put 47302 into value
 ;
@@ -520,7 +521,7 @@ That leaves 7 pins for your own use (PA2, PA3, PA4, PB0, PB1, PB2, PB3).
 Example:
 
 
-```asm
+```
 
 ;
 ;  digitalWrite example

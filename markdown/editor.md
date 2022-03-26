@@ -38,19 +38,23 @@ The editor is available from the main "shell" prompt. Type **H** to see a list o
 ```
 Available actions:
 
-List/SAve   line_number_range
 Delete      line_number_range
 Insert/LOad after_line
 Find        line_number_range /target/flags
+List/SAve   line_number_range
 Replace     line_number_range /target/replacement/flags
-
-Help
-INfo/LIBrary
-Memory first_address last_address
-Compile/Syntax/Assemble
-RUn/DEBug/Trace/RESume
-Poke/Jsr/JMp
 RECover
+---
+Help
+INFo
+Memory      first_address last_address
+Assemble
+Compile/Syntax
+DEBug/Trace
+LIBrary
+Poke/Jsr/JMp
+RUn
+RESume
 (Actions may be abbreviated)
 (Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)
 ```
