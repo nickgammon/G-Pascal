@@ -175,30 +175,33 @@ editor_handlers:
 
 editor_help_info:
   asc "Available actions:\n\n"
-  asc "List/SAve   line_number_range\n"
   asc "Delete      line_number_range\n"
   asc "Insert/LOad after_line\n"
   asc "Find        line_number_range /target/flags\n"
+  asc "List/SAve   line_number_range\n"
   asc "Replace     line_number_range /target/replacement/flags\n"
   asc "RECover\n"
-  asc "\n"
+  asc "---\n"
   asc "Help\n"
   asc "INFo\n"
   asc "Memory      first_address last_address\n"
 
   .if USE_ASSEMBLER
   asc "Assemble\n"
-  asc "LIBrary\n"
   .endif  ; USE_ASSEMBLER
 
   .if USE_PASCAL
   asc "Compile/Syntax\n"
+  asc "DEBug/Trace\n"
   .endif  ; USE_PASCAL
 
-  asc "RUn\n"
-  asc "DEBug/Trace\n"
-  asc "RESume\n"
+  .if USE_ASSEMBLER
+  asc "LIBrary\n"
+  .endif  ; USE_ASSEMBLER
+
   asc "Poke/Jsr/JMp\n"
+  asc "RUn\n"
+  asc "RESume\n"
   asc "(Actions may be abbreviated)\n"
   asc "(Flags: 'I'gnore case, 'G'lobal, 'Q'uiet)\n"
   dfb 0
