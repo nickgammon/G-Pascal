@@ -37,9 +37,6 @@ handler_find_length:
   bra handler_find_length
 handler_found_length:
 
-;  lda #'i'
-;  jsr ass_debug_point
-
   cpy token_work
   beq handler_same_length
 ;
@@ -58,9 +55,6 @@ handler_next:
 
 handler_same_length:
 
-;  lda #'j'
-;  jsr ass_debug_point
-
   phy  ; save the length
   jsr COMSTL
   beq  handler_found_directive
@@ -74,22 +68,12 @@ handler_found_directive:
   iny
   lda (DEST),y
   sta token_work+2
-  jsr call_handler
   clc
   rts
 
 handlers_done:
-;  lda #'h'
-;  jsr ass_debug_point
   sec     ; error flag
   rts
-
-call_handler:
-;  lda #'g'
-;  jsr ass_debug_point
-
-  jmp (token_work+1)   ; do handler - it will RTS for us
-
 
 ;
 ;  function to look up a handler for a word on a partial match (eg. editor command)

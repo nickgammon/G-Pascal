@@ -54,6 +54,7 @@ errors_table:
 assertion_failed_message:   ; used by Pascal assert function
   asciiz "Assertion failed"                          ; 52
   asciiz "Use of function identifier in statement"   ; 53
+  asciiz "Use of opcode as label"                    ; 54
   dfb 0
 
 ;***********************************************
