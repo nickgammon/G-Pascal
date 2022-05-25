@@ -205,11 +205,11 @@ TEXT_START = *            ; where source goes in memory (currently $300)
     .include "cp437_font.inc"
   .endif
 
-introduction asc    "G-Pascal compiler, version 4.06.\n"
+introduction asc    "G-Pascal compiler, version 4.07.\n"
              asciiz "Written by Nick Gammon.\nType H for help.\n"
 
   .if LCD_SUPPORT
-LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.06"
+LCD_welcome asciiz "Nick's G-Pascal\nCompiler v4.07"
   .endif
 
 running_message   asciiz  'Running\n'

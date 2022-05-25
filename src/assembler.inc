@@ -133,10 +133,10 @@ ass_identifier:
 ;
   lda token_address
   cmp token_line_start
-  bne ass_opcode
+  bne ass_opcodeJ
   lda token_address+1
   cmp token_line_start+1
-  bne ass_opcode
+  bne ass_opcodeJ
 
   lda token_type         ; can't have = as an identifier
   cmp #'='               ; or "="
@@ -150,6 +150,32 @@ ass_identifier:
 ;
 ;  here for first pass
 ;
+;
+;  first check that the label is not an opcode
+;
+  jsr ass_see_if_opcode
+  bcc ass_identifier_not_opcode
+
+ass_identifier_is_opcode:
+  ldx #54     ; ERROR: Use of opcode as label
+  jmp ass_error
+
+ass_opcodeJ jmp ass_opcode
+
+ass_identifier_not_opcode:
+
+;
+;  look for assembler directives
+;
+  lda #<DIRECTIVES
+  sta DEST
+  lda #>DIRECTIVES
+  sta DEST+1
+  lda OPCODE_LEN
+
+  jsr handlerLookup
+  bcc ass_identifier_is_opcode
+
   jsr CHKDUP
 ;
 ; not a duplicate - add it
@@ -650,16 +676,8 @@ opcode_lookup_loop_done:
   sta DEST+1
   lda OPCODE_LEN
 
-;  pha
-;   lda #'c'
-;   jsr ass_debug_point
-;   pla
-
   jsr handlerLookup
   bcc opcode_lookup_ok
-
-;   lda #'d'
-;   jsr ass_debug_point
 
 ;
 ;  here for unknown opcode
@@ -697,11 +715,15 @@ opcode_lookup_loop_unknown:
   JMP  ass_error
 
 opcode_lookup_ok:
-
-;   lda #'e'
-; jsr ass_debug_point
-
+;
+;  do the handler for this directive
+;
+  jsr call_handler
   rts
+
+call_handler:
+  jmp (token_work+1)   ; do handler - it will RTS for us
+
 
 ass_done:
   jsr  CROUT
@@ -1869,9 +1891,6 @@ asm_do_constant_expectedJ jmp asm_do_constant_expected
 
 asm_do_list = *
 
-;   lda #'f'
-;   jsr ass_debug_point
-
   lda ASS_OPERAND
   cmp #ASS_OPERAND_IMPLIED      ; implied (ie. no operand) will resolve to be the same as LIST 3
   beq asm_do_list_no_operand
@@ -1900,11 +1919,6 @@ asm_do_list_no_operand:
 asm_do_list_ok:
   lda ASS_PASS
   beq asm_do_list_first_pass  ; ignore on first pass
-
-;  lda ASS_VALUE
-;  clc
-;  adc #'0'
-;  jsr ass_debug_point
 
   lda ASS_VALUE
   and #$01
@@ -2281,6 +2295,58 @@ list_symbols_name = *
 
 list_symbols_done = *
          rts
+
+;
+;  see if a label is an opcode - returns carry set if true
+;
+ass_see_if_opcode:
+  ; the label we are looking up
+  lda token_address
+  sta SRCE
+  lda token_address+1
+  sta SRCE+1
+  lda token_length
+  sta OPCODE_LEN
+;
+;  get the address of our table of tables
+;
+  lda #<OPCODE_LOOKUP_TABLE
+  sta ASS_OPCODE_WORK
+  lda #>OPCODE_LOOKUP_TABLE
+  sta ASS_OPCODE_WORK+1
+ass_see_if_opcode_loop:
+  ldy #OPCODE_LOOKUP_OPCODE_LENGTH
+  lda (ASS_OPCODE_WORK),Y       ; get opcode length
+  beq ass_see_if_opcode_loop_done   ; end of table
+  cmp OPCODE_LEN                ; right length?
+  beq ass_see_if_opcode_correct_length ; yes
+;
+; no, try the next table item
+;
+ass_see_if_opcode_next_table:
+  clc
+  lda ASS_OPCODE_WORK
+  adc #OPCODE_LOOKUP_TABLE_SIZE  ; onto next item
+  sta ASS_OPCODE_WORK
+  lda ASS_OPCODE_WORK+1
+  adc #0
+  sta ASS_OPCODE_WORK+1
+  bra ass_see_if_opcode_loop
+
+ass_see_if_opcode_correct_length:
+  ldy #OPCODE_LOOKUP_OPCODE_TABLE
+  lda (ASS_OPCODE_WORK),Y ; get table address low-order byte
+  sta DEST
+  iny
+  lda (ASS_OPCODE_WORK),Y ; get table address high-order byte
+  sta DEST+1
+  jsr ass_lookup_loop
+  bcc ass_see_if_opcode_next_table  ; not found
+  rts   ; with carry set
+
+ass_see_if_opcode_loop_done:
+  clc
+  rts
 
 assembler_library_functions_table:
   makeAsmLibraryFunction "bcd_result",           bcd_result
