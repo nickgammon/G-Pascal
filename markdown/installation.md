@@ -16,7 +16,7 @@ You need to make the [suggested hardware modifications](hardware_mods.htm) --- o
 ## Assemble source
 
 
-The source to the G-Pascal system is [here](/src).
+The source to the G-Pascal system is [here](https://github.com/nickgammon/G-Pascal).
 
 If you have installed the hardware mod to give you more memory, change the line in the source:
 
