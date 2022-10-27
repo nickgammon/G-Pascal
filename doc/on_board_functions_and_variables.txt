@@ -98,7 +98,7 @@
                         ;  (eg. 0x03 becomes ^C) - newlines are printed "as is". All registers preserved.
 
 ;
-;  VIA functions (names have trailing underscore to avoid clashing with compiler reserved words)
+;  VIA functions
 ;
   pinmode           ; sets the pin mode - pin: 0 to 15; mode: 0 or 1 : pin in A, mode in X (0=read)
   digitalread       ; reads a pin - pin: 0 to 15; Pin to read is in in A. Returns zero or non-zero in A.
